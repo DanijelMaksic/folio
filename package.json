@@ -1,0 +1,21 @@
+{
+   "name": "folio",
+   "private": true,
+   "workspaces": [
+      "client",
+      "server",
+      "shared"
+   ],
+   "scripts": {
+      "predev": "docker compose up -d",
+      "dev": "concurrently \"npm run dev -w server\" \"npm run dev -w client\"",
+      "dev:ci": "concurrently \"npm run dev -w server\" \"npm run dev -w client\"",
+      "test": "vitest run"
+   },
+   "devDependencies": {
+      "@playwright/test": "^1.61.1",
+      "@types/node": "^26.0.1",
+      "concurrently": "^10.0.3",
+      "playwright": "^1.61.1"
+   }
+}
