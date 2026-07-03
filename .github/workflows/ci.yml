@@ -47,4 +47,4 @@ jobs:
          - name: Run Playwright
            run: npx playwright test
            env:
-              DATABASE_URL: postgresql://postgres@localhost:5432/folio_test
+              DATABASE_URL: postgresql://postgres:postgres@localhost:5432/folio_test
