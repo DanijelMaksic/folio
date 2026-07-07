@@ -7,10 +7,10 @@ export default function App() {
       fetch('/api/health')
          .then((r) => {
             console.log('status:', r.status);
-            return r.text(); // use .text() instead of .json() to see raw body
+            return r.text();
          })
          .then((text) => {
-            console.log('body:', text); // 👈 check this in devtools
+            console.log('body:', text);
             const data = JSON.parse(text);
             setStatus(data.status);
          })

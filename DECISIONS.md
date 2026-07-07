@@ -1,6 +1,6 @@
 # Documented Sprints
 
-Agile methodology was utilized in building the Folio app. This file keeps track on my progress and decisions related to each sprint.
+Agile methodology was utilized in building the Folio app. This file keeps track on my progress and decisions made during each sprint.
 
 ---
 
@@ -16,6 +16,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 - React client fetches the health endpoint and renders the resutl in the browser
 - Vitest unit test confirms the health route returns `{ status: "ok" }`
 - Playwright e2e test confirms the browser sees "API status: ok"
+- Set up the CI pipeline with GutHub Actions
 
 **Decisions:**
 
