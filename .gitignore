@@ -4,3 +4,5 @@ dist/
 *.tsbuildinfo
 drizzle/
 test-results/
+client/.env
+server/.env

@@ -1,29 +1,31 @@
-import { useEffect, useState } from 'react';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { useSession } from './lib/auth-client';
+import Register from './pages/Register';
+import Login from './pages/Login';
+import Home from './pages/Home';
+
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+   const { data: session, isPending } = useSession();
+   if (isPending) return <p>Loading...</p>;
+   if (!session) return <Navigate to="/login" replace />;
+   return <>{children}</>;
+}
 
 export default function App() {
-   const [status, setStatus] = useState<string>('loading...');
-
-   useEffect(() => {
-      fetch('/api/health')
-         .then((r) => {
-            console.log('status:', r.status);
-            return r.text();
-         })
-         .then((text) => {
-            console.log('body:', text);
-            const data = JSON.parse(text);
-            setStatus(data.status);
-         })
-         .catch((err) => {
-            console.error(err);
-            setStatus('error');
-         });
-   }, []);
-
    return (
-      <div>
-         <h1>Folio</h1>
-         <p>API status: {status}</p>
-      </div>
+      <BrowserRouter>
+         <Routes>
+            <Route path="/register" element={<Register />} />
+            <Route path="/login" element={<Login />} />
+            <Route
+               path="/"
+               element={
+                  <ProtectedRoute>
+                     <Home />
+                  </ProtectedRoute>
+               }
+            />
+         </Routes>
+      </BrowserRouter>
    );
 }
