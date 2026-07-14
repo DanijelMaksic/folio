@@ -1,1 +1,1 @@
-App that let's you transcribe your documents.
+A full-stack document transcription app.
