@@ -38,6 +38,7 @@ jobs:
 
          - name: Run migrations
            run: npx drizzle-kit push
+           working-directory: server
            env:
               DATABASE_URL: postgresql://postgres:postgres@localhost:5432/folio_test
 
