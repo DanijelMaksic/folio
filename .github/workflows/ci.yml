@@ -39,4 +39,8 @@ jobs:
          - name: Run Vitest
            run: npm run test
            env:
-              DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@localhost:5432/folio_test
+              DATABASE_URL: ${{secrets.DATABASE_URL}}
+              BETTER_AUTH_SECRET: ${{secrets.BETTER_AUTH_SECRET}}
+              BETTER_AUTH_URL: ${{secrets.BETTER_AUTH_URL}}
+              RESEND_API_KEY: ${{secrets.RESEND_API_KEY}}
+              CLIENT_URL: http://localhost:5173

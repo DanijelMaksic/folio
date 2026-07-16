@@ -3,7 +3,9 @@ import * as path from 'path';
 import { createServer } from 'http';
 import type { Server } from 'http';
 
-dotenv.config({ path: path.resolve(process.cwd(), 'server/.env') });
+if (!process.env.DATABASE_URL) {
+   dotenv.config({ path: path.resolve(process.cwd(), 'server/.env') });
+}
 
 let server: Server;
 
