@@ -15,7 +15,7 @@ jobs:
             image: postgres:16
             env:
                POSTGRES_USER: postgres
-               POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+               POSTGRES_PASSWORD: postgres
                POSTGRES_DB: folio_test
             ports:
                - 5432:5432
@@ -36,11 +36,16 @@ jobs:
          - name: Install dependencies
            run: npm ci
 
+         - name: Run migrations
+           run: npx drizzle-kit push
+           env:
+              DATABASE_URL: postgresql://postgres:postgres@localhost:5432/folio_test
+
          - name: Run Vitest
            run: npm run test
            env:
-              DATABASE_URL: ${{secrets.DATABASE_URL}}
-              BETTER_AUTH_SECRET: ${{secrets.BETTER_AUTH_SECRET}}
-              BETTER_AUTH_URL: ${{secrets.BETTER_AUTH_URL}}
-              RESEND_API_KEY: ${{secrets.RESEND_API_KEY}}
+              DATABASE_URL: postgresql://postgres:postgres@localhost:5432/folio_test
+              BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
+              BETTER_AUTH_URL: http://localhost:3000
+              RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
               CLIENT_URL: http://localhost:5173
