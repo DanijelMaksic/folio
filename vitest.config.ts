@@ -5,6 +5,7 @@ export default defineConfig({
    test: {
       globals: true,
       setupFiles: ['./vitest.setup.ts'],
+      globalSetup: ['./server/src/tests/globalSetup.ts'],
       exclude: [...configDefaults.exclude, 'tests/e2e/**'],
    },
    resolve: {
