@@ -18,7 +18,7 @@ app.use(
    }),
 );
 
-// BetterAuth -- must be before express.json()
+// Better Auth -- must be before express.json()
 app.all('/api/auth/{*any}', toNodeHandler(auth));
 
 app.use(express.json());

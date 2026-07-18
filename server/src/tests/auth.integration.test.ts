@@ -52,7 +52,7 @@ describe('Registration', () => {
    });
 
    it('rejects duplicate email', async () => {
-      // Imperative way to test, since BetterAuth makes it hard to do this declaratively
+      // Imperative way to test, since Better Auth makes it hard to do this declaratively
       await register(testUser);
       const users = await db
          .select()
@@ -65,7 +65,7 @@ describe('Registration', () => {
 describe('Login', () => {
    it('rejects login before email verification', async () => {
       const res = await login(testUser.email, testUser.password);
-      // BetterAuth blocks unverified users when requireEmailVerification is set to true
+      // Better Auth blocks unverified users when requireEmailVerification is set to true
       expect(res.status).toBe(403);
    });
 
