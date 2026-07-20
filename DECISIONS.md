@@ -44,7 +44,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Better Auth generates basic Drizzle schema, onto which I added username and globalRole additional fields
 - Converted the project to ESM, as Better Auth doesn't support CommonJS module system
-- Built registration and login forms, HTML handles basic validation
+- Built registration and login forms, HTML and Better Auth handle basic validation (will add Zod validation for tRPC procedures later)
 - Form submission is handled with formData API
 - On registration, user data is sent to the DB, but with emailVerified set to false. User can't log in until email is verified.
 - Upon user data being stored in DB, Resend sends verification email, which when confirmed tells Better Autg to set emailVerified field to true. Now user can log in.
@@ -67,7 +67,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 **Known issues carried forward:**
 
-- Resend free tier with `onboarding@resend.dev` can only deliver to the Resend account owner's email — real domain verification deferred to Sprint 9
+- Resend free tier: only delivers to Resend account owner email in dev. Real domain verification on Resend website deferred to Sprint 9.
 - Email verification flow untested for non-owner emails as a result
 - No password strength validation on register — BetterAuth enforces 8 character minimum but nothing beyond that; proper validation deferred to a later sprint
 - Docker warns about some vulnerabilities related to Golang packages. No idea what that means, but a quick research showed that it's probably a false-flag warning. Will revisit later.

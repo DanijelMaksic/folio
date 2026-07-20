@@ -10,7 +10,10 @@
       "predev": "docker compose up -d",
       "dev": "concurrently \"npm run dev -w server\" \"npm run dev -w client\"",
       "dev:ci": "concurrently \"npm run dev -w server\" \"npm run dev -w client\"",
-      "test": "vitest run"
+      "preview": "vite preview",
+      "test:unit": "vitest run --passWithNoTests",
+      "test:e2e": "playwright test",
+      "build-only": "vite build"
    },
    "devDependencies": {
       "@playwright/test": "^1.61.1",
