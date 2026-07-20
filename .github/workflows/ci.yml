@@ -43,7 +43,7 @@ jobs:
               DATABASE_URL: postgresql://postgres:postgres@localhost:5432/folio_test
 
          - name: Run Vitest
-           run: npm run test
+           run: npm run test:unit
            env:
               DATABASE_URL: postgresql://postgres:postgres@localhost:5432/folio_test
               BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
