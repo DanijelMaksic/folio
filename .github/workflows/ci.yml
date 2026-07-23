@@ -37,10 +37,23 @@ jobs:
            run: npm ci
 
          - name: Run migrations
-           run: npx drizzle-kit push
+           run: npx drizzle-kit migrate
            working-directory: server
            env:
               DATABASE_URL: postgresql://postgres:postgres@localhost:5432/folio_test
+
+         - name: Start server
+           run: npm run dev &
+           working-directory: server
+           env:
+              DATABASE_URL: postgresql://postgres:postgres@localhost:5432/folio_test
+              BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
+              BETTER_AUTH_URL: http://localhost:3000
+              RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+              CLIENT_URL: http://localhost:5173
+
+         - name: Wait for server
+           run: npx wait-on http://localhost:3000/api/health
 
          - name: Run Vitest
            run: npm run test:unit

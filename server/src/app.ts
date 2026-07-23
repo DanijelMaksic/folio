@@ -22,6 +22,10 @@ app.all('/api/auth/{*any}', toNodeHandler(auth));
 
 app.use(express.json());
 
+app.get('/api/health', (_req, res) => {
+   res.sendStatus(200);
+});
+
 // tRPC
 app.use(
    '/api/trpc',
