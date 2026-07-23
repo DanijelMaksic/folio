@@ -10,16 +10,17 @@ export default function Login() {
       e.preventDefault();
       const form = new FormData(e.currentTarget);
 
-      const { error } = await signIn.email({
+      const { data, error } = await signIn.email({
          email: form.get('email') as string,
          password: form.get('password') as string,
       });
 
       if (error) {
          setError(error.message ?? 'Login failed');
-      } else {
+      } else if (data && !('twoFactorRedirect' in data)) {
          navigate('/');
       }
+      // if twoFactorRedirect exists, onTwoFactorRedirect in auth-client.ts handles the redirection
    };
 
    return (

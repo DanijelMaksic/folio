@@ -20,5 +20,13 @@
       "@types/node": "^26.0.1",
       "concurrently": "^10.0.3",
       "playwright": "^1.61.1"
+   },
+   "engines": {
+      "node": "^24.0.0",
+      "npm": ">=11"
+   },
+   "overrides": {
+      "esbuild": "^0.25.0",
+      "shell-quote": "^1.8.5"
    }
 }

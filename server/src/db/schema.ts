@@ -6,6 +6,7 @@ import {
    boolean,
    index,
    pgEnum,
+   integer,
 } from 'drizzle-orm/pg-core';
 
 export const globalRoleEnum = pgEnum('global_role', [
@@ -28,6 +29,7 @@ export const user = pgTable('user', {
       .notNull(),
    username: text('username').notNull().unique(),
    globalRole: globalRoleEnum('global_role').notNull().default('viewer'),
+   twoFactorEnabled: boolean().default(false),
 });
 
 export const session = pgTable(
@@ -88,6 +90,18 @@ export const verification = pgTable(
    },
    (table) => [index('verification_identifier_idx').on(table.identifier)],
 );
+
+export const twoFactor = pgTable('two_factor', {
+   id: text().primaryKey(),
+   userId: text()
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+   secret: text().notNull(),
+   backupCodes: text().notNull(),
+   verified: boolean().default(false),
+   failedVerificationCount: integer().notNull().default(0),
+   lockedUntil: timestamp(),
+});
 
 export const userRelations = relations(user, ({ many }) => ({
    sessions: many(session),

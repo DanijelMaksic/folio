@@ -3,6 +3,7 @@ import { useSession } from './lib/auth-client';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import Home from './pages/Home';
+import VerifyOtp from '@/pages/VerifyOtp';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
    const { data: session, isPending } = useSession();
@@ -17,6 +18,7 @@ export default function App() {
          <Routes>
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/verify-otp" element={<VerifyOtp />} />
             <Route
                path="/"
                element={

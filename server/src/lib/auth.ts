@@ -1,10 +1,12 @@
 import { db } from '@/db/index.js'; // drizzle instance
 import * as schema from '@/db/schema.js';
-import { betterAuth } from 'better-auth';
-import { sendVerificationEmail } from './email.js';
+import { betterAuth } from 'better-auth/minimal';
+import { sendVerificationEmail, sendOtpEmail } from './email.js';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
+import { twoFactor } from 'better-auth/plugins';
 
 export const auth = betterAuth({
+   appName: 'Folio',
    database: drizzleAdapter(db, {
       provider: 'pg',
       schema: {
@@ -37,6 +39,17 @@ export const auth = betterAuth({
          },
       },
    },
+   plugins: [
+      twoFactor({
+         skipVerificationOnEnable: true,
+         otpOptions: {
+            async sendOTP({ user, otp }) {
+               await sendOtpEmail(user.email, otp);
+            },
+            period: 600, // 10 minutes in seconds
+         },
+      }),
+   ],
    trustedOrigins: [process.env.CLIENT_URL!],
 });
 

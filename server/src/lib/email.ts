@@ -17,3 +17,16 @@ export const sendVerificationEmail = async (to: string, url: string) => {
       `,
    });
 };
+
+export const sendOtpEmail = async (to: string, otp: string) => {
+   await resend.emails.send({
+      from: FROM,
+      to,
+      subject: 'Your Folio login code',
+      html: `
+      <p>Your login verification code is:</p>
+      <h2 style="letter-spacing:0.25em;font-size:2em">${otp}</h2>
+      <p>This code expires in 10 minutes. If you didn't try to log in, ignore this email.</p>
+      `,
+   });
+};

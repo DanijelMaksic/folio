@@ -14,7 +14,7 @@ if (!process.env.DATABASE_URL) {
 let server: Server;
 
 export async function setup() {
-   const { app } = await import('../index.js');
+   const { app } = await import('../app.js');
 
    await new Promise<void>((resolve) => {
       server = createServer(app).listen(3000, resolve);
