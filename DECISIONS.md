@@ -48,15 +48,19 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 - Form submission is handled with formData API
 - On registration, user data is sent to the DB, but with emailVerified set to false. User can't log in until email is verified.
 - Upon user data being stored in DB, Resend sends verification email, which when confirmed tells Better Autg to set emailVerified field to true. Now user can log in.
+- First admin is bootstrapped via a one-time seed script.
+- Integrated Two Factor auth for `editor` and `admin` roles.
 - On the Front-End, React Router's `ProtectedRoute` prevents rendering the UI (`/` route) for the logged-out users. On the Back-End, the actual route protection is enforced by Better Auth and tRPC's `protectedProcedure`
 - Enabled CORS, because `locahhost:5173` works with `localhost:3000`, enabling communication between two origins
-- Vitest tests the
+- Vitest tests the registration, login, session and 2FA flows
+- `globalSetup.ts`starts and tears down the Express server around the Vitest test suite, allowing integration tests to hit real HTTP endpoints without a separately running server process
 
 **Decisions:**
 
 - Chose Better Auth over manual auth setup and JWT, since Better Auth handles boilerplate hashing algorithms, tokens and email verification (via Resend)
 - Gave up on REST in favor of tRPC, because this app is a monorepo full stack project based on TypeScript, a perfect candidate for tRPC, as tRPC ensures end-to-end type safety and synchronization over the whole stack
 - For this sprint there are no E2E tests, just Vitest integration tests related to registration and login, because email verification is currently restricted to just one email (Resend requires real domain, until then I'm restricted to just one email for testing)
+- Chose to split tRPC init (`trpc.ts`) from route assembly (`router.ts`) to avoid circular dependency between the admin router and the main router
 
 **Issues resolved:**
 
@@ -72,3 +76,4 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 - No password strength validation on register — BetterAuth enforces 8 character minimum but nothing beyond that; proper validation deferred to a later sprint
 - Docker warns about some vulnerabilities related to Golang packages. No idea what that means, but a quick research showed that it's probably a false-flag warning. Will revisit later.
 - esbuild moderate vulnerability via drizzle-kit's dependency on `@esbuild-kit` — dev-only, unexploitable in production. Monitor for a drizzle-kit update that resolves it later.
+- OTP cannot be tested end-to-end in Vitest since valid codes require intercepting Resend delivery, so only rejection paths are covered
