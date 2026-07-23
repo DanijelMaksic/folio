@@ -8,6 +8,7 @@
       "seed:admin": "tsx src/scripts/seed-admin.ts"
    },
    "dependencies": {
+      "@folio/shared": "*",
       "@trpc/server": "^11.18.0",
       "bcrypt": "^6.0.0",
       "better-auth": "^1.6.23",

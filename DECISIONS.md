@@ -49,7 +49,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 - On registration, user data is sent to the DB, but with emailVerified set to false. User can't log in until email is verified.
 - Upon user data being stored in DB, Resend sends verification email, which when confirmed tells Better Autg to set emailVerified field to true. Now user can log in.
 - First admin is bootstrapped via a one-time seed script.
-- Integrated Two Factor auth for `editor` and `admin` roles.
+- Integrated Better Auth's Two Factor plugin for `editor` and `admin` roles via `twoFactorEnabled: true`
 - On the Front-End, React Router's `ProtectedRoute` prevents rendering the UI (`/` route) for the logged-out users. On the Back-End, the actual route protection is enforced by Better Auth and tRPC's `protectedProcedure`
 - Enabled CORS, because `locahhost:5173` works with `localhost:3000`, enabling communication between two origins
 - Vitest tests the registration, login, session and 2FA flows
