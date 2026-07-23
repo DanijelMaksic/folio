@@ -1,5 +1,5 @@
 import { createTRPCReact } from '@trpc/react-query';
-import type { AppRouter } from '../../../server/src/trpc/router.js'; // tHe contract, defining what endpoints exist and their input/output shapes.
+import type { AppRouter } from '@server/trpc/router.js'; // tHe contract, defining what endpoints exist and their input/output shapes.
 import { httpBatchLink } from '@trpc/client';
 
 // Ensures that React Query hooks are typed with AppRouter type

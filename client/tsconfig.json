@@ -9,7 +9,9 @@
       "noEmit": true,
       "skipLibCheck": true,
       "paths": {
-         "@/*": ["./src/*"]
+         "@/*": ["./src/*"],
+         "@server/*": ["../server/src/*"],
+         "@shared": ["../shared/src/index.ts"]
       },
       "types": ["vite/client"]
    },
