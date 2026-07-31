@@ -111,6 +111,11 @@ jobs:
          - name: Wait for server
            run: npx wait-on http://localhost:3000/api/health
 
+         - name: Create client env
+           run: |
+              echo "VITE_API_URL=http://localhost:3000" > client/.env
+              echo "VITE_CLIENT_URL=http://localhost:5173" >> client/.env
+
          - name: Start client
            run: npm run dev -w client &
 
