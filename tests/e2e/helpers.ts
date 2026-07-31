@@ -1,4 +1,3 @@
-import { Page } from 'playwright/test';
 import { db } from '../../server/src/db/index.js';
 import { user } from '../../server/src/db/schema.js';
 import { eq } from 'drizzle-orm';
