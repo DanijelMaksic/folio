@@ -32,5 +32,8 @@ app.use(
    createExpressMiddleware({
       router: appRouter,
       createContext,
+      onError({ error }) {
+         console.log('tRPC error', error);
+      },
    }),
 );

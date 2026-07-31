@@ -1,48 +1,25 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { API, register, login, cleanupUser } from './helpers.js';
 import { db } from '@/db/index.js';
 import { user } from '@/db/schema.js';
 import { eq } from 'drizzle-orm';
 
-// Tests in this file are written in ORDER, don't reshuffle them
-
-const API = 'http://localhost:3000';
-
-// Origin is here to enable CORS during tests
-const headers = {
-   'Content-Type': 'application/json',
-   Origin: 'http://localhost:5173',
-};
-
-async function register(payload: Record<string, string>) {
-   return fetch(`${API}/api/auth/sign-up/email`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(payload),
-   });
-}
-
-async function login(email: string, password: string) {
-   return fetch(`${API}/api/auth/sign-in/email`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ email, password }),
-   });
-}
-
 const testUser = {
-   email: 'test_vitest@example.com',
+   email: 'test_auth@example.com',
    password: 'Password123!',
-   username: 'vitestuser',
-   name: 'Vitest User',
+   username: 'vitestauth',
+   name: 'Auth Test User',
 };
+
+// Tests in this file are written in ORDER, don't reshuffle them
 
 beforeAll(async () => {
    // Clean up any leftover test user
-   await db.delete(user).where(eq(user.email, testUser.email));
+   cleanupUser(testUser.email);
 });
 
 afterAll(async () => {
-   await db.delete(user).where(eq(user.email, testUser.email));
+   cleanupUser(testUser.email);
 });
 
 describe('Registration', () => {

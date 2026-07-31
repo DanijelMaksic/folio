@@ -4,6 +4,9 @@ import Register from './pages/Register';
 import Login from './pages/Login';
 import Home from './pages/Home';
 import VerifyOtp from '@/pages/VerifyOtp';
+import Documents from '@/pages/Documents';
+import DocumentDetail from '@/pages/DocumentDetail';
+import UploadDocument from '@/pages/UploadDocument';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
    const { data: session, isPending } = useSession();
@@ -19,6 +22,16 @@ export default function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
             <Route path="/verify-otp" element={<VerifyOtp />} />
+            <Route path="/documents" element={<Documents />} />
+            <Route
+               path="/documents/upload"
+               element={
+                  <ProtectedRoute>
+                     <UploadDocument />
+                  </ProtectedRoute>
+               }
+            />
+            <Route path="/documents/:id" element={<DocumentDetail />} />
             <Route
                path="/"
                element={

@@ -1,6 +1,5 @@
 import { initTRPC, TRPCError } from '@trpc/server';
 import type { Context } from './context.js';
-import { adminRouter } from './routers/admin.js';
 
 // tRPC initialization file
 
@@ -12,7 +11,6 @@ export const publicProcedure = t.procedure;
 
 // Authorization boundary middleware
 export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
-   // Checks if the user exists, if it doesn't, tRPC throws the 401 error response
    if (!ctx.user) {
       throw new TRPCError({ code: 'UNAUTHORIZED' });
    }

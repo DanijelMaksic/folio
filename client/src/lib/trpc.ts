@@ -11,6 +11,12 @@ export const trpcClient = trpc.createClient({
       httpBatchLink({
          // Batches HTTP requests
          url: `${import.meta.env.VITE_API_URL}/api/trpc`,
+         fetch(url, options) {
+            return fetch(url, {
+               ...options,
+               credentials: 'include', // Forward Better Auth cookies safely
+            });
+         },
       }),
    ],
 });

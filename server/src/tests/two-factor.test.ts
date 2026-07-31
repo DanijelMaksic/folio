@@ -1,25 +1,9 @@
 import { db } from '@/db/index.js';
 import { twoFactor, user } from '@/db/schema.js';
-import { admin } from 'better-auth/plugins';
+import { login, headers, API } from './helpers.js';
 import { randomBytes } from 'crypto';
 import { eq } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-
-const API = 'http://localhost:3000';
-
-// Origin is here to enable CORS during tests
-const headers = {
-   'Content-Type': 'application/json',
-   Origin: 'http://localhost:5173',
-};
-
-async function login(email: string, password: string) {
-   return fetch(`${API}/api/auth/sign-in/email`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ email, password }),
-   });
-}
 
 const adminUser = {
    email: 'test_2fa_admin@example.com',

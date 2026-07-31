@@ -1,0 +1,1 @@
+alias db='docker exec -it folio-postgres-1 psql -U postgres -d folio'

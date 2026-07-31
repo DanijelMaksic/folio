@@ -6,7 +6,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 ## Sprint 0 — Walking Skeleton
 
-**Goal:** Scaffolded the project, ensuring the communication between the front and back end works as intended. Zero features, just wiring up essential components of the app.
+**Goal:** Scaffold the project, ensuring the communication between the front and back end works as intended. Zero features, just wiring up essential components of the app.
 
 **Completed:**
 
@@ -28,17 +28,17 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 **Issues resolved:**
 
-- Vitest couldn't load `.env`because its cwd is the monorepo root, not`/server`. Fixed by calling `dotenv.config({ path })`explicitly in`vitest.setup.ts`with an absolute path to`server/.env`.
+- Vitest couldn't load `.env`because its cwd is the monorepo root, not`/server`. Fixed by calling `dotenv.config({ path })`explicitly in`vitest.setup.ts`with an absolute path to`server/.env`
 - Playwright config threw `Cannot find name `process``— fixed by installing`@types/node`at the root and adding`node` to the types array in the root tsconfig.
 - Playwright test failed because the server wasn't running together with the test — fixed by inserting `webServer` block in the playwright config file
 
 - **Known issues carried forward:**
-- Docker warns about some vulnerabilities related to Golang packages. No idea what that means, but a quick research showed that it's probably a false-flag warning. Will revisit later.
-- esbuild moderate vulnerability via drizzle-kit's dependency on `@esbuild-kit` — dev-only, unexploitable in production. Monitor for a drizzle-kit update that resolves it later.
+- Docker warns about some vulnerabilities related to Golang packages. No idea what that means, but a quick research showed that it's probably a false-flag warning. Will revisit later
+- esbuild moderate vulnerability via drizzle-kit's dependency on `@esbuild-kit` — dev-only, unexploitable in production. Monitor for a drizzle-kit update that resolves it later
 
 ## Sprint 1 — Registration and Login
 
-**Goal:** Set up bare authentication and authorization via Better Auth. Only essential features were implemented, such as registration, email verification and login.
+**Goal:**A real user can create an account and log in through the browser.
 
 **Completed:**
 
@@ -46,14 +46,14 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 - Converted the project to ESM, as Better Auth doesn't support CommonJS module system
 - Built registration and login forms, HTML and Better Auth handle basic validation (will add Zod validation for tRPC procedures later)
 - Form submission is handled with formData API
-- On registration, user data is sent to the DB, but with emailVerified set to false. User can't log in until email is verified.
+- On registration, user data is sent to the DB, but with emailVerified set to false. User can't log in until email is verified
 - Upon user data being stored in DB, Resend sends verification email, which when confirmed tells Better Autg to set emailVerified field to true. Now user can log in.
 - First admin is bootstrapped via a one-time seed script.
 - Integrated Better Auth's Two Factor plugin for `editor` and `admin` roles via `twoFactorEnabled: true`
 - On the Front-End, React Router's `ProtectedRoute` prevents rendering the UI (`/` route) for the logged-out users. On the Back-End, the actual route protection is enforced by Better Auth and tRPC's `protectedProcedure`
-- Enabled CORS, because `locahhost:5173` works with `localhost:3000`, enabling communication between two origins
-- Vitest tests the registration, login, session and 2FA flows
-- `globalSetup.ts`starts and tears down the Express server around the Vitest test suite, allowing integration tests to hit real HTTP endpoints without a separately running server process
+- Enabled CORS, because `locahhost:5173` works with `localhost:3000`, enabling communication between two origins.
+- Vitest tests the registration, login, session and 2FA flows.
+- `globalSetup.ts`starts and tears down the Express server around the Vitest test suite, allowing integration tests to hit real HTTP endpoints without a separately running server process.
 
 **Decisions:**
 
@@ -74,6 +74,43 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 - Resend free tier: only delivers to Resend account owner email in dev. Real domain verification on Resend website deferred to Sprint 9.
 - Email verification flow untested for non-owner emails as a result
 - No password strength validation on register — BetterAuth enforces 8 character minimum but nothing beyond that; proper validation deferred to a later sprint
-- Docker warns about some vulnerabilities related to Golang packages. No idea what that means, but a quick research showed that it's probably a false-flag warning. Will revisit later.
-- esbuild moderate vulnerability via drizzle-kit's dependency on `@esbuild-kit` — dev-only, unexploitable in production. Monitor for a drizzle-kit update that resolves it later.
+- Docker warns about some vulnerabilities related to Golang packages. No idea what that means, but a quick research showed that it's probably a false-flag warning. Will revisit later
+- esbuild moderate vulnerability via drizzle-kit's dependency on `@esbuild-kit` — dev-only, unexploitable in production. Monitor for a drizzle-kit update that resolves it later
 - OTP cannot be tested end-to-end in Vitest since valid codes require intercepting Resend delivery, so only rejection paths are covered
+
+## Sprint 2 — Document Upload
+
+**Goal:**A logged-in contributor can uplaod a document and anyone can view it.
+
+**Completed:**
+
+- Added `documents` table to schema.
+- Only authenticated users that have `contributor` globalRole or above can access the `documents/upload` page (there is also another role-check in the back-end)
+- Added tRPC `documents.ts` route
+- Set up tRPC mutation: POST request, validates with zod, checks globalRole, accepts file, stores in Cloudinary cloud storage, saves metadata to DB
+- Added two tRPC queries: `list` for getting all documents and `getById` for fetching a single document
+- On front-end I made Document list page on `documents` and upload form on `documents/upload` page (wired to the upload mutation). After the document is uploaded it will be displayed on `/documents`. Finally, document details can be inspected on `/documents/:id` page
+- Vitest tests the upload mutation server-side
+- Playwright tests the full E2E upload flow: log in → upload → see it in list → click through to detail
+
+**Decisions:**
+
+- Chose Cloudinary over Cloudflare R2 for cloud storage because Cloudflare's dashboard looks archaic
+- Added shadcn for component styling, starting with auth and document pages
+- `list` and `getById` procedures use `publicProcedure` since anyone can view documents per the sprint goal; only `upload` requires authentication and a contributor+ role check
+
+**Issues resolved:**
+
+- tRPC wasn't forwarding session cookies — fixed by adding `credentials: 'include'` to the fetch call in the tRPC client config `drizzle-kit migrate` silently did nothing in every attempt — root cause was missing `import 'dotenv/config'` in `drizzle.config.ts`. Switched to a programmatic migration script (`src/scripts/migrate.ts`) using Drizzle's `migrate()` function directly, which is more reliable than the CLI
+- DB columns were a mix of camelCase and snake_case due to migrations running before `casing: 'snake_case'` was added to both the Drizzle config and `drizzle.config.ts` — resolved by wiping the DB and regenerating a single clean migration from the current schema
+- Playwright `page.goto()` was aborting on the login page — fixed by inlining the login steps directly in the test rather than abstracting them into a helper function
+
+**Known issues carried forward:**
+
+- Resend free tier: only delivers to Resend account owner email in dev. Real domain verification on Resend website deferred to Sprint 9.
+- Email verification flow untested for non-owner emails as a result
+- No password strength validation on register — BetterAuth enforces 8 character minimum but nothing beyond that; proper validation deferred to a later sprint
+- Docker warns about some vulnerabilities related to Golang packages. No idea what that means, but a quick research showed that it's probably a false-flag warning. Will revisit later
+- esbuild moderate vulnerability via drizzle-kit's dependency on `@esbuild-kit` — dev-only, unexploitable in production. Monitor for a drizzle-kit update that resolves it later
+- OTP cannot be tested end-to-end in Vitest since valid codes require intercepting Resend delivery, so only rejection paths are covered
+- The Playwrright `loginPage` helper function causes test failures when used — login steps are currently inlined in the test as a workaround; needs investigation

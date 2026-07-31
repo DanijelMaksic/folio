@@ -5,6 +5,10 @@
    "private": true,
    "scripts": {
       "dev": "tsx watch src/server.ts",
+      "db:migrate": "tsx src/scripts/migrate.ts",
+      "db:push": "dotenv -e .env -- drizzle-kit push",
+      "db:studio": "dotenv -e .env -- drizzle-kit studio",
+      "db:generate": "dotenv -e .env -- drizzle-kit generate",
       "seed:admin": "tsx src/scripts/seed-admin.ts"
    },
    "dependencies": {
@@ -12,6 +16,7 @@
       "@trpc/server": "^11.18.0",
       "bcrypt": "^6.0.0",
       "better-auth": "^1.6.23",
+      "cloudinary": "^2.10.0",
       "cors": "^2.8.6",
       "dotenv": "^17.4.2",
       "drizzle-orm": "^0.45.2",

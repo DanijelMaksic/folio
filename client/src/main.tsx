@@ -1,10 +1,17 @@
+import './index.css';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { trpc, trpcClient } from './lib/trpc.js';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+   defaultOptions: {
+      queries: {
+         refetchOnWindowFocus: false,
+      },
+   },
+});
 
 // trpc.Provider makes it possible to use useQuery() hooks anywhere in the component tree
 // QueryClientProvider sets up the cache for hooks to use
