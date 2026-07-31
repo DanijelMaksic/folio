@@ -129,3 +129,10 @@ jobs:
               CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
               CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
               CI: true
+
+         - name: Upload test artifacts
+           if: failure()
+           uses: actions/upload-artifact@v4
+           with:
+              name: playwright-results
+              path: test-results/
