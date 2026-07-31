@@ -1,4 +1,10 @@
+import dotenv from 'dotenv';
+import path from 'path';
 import { defineConfig } from '@playwright/test';
+
+if (!process.env.CI) {
+   dotenv.config({ path: path.resolve(__dirname, 'server/.env') });
+}
 
 export default defineConfig({
    testDir: './tests/e2e',
