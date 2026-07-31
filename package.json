@@ -12,7 +12,7 @@
       "dev:ci": "concurrently \"npm run dev -w server\" \"npm run dev -w client\"",
       "preview": "vite preview",
       "test:unit": "vitest run --passWithNoTests",
-      "test:e2e": "dotenv -e server/.env -- playwright test",
+      "test:e2e": "npx dotenv-cli -e server/.env -- playwright test",
       "build-only": "vite build"
    },
    "devDependencies": {
