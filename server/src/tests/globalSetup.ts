@@ -16,20 +16,22 @@ let server: Server;
 
 export async function setup() {
    // Starts docker postgres container
-   execSync('docker compose up -d', { stdio: 'inherit' });
+   if (!process.env.CI) {
+      execSync('docker compose up -d', { stdio: 'inherit' });
 
-   // Wait for postgres to be ready
-   const maxRetries = 20;
-   for (let i = 0; i < maxRetries; i++) {
-      try {
-         execSync('docker compose exec -T postgres pg_isready -U postgres', {
-            stdio: 'pipe',
-         });
-         break;
-      } catch {
-         if (i === maxRetries - 1)
-            throw new Error('Postgres did not become ready in time');
-         await new Promise((resolve) => setTimeout(resolve, 500));
+      // Wait for postgres to be ready
+      const maxRetries = 20;
+      for (let i = 0; i < maxRetries; i++) {
+         try {
+            execSync('docker compose exec -T postgres pg_isready -U postgres', {
+               stdio: 'pipe',
+            });
+            break;
+         } catch {
+            if (i === maxRetries - 1)
+               throw new Error('Postgres did not become ready in time');
+            await new Promise((resolve) => setTimeout(resolve, 500));
+         }
       }
    }
 
