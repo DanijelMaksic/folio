@@ -96,6 +96,18 @@ jobs:
          - name: Install Playwright browsers
            run: npx playwright install --with-deps
 
+         - name: Start server
+           run: npm run dev -w server &
+           env:
+              DATABASE_URL: postgresql://postgres:postgres@localhost:5432/folio_test
+              BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
+              BETTER_AUTH_URL: http://localhost:3000
+              RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+              CLIENT_URL: http://localhost:5173
+              CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+              CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+              CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
+
          - name: Wait for server
            run: npx wait-on http://localhost:3000/api/health
 
