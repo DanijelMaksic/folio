@@ -52,6 +52,9 @@ jobs:
               BETTER_AUTH_URL: http://localhost:3000
               RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
               CLIENT_URL: http://localhost:5173
+              CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+              CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+              CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
 
    e2e-tests:
       name: End-to-End Tests
