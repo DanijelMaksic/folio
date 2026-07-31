@@ -29,7 +29,7 @@ export default defineConfig({
             ? 'npm run preview'
             : 'npm run dev --workspace=client',
          url: 'http://localhost:5173',
-         reuseExistingServer: !process.env.CI,
+         reuseExistingServer: true,
          timeout: 120_000,
       },
    ],
