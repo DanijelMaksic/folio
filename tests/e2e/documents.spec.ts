@@ -1,5 +1,5 @@
 import { test, expect } from 'playwright/test';
-import { cleanupUser, seedUser } from './helpers.js';
+import { cleanupUser, seedUser, headers, API } from './helpers.js';
 
 const testUser = {
    email: 'test_e2e_docs@example.com',
@@ -14,7 +14,18 @@ test.beforeAll(async () => {
    try {
       await cleanupUser(testUser.email);
       await seedUser(testUser, 'contributor');
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Verify user exists
+      const res = await fetch(`${API}/api/auth/sign-in/email`, {
+         method: 'POST',
+         headers,
+         body: JSON.stringify({
+            email: testUser.email,
+            password: testUser.password,
+         }),
+      });
+      console.log('seed login test status:', res.status);
+      console.log('seed login test body:', await res.json());
       console.log('Setup complete');
    } catch (err) {
       console.error('beforeAll failed:', err);
