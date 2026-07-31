@@ -31,14 +31,7 @@ test('contributor can upload a document and see it in the list', async ({
    await page.goto('/login');
    await page.getByLabel('Email').fill(testUser.email);
    await page.getByLabel('Password').fill(testUser.password);
-
-   // Intercept the login response
-   const responsePromise = page.waitForResponse('**/api/auth/sign-in/email');
-
    await page.getByRole('button', { name: 'Sign in' }).click();
-   const response = await responsePromise;
-   console.log('login response status:', response.status());
-   console.log('login response body:', await response.text());
    await page.waitForURL('/');
 
    // Go to upload page
