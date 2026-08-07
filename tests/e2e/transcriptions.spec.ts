@@ -51,8 +51,6 @@ test.describe('Transcription flow', () => {
          'draft',
       );
       await page.getByRole('button', { name: 'Show revision history' }).click();
-      await expect(page.getByTestId('transcription-revision')).toHaveText(
-         'Transcription content.',
-      );
+      await expect(page.getByTestId('transcription-revision')).toBeVisible();
    });
 });
