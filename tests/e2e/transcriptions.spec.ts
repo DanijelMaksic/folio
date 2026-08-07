@@ -42,6 +42,10 @@ test.describe('Transcription flow', () => {
 
       // Transcribe document
       await page.getByRole('button', { name: 'Start transcribing' }).click();
+      await page.waitForResponse(
+         (res) =>
+            res.url().includes('transcriptions.create') && res.status() === 200,
+      );
       await page
          .getByTestId('transcription-content')
          .fill('Transcription content.');
