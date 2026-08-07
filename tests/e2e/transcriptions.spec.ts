@@ -8,15 +8,14 @@ const testUser = {
    name: 'E2E Docs user',
 };
 
-const docTitle = 'Test Document';
-const transcriptionContent = 'Test content.';
+const docTitle = 'Document';
 
 test.afterAll(async () => {
    await cleanupUser(testUser.email);
 });
 
 test.describe('Transcription flow', () => {
-   test('contributor can transcribe document and see the changes in revision history', async ({
+   test('contributor can transcribe document and see the changes in transcription history', async ({
       page,
    }) => {
       // page is already logged in via fixture
@@ -45,7 +44,7 @@ test.describe('Transcription flow', () => {
       await page.getByRole('button', { name: 'Start transcribing' }).click();
       await page
          .getByTestId('transcription-content')
-         .fill(transcriptionContent);
+         .fill('Transcription content.');
 
       await page.getByRole('button', { name: 'Save' }).click();
       await expect(page.getByTestId('transcription-status')).toHaveText(
@@ -53,7 +52,7 @@ test.describe('Transcription flow', () => {
       );
       await page.getByRole('button', { name: 'Show revision history' }).click();
       await expect(page.getByTestId('transcription-revision')).toHaveText(
-         transcriptionContent,
+         'Transcription content.',
       );
    });
 });
