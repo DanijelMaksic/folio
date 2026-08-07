@@ -9,12 +9,7 @@ if (!process.env.CI) {
 export default defineConfig({
    testDir: './tests/e2e',
    reporter: [['html', { open: 'on-failure' }]],
-   // webServer: {
-   //    command: process.env.CI ? 'npm run dev:ci' : 'npm run dev',
-   //    url: 'http://localhost:3000/api/health',
-   //    reuseExistingServer: true,
-   //    timeout: 120_000,
-   // },
+   globalSetup: './tests/e2e/globalSetup.ts',
    webServer: [
       {
          command: process.env.CI
@@ -37,4 +32,10 @@ export default defineConfig({
       baseURL: 'http://localhost:5173',
       screenshot: 'only-on-failure',
    },
+   // webServer: {
+   //    command: process.env.CI ? 'npm run dev:ci' : 'npm run dev',
+   //    url: 'http://localhost:3000/api/health',
+   //    reuseExistingServer: true,
+   //    timeout: 120_000,
+   // },
 });

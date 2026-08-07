@@ -8,6 +8,13 @@
       "when": 1785237447193,
       "tag": "0000_lucky_meltdown",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1785598009641,
+      "tag": "0001_mushy_vin_gonzales",
+      "breakpoints": true
     }
   ]
 }

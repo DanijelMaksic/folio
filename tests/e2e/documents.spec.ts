@@ -1,5 +1,5 @@
 import { test, expect } from 'playwright/test';
-import { cleanupUser, seedUser } from './helpers.js';
+import { cleanupUser, seedUser } from './globalSetup';
 
 const testUser = {
    email: 'test_e2e_docs@example.com',
@@ -14,7 +14,6 @@ test.beforeAll(async () => {
    try {
       await cleanupUser(testUser.email);
       await seedUser(testUser, 'contributor');
-      console.log('Setup complete');
    } catch (err) {
       console.error('beforeAll failed:', err);
       throw err;

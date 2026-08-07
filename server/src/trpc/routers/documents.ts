@@ -23,7 +23,10 @@ export const documentsRouter = router({
             !ctx.user.globalRole ||
             !CONTRIBUTOR_ROLES.includes(ctx.user.globalRole)
          ) {
-            throw new TRPCError({ code: 'FORBIDDEN' });
+            throw new TRPCError({
+               code: 'FORBIDDEN',
+               message: 'Only contributors and above can upload documents.',
+            });
          }
 
          const uploaded = await cloudinary.uploader.upload(input.fileBase64, {
