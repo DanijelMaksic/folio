@@ -32,10 +32,4 @@ export default defineConfig({
       baseURL: 'http://localhost:5173',
       screenshot: 'only-on-failure',
    },
-   // webServer: {
-   //    command: process.env.CI ? 'npm run dev:ci' : 'npm run dev',
-   //    url: 'http://localhost:3000/api/health',
-   //    reuseExistingServer: true,
-   //    timeout: 120_000,
-   // },
 });

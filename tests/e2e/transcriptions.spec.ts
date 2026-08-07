@@ -1,5 +1,5 @@
 import { test, expect } from './fixtures.js';
-import { cleanupUser } from './globalSetup.js';
+import { cleanupUser } from './globalSetup';
 
 const testUser = {
    email: 'test_e2e_docs@example.com',
@@ -8,17 +8,20 @@ const testUser = {
    name: 'E2E Docs user',
 };
 
-const docTitle = 'E2E Test Document';
+const docTitle = 'Test Document';
+const transcriptionContent = 'Test content.';
 
 test.afterAll(async () => {
    await cleanupUser(testUser.email);
 });
 
-test.describe('Document upload flow', () => {
-   test('contributor can upload a document and see it in the list', async ({
+test.describe('Transcription flow', () => {
+   test('contributor can transcribe document and see the changes in revision history', async ({
       page,
    }) => {
       // page is already logged in via fixture
+
+      // Upload document
       await page.goto('/documents/upload');
 
       await page.getByLabel('Title').fill(docTitle);
@@ -38,11 +41,19 @@ test.describe('Document upload flow', () => {
       await page.waitForURL(/\/documents\/.+/);
       await expect(page.getByText(docTitle)).toBeVisible();
 
-      await page.goto('/documents');
-      await expect(page.getByText(docTitle)).toBeVisible();
+      // Transcribe document
+      await page.getByRole('button', { name: 'Start transcribing' }).click();
+      await page
+         .getByTestId('transcription-content')
+         .fill(transcriptionContent);
 
-      await page.getByText(docTitle).click();
-      await page.waitForURL(/\/documents\/.+/);
-      await expect(page.getByText(docTitle)).toBeVisible();
+      await page.getByRole('button', { name: 'Save' }).click();
+      await expect(page.getByTestId('transcription-status')).toHaveText(
+         'draft',
+      );
+      await page.getByRole('button', { name: 'Show revision history' }).click();
+      await expect(page.getByTestId('transcription-revision')).toHaveText(
+         transcriptionContent,
+      );
    });
 });

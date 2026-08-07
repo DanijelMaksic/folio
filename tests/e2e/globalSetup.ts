@@ -1,6 +1,9 @@
 import dotenv from 'dotenv';
 import path from 'path';
-dotenv.config({ path: path.resolve('../server/.env') });
+
+if (!process.env.CI) {
+   dotenv.config({ path: path.resolve('../server/.env') });
+}
 
 import { user } from '../../server/src/db/schema.js';
 import { db } from '../../server/src/db/index.js';

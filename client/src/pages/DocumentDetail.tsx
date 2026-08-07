@@ -105,6 +105,7 @@ export default function DocumentDetail() {
                      <textarea
                         className="w-full min-h-50 border rounded p-2 text-sm font-mono resize-y disabled:opacity-60"
                         value={content}
+                        data-testid="transcription-content"
                         onChange={(e) => setContent(e.target.value)}
                         disabled={isSubmitted}
                         placeholder="Type your transcription here..."
@@ -140,7 +141,10 @@ export default function DocumentDetail() {
                               Submitted — awaiting review.
                            </p>
                         )}
-                        <span className="ml-auto text-xs text-muted-foreground capitalize">
+                        <span
+                           data-testid="transcription-status"
+                           className="ml-auto text-xs text-muted-foreground capitalize"
+                        >
                            {transcription.status}
                         </span>
                      </div>
@@ -168,7 +172,10 @@ export default function DocumentDetail() {
                                     <p className="text-muted-foreground">
                                        {new Date(rev.savedAt).toLocaleString()}
                                     </p>
-                                    <p className="font-mono whitespace-pre-wrap">
+                                    <p
+                                       data-testid="transcription-revision"
+                                       className="font-mono whitespace-pre-wrap"
+                                    >
                                        {rev.content}
                                     </p>
                                  </li>
