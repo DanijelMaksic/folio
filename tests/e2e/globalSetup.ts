@@ -25,12 +25,21 @@ export interface UserPayload {
    name: string;
 }
 
+async function signUpWithRetry(payload: UserPayload, retries = 5) {
+   for (let i = 0; i < retries; i++) {
+      const res = await fetch(`${API}/api/auth/sign-up/email`, {
+         method: 'POST',
+         headers,
+         body: JSON.stringify(payload),
+      });
+      if (res.ok) return;
+      await new Promise((r) => setTimeout(r, 1000));
+   }
+   throw new Error('Sign-up failed after retries');
+}
+
 export async function seedUser(payload: UserPayload, role: Role) {
-   await fetch(`${API}/api/auth/sign-up/email`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(payload),
-   });
+   await signUpWithRetry(payload);
 
    await db
       .update(user)
