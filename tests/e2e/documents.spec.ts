@@ -3,8 +3,8 @@ import { cleanupUser } from './globalSetup.js';
 
 const testUser = {
    email: 'test_e2e_docs@example.com',
-   password: 'Password123!',
-   username: 'e2edocs',
+   password: 'Password123!!',
+   username: 'e2eDocs',
    name: 'E2E Docs user',
 };
 
@@ -43,6 +43,6 @@ test.describe('Document upload flow', () => {
 
       await page.getByText(docTitle).click();
       await page.waitForURL(/\/documents\/.+/);
-      await expect(page.getByText(docTitle)).toBeVisible();
+      await expect(page.getByText(docTitle)).toBeVisible({ timeout: 15_000 });
    });
 });

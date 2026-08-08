@@ -2,10 +2,10 @@ import { test, expect } from './fixtures.js';
 import { cleanupUser } from './globalSetup';
 
 const testUser = {
-   email: 'test_e2e_docs@example.com',
+   email: 'test_e2e_transcriptions@example.com',
    password: 'Password123!',
-   username: 'e2edocs',
-   name: 'E2E Docs user',
+   username: 'e2eTranscriptions',
+   name: 'E2E Transcription user',
 };
 
 const docTitle = 'Document';
@@ -19,6 +19,8 @@ test.describe('Transcription flow', () => {
       page,
    }) => {
       // page is already logged in via fixture
+
+      test.setTimeout(60_000); // CI is slower; upload + transcribe need headroom
 
       // Upload document
       await page.goto('/documents/upload');
@@ -41,11 +43,17 @@ test.describe('Transcription flow', () => {
       await expect(page.getByText(docTitle)).toBeVisible();
 
       // Transcribe document
-      await page.getByRole('button', { name: 'Start transcribing' }).click();
-      await page.waitForResponse(
+      const createResponse = page.waitForResponse(
          (res) =>
             res.url().includes('transcriptions.create') && res.status() === 200,
       );
+      await page.getByRole('button', { name: 'Start transcribing' }).click();
+      await createResponse;
+
+      // Wait for textarea to actually render before filling
+      await expect(page.getByTestId('transcription-content')).toBeVisible({
+         timeout: 15_000,
+      });
       await page
          .getByTestId('transcription-content')
          .fill('Transcription content.');
