@@ -5,8 +5,8 @@ if (!process.env.CI) {
    dotenv.config({ path: path.resolve('../server/.env') });
 }
 
-import { user } from '@folio/server/src/db/schema.js';
-import { db } from '@folio/server/src/db/index.js';
+import { user } from '../../server/src/db/schema.js';
+import { db } from '../../server/src/db/index.js';
 import { eq } from 'drizzle-orm';
 
 const API = 'http://localhost:3000';
