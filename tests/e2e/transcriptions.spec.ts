@@ -1,5 +1,5 @@
-import { test, expect } from './fixtures.js';
-import { cleanupUser } from './globalSetup';
+import { test, expect } from '@/fixtures.js';
+import { cleanupUser } from '@/globalSetup';
 
 const testUser = {
    email: 'test_e2e_transcriptions@example.com',
@@ -41,6 +41,14 @@ test.describe('Transcription flow', () => {
 
       await page.waitForURL(/\/documents\/.+/);
       await expect(page.getByText(docTitle)).toBeVisible();
+
+      // Wait for transcription panel query to complete before interacting with it
+      await page.waitForResponse(
+         (res) =>
+            res.url().includes('transcriptions.getByDocument') &&
+            res.status() === 200,
+         { timeout: 15_000 },
+      );
 
       // Transcribe document
       const createResponse = page.waitForResponse(

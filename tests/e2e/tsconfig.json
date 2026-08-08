@@ -1,0 +1,10 @@
+{
+   "include": ["./**/*"],
+   "compilerOptions": {
+      "noEmit": true,
+      "paths": {
+         "@/*": ["./*"],
+         "@folio/server/*": ["../server/src/*"]
+      }
+   }
+}
