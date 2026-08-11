@@ -5,7 +5,7 @@ if (!process.env.CI) {
    dotenv.config({ path: path.resolve('../server/.env') });
 }
 
-import { user } from '../../server/src/db/schema.js';
+import { user } from '../../server/src/db/schema/index.js';
 import { db } from '../../server/src/db/index.js';
 import { eq } from 'drizzle-orm';
 

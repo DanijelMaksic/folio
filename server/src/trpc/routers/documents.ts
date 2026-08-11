@@ -1,28 +1,18 @@
 import { z } from 'zod';
 import { protectedProcedure, publicProcedure, router } from '@/trpc/trpc.js';
-import { documents } from '@/db/schema.js';
+import { documents } from '@/db/schema/index.js';
 import { eq } from 'drizzle-orm';
 import cloudinary from '@/lib/cloudinary.js';
 import { TRPCError } from '@trpc/server';
-
-const CONTRIBUTOR_ROLES = ['contributor', 'editor', 'admin'];
+import { listDocumentsSchema, uploadDocumentSchema } from '@folio/shared';
+import { isContributor } from '@folio/shared';
 
 export const documentsRouter = router({
    // POST request
    upload: protectedProcedure
-      .input(
-         z.object({
-            title: z.string().min(1),
-            description: z.string().optional(),
-            fileBase64: z.string(),
-            fileType: z.string(),
-         }),
-      )
+      .input(uploadDocumentSchema)
       .mutation(async ({ ctx, input }) => {
-         if (
-            !ctx.user.globalRole ||
-            !CONTRIBUTOR_ROLES.includes(ctx.user.globalRole)
-         ) {
+         if (!isContributor(ctx.user.globalRole)) {
             throw new TRPCError({
                code: 'FORBIDDEN',
                message: 'Only contributors and above can upload documents.',
@@ -43,7 +33,7 @@ export const documentsRouter = router({
                uploadedBy: ctx.user.id,
                cloudinaryPublicId: uploaded.public_id,
                cloudinaryUrl: uploaded.secure_url,
-               version: '1',
+               version: 1,
             })
             .returning();
 
@@ -51,12 +41,7 @@ export const documentsRouter = router({
       }),
 
    list: publicProcedure
-      .input(
-         z.object({
-            page: z.number().min(1).default(1),
-            limit: z.number().min(1).max(50).default(20),
-         }),
-      )
+      .input(listDocumentsSchema)
       .query(async ({ ctx, input }) => {
          const offset = (input.page - 1) * input.limit;
 

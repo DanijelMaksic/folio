@@ -2,7 +2,7 @@ import { trpc } from '../lib/trpc';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import type { Document } from '@server/db/schema.js';
+import { Document } from '@shared';
 
 export default function Documents() {
    const navigate = useNavigate();

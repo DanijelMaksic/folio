@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { API, register, login, cleanupUser } from './helpers.js';
 import { db } from '@/db/index.js';
-import { user } from '@/db/schema.js';
+import { user } from '@/db/schema/auth-schema.js';
 import { eq } from 'drizzle-orm';
 
 const testUser = {

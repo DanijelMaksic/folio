@@ -1,5 +1,5 @@
 import { db } from '@/db/index.js'; // drizzle instance
-import * as schema from '@/db/schema.js';
+import * as schema from '@/db/schema/index.js';
 import { betterAuth } from 'better-auth/minimal';
 import { sendVerificationEmail, sendOtpEmail } from './email.js';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';

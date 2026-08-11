@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { API, login, cleanupUser, headers } from './helpers.js';
-import { user } from '@/db/schema.js';
+import { user } from '@/db/schema/auth-schema.js';
 import { db } from '@/db/index.js';
 import { eq } from 'drizzle-orm';
 

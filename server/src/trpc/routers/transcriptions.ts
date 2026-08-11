@@ -1,11 +1,13 @@
 import { db } from '@/db/index.js';
-import { transcriptionRevisions, transcriptions } from '@/db/schema.js';
+import {
+   transcriptionRevisions,
+   transcriptions,
+} from '@/db/schema/transcriptions.js';
 import { protectedProcedure, router } from '@/trpc/trpc.js';
+import { isContributor } from '@folio/shared';
 import { TRPCError } from '@trpc/server';
 import { and, desc, eq } from 'drizzle-orm';
 import z from 'zod';
-
-const CONTRIBUTOR_ROLES = ['contributor', 'editor', 'admin'];
 
 export const transcriptionsRouter = router({
    // Fetches the current user's transcription for a given document
@@ -30,10 +32,7 @@ export const transcriptionsRouter = router({
    create: protectedProcedure
       .input(z.object({ documentId: z.string() }))
       .mutation(async ({ ctx, input }) => {
-         if (
-            !ctx.user.globalRole ||
-            !CONTRIBUTOR_ROLES.includes(ctx.user.globalRole)
-         ) {
+         if (!isContributor(ctx.user.globalRole)) {
             throw new TRPCError({
                code: 'FORBIDDEN',
                message: 'Only contributors and above can transcribe.',
