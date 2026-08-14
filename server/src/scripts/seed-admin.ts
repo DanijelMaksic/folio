@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { db } from '@/db/index.js';
-import { twoFactor, user } from '@/db/schema/auth-schema.js';
+import { twoFactor, user } from '@/db/schema/auth.js';
 import { eq } from 'drizzle-orm';
 import { randomBytes } from 'crypto';
 

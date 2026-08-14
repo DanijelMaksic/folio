@@ -292,7 +292,7 @@ export const transcriptionsRouter = router({
             .update(transcriptions)
             .set({
                status: 'rejected',
-               rejectedReason: input.reason,
+               rejectionReason: input.reason,
                updatedAt: new Date(),
             })
             .where(eq(transcriptions.id, input.transcriptionId));

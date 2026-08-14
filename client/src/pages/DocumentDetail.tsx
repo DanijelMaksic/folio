@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { trpc } from '../lib/trpc';
 import { useSession } from '../lib/auth-client';
-import type { TranscriptionRevision } from '@server/db/schema';
+import { TranscriptionRevision } from '@shared';
 
 const CONTRIBUTOR_ROLES = ['contributor', 'editor', 'admin'];
 
