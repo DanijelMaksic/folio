@@ -1,0 +1,1 @@
+ALTER TABLE "transcriptions" RENAME COLUMN "rejected_reason" TO "rejection_reason";

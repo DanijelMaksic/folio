@@ -7,6 +7,7 @@ import VerifyOtp from '@/pages/VerifyOtp';
 import Documents from '@/pages/Documents';
 import DocumentDetail from '@/pages/DocumentDetail';
 import UploadDocument from '@/pages/UploadDocument';
+import ReviewQueue from '@/pages/ReviewQueue';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
    const { data: session, isPending } = useSession();
@@ -28,6 +29,14 @@ export default function App() {
                element={
                   <ProtectedRoute>
                      <UploadDocument />
+                  </ProtectedRoute>
+               }
+            />
+            <Route
+               path="/review-queue"
+               element={
+                  <ProtectedRoute>
+                     <ReviewQueue />
                   </ProtectedRoute>
                }
             />

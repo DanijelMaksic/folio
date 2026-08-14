@@ -15,7 +15,7 @@ export const documentsRouter = router({
          if (!isContributor(ctx.user.globalRole)) {
             throw new TRPCError({
                code: 'FORBIDDEN',
-               message: 'Only contributors and above can upload documents.',
+               message: 'Only contributors and above can upload documents',
             });
          }
 

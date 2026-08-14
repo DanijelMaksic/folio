@@ -17,6 +17,7 @@ export const transcriptions = pgTable(
          .references(() => user.id, { onDelete: 'cascade' }),
       content: text().notNull().default(''),
       status: transcriptionStatusEnum().notNull().default('draft'),
+      rejectionReason: text(),
       createdAt: timestamp().notNull().defaultNow(),
       updatedAt: timestamp().notNull().defaultNow(),
    },

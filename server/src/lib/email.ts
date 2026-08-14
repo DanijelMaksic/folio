@@ -30,3 +30,48 @@ export const sendOtpEmail = async (to: string, otp: string) => {
       `,
    });
 };
+
+interface ApprovedParams {
+   to: string;
+   username: string;
+   documentId: string;
+}
+
+interface RejectedParams {
+   to: string;
+   username: string;
+   documentId: string;
+   reason: string;
+}
+
+export const sendApprovalEmail = async ({
+   to,
+   username,
+   documentId,
+}: ApprovedParams) => {
+   await resend.emails.send({
+      from: FROM,
+      to,
+      subject: 'Your transcription was approved!',
+      html: `
+      <p>Thanks for transcribin, ${username}...</p>
+      `,
+   });
+};
+
+export const sendRejectionEmail = async ({
+   to,
+   username,
+   documentId,
+   reason,
+}: RejectedParams) => {
+   await resend.emails.send({
+      from: FROM,
+      to,
+      subject: `Sorry ${username}, your transcription was rejected`,
+      html: `
+      <div>Rejection reason:</div>
+      <p>${reason}</p>
+      `,
+   });
+};

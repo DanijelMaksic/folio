@@ -4,10 +4,18 @@ import {
    transcriptions,
 } from '@/db/schema/transcriptions.js';
 import { protectedProcedure, router } from '@/trpc/trpc.js';
-import { isContributor } from '@folio/shared';
+import {
+   approveSchema,
+   isContributor,
+   isEditor,
+   rejectSchema,
+} from '@folio/shared';
 import { TRPCError } from '@trpc/server';
 import { and, desc, eq } from 'drizzle-orm';
 import z from 'zod';
+import { sendApprovalEmail, sendRejectionEmail } from '@/lib/email.js';
+import { documents } from '@/db/schema/documents.js';
+import { user } from '@/db/schema/auth.js';
 
 export const transcriptionsRouter = router({
    // Fetches the current user's transcription for a given document
@@ -35,7 +43,7 @@ export const transcriptionsRouter = router({
          if (!isContributor(ctx.user.globalRole)) {
             throw new TRPCError({
                code: 'FORBIDDEN',
-               message: 'Only contributors and above can transcribe.',
+               message: 'Only contributors and above can transcribe',
             });
          }
 
@@ -80,11 +88,11 @@ export const transcriptionsRouter = router({
          if (existing.userId !== ctx.user.id)
             throw new TRPCError({ code: 'FORBIDDEN' });
 
-         // Status check — throws BAD_REQUEST if already submitted (locks editing)
-         if (existing.status === 'submitted') {
+         // Status check — throws FORBIDDEN if already submitted or approved (locks editing)
+         if (existing.status !== 'draft' && existing.status !== 'rejected') {
             throw new TRPCError({
-               code: 'BAD_REQUEST',
-               message: 'Cannot edit a submitted transcription.',
+               code: 'FORBIDDEN',
+               message: 'Cannot edit a submitted or reviewed transcription',
             });
          }
 
@@ -117,16 +125,19 @@ export const transcriptionsRouter = router({
          }
          if (existing.userId !== ctx.user.id)
             throw new TRPCError({ code: 'FORBIDDEN' });
-         if (existing.status === 'submitted') {
+
+         if (existing.status !== 'draft' && existing.status !== 'rejected') {
             throw new TRPCError({
-               code: 'BAD_REQUEST',
-               message: 'Already submitted.',
+               code: 'FORBIDDEN',
+               message:
+                  'Cannot submit a transcription that is already submitted or reviewed',
             });
          }
+
          if (!existing.content.trim()) {
             throw new TRPCError({
                code: 'BAD_REQUEST',
-               message: 'Cannot submit an empty transcription.',
+               message: 'Cannot submit an empty transcription',
             });
          }
 
@@ -164,5 +175,135 @@ export const transcriptionsRouter = router({
                ),
             )
             .orderBy(desc(transcriptionRevisions.savedAt));
+      }),
+
+   listQueue: protectedProcedure.query(async ({ ctx }) => {
+      if (!isEditor(ctx.user.globalRole)) {
+         throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: 'Editor role required',
+         });
+      }
+
+      const queue = await db
+         .select({
+            id: transcriptions.id,
+            documentId: transcriptions.documentId,
+            documentTitle: documents.title,
+            contributorUsername: user.username,
+            status: transcriptions.status,
+            updatedAt: transcriptions.updatedAt,
+         })
+         .from(transcriptions)
+         .innerJoin(documents, eq(documents.id, transcriptions.documentId))
+         .innerJoin(user, eq(user.id, transcriptions.userId))
+         .where(eq(transcriptions.status, 'submitted'));
+
+      return queue;
+   }),
+
+   approve: protectedProcedure
+      .input(approveSchema)
+      .mutation(async ({ ctx, input }) => {
+         if (!isEditor(ctx.user.globalRole)) {
+            throw new TRPCError({
+               code: 'FORBIDDEN',
+               message: 'Editor role required',
+            });
+         }
+
+         const transcription = await db.query.transcriptions.findFirst({
+            where: eq(transcriptions.id, input.transcriptionId),
+            with: { user: true },
+         });
+
+         if (!transcription) {
+            throw new TRPCError({
+               code: 'NOT_FOUND',
+               message: 'Transcription not found',
+            });
+         }
+
+         if (transcription.userId === ctx.user.id) {
+            throw new TRPCError({
+               code: 'FORBIDDEN',
+               message: 'Cannot approve your own transcription',
+            });
+         }
+
+         if (transcription.status !== 'submitted') {
+            throw new TRPCError({
+               code: 'BAD_REQUEST',
+               message: 'Transcription is not submitted',
+            });
+         }
+
+         await db
+            .update(transcriptions)
+            .set({ status: 'approved', updatedAt: new Date() })
+            .where(eq(transcriptions.id, input.transcriptionId));
+
+         await sendApprovalEmail({
+            to: transcription.user.email,
+            username: transcription.user.username,
+            documentId: transcription.documentId,
+         });
+
+         return { success: true };
+      }),
+
+   reject: protectedProcedure
+      .input(rejectSchema)
+      .mutation(async ({ ctx, input }) => {
+         if (!isEditor(ctx.user.globalRole)) {
+            throw new TRPCError({
+               code: 'FORBIDDEN',
+               message: 'Editor role required',
+            });
+         }
+
+         const transcription = await db.query.transcriptions.findFirst({
+            where: eq(transcriptions.id, input.transcriptionId),
+            with: { user: true },
+         });
+
+         if (!transcription) {
+            throw new TRPCError({
+               code: 'NOT_FOUND',
+               message: 'Transcription not found.',
+            });
+         }
+
+         if (transcription.userId === ctx.user.id) {
+            throw new TRPCError({
+               code: 'FORBIDDEN',
+               message: 'Cannot reject your own transcription.',
+            });
+         }
+
+         if (transcription.status !== 'submitted') {
+            throw new TRPCError({
+               code: 'BAD_REQUEST',
+               message: 'Transcription is not submitted.',
+            });
+         }
+
+         await db
+            .update(transcriptions)
+            .set({
+               status: 'rejected',
+               rejectedReason: input.reason,
+               updatedAt: new Date(),
+            })
+            .where(eq(transcriptions.id, input.transcriptionId));
+
+         await sendRejectionEmail({
+            to: transcription.user.email,
+            username: transcription.user.username,
+            documentId: transcription.documentId,
+            reason: input.reason,
+         });
+
+         return { success: true };
       }),
 });
