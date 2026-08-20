@@ -5,7 +5,7 @@ import { httpBatchLink } from '@trpc/client';
 // Ensures that React Query hooks are typed with AppRouter type
 export const trpc = createTRPCReact<AppRouter>();
 
-// rRPC HTTP transport layer
+// tRPC HTTP transport layer
 export const trpcClient = trpc.createClient({
    links: [
       httpBatchLink({

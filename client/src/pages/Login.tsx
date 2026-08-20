@@ -1,4 +1,4 @@
-import { signIn } from '@/lib/auth-client';
+import { signIn, useSession } from '@/lib/auth-client';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,8 @@ export default function Login() {
    const [error, setError] = useState<string | null>(null);
    const [loading, setLoading] = useState(false);
    const navigate = useNavigate();
+
+   const { refetch } = useSession();
 
    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
@@ -27,6 +29,7 @@ export default function Login() {
       if (error) {
          setError(error.message ?? 'Login failed');
       } else if (data && !('twoFactorRedirect' in data)) {
+         await refetch();
          navigate('/');
       }
    };

@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { trpc, trpcClient } from './lib/trpc.js';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 const queryClient = new QueryClient({
    defaultOptions: {
@@ -20,6 +21,7 @@ function Root() {
       <trpc.Provider client={trpcClient} queryClient={queryClient}>
          <QueryClientProvider client={queryClient}>
             <App />
+            <ReactQueryDevtools />
          </QueryClientProvider>
       </trpc.Provider>
    );

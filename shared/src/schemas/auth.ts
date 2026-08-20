@@ -62,13 +62,13 @@ export const usernameSchema = z
 
 export const registerSchema = z.object({
    username: usernameSchema,
-   email: z.email('Must be a valid email address'),
+   email: z.string().email('Must be a valid email address'),
    password: z.string().min(8, 'Password must be at least 8 characters'),
 });
 
 export const loginSchema = z.object({
    username: usernameSchema,
-   email: z.email('Must be a valid email address'),
+   email: z.string().email('Must be a valid email address'),
    password: z.string().min(1, 'Password is required'),
 });
 
@@ -79,7 +79,7 @@ export const verifyOtpSchema = z.object({
 export const userSchema = z.object({
    id: z.string(),
    username: z.string(),
-   email: z.email(),
+   email: z.string().email(),
    globalRole: z.enum(GLOBAL_ROLES),
    twoFactorEnabled: z.boolean(),
    createdAt: z.date(),

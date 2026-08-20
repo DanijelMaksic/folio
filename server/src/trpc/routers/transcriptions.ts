@@ -306,4 +306,25 @@ export const transcriptionsRouter = router({
 
          return { success: true };
       }),
+
+   getSubmittedByDocument: protectedProcedure
+      .input(z.object({ documentId: z.string() }))
+      .query(async ({ ctx, input }) => {
+         if (!isEditor(ctx.user.globalRole)) {
+            throw new TRPCError({
+               code: 'FORBIDDEN',
+               message: 'Editor role required.',
+            });
+         }
+
+         const transcription = await db.query.transcriptions.findFirst({
+            where: and(
+               eq(transcriptions.documentId, input.documentId),
+               eq(transcriptions.status, 'submitted'),
+            ),
+            with: { user: true },
+         });
+
+         return transcription ?? null;
+      }),
 });

@@ -33,7 +33,7 @@ export default function App() {
                }
             />
             <Route
-               path="/review-queue"
+               path="/review"
                element={
                   <ProtectedRoute>
                      <ReviewQueue />

@@ -31,47 +31,48 @@ export const sendOtpEmail = async (to: string, otp: string) => {
    });
 };
 
-interface ApprovedParams {
-   to: string;
-   username: string;
-   documentId: string;
-}
-
-interface RejectedParams {
-   to: string;
-   username: string;
-   documentId: string;
-   reason: string;
-}
-
-export const sendApprovalEmail = async ({
+export async function sendApprovalEmail({
    to,
    username,
    documentId,
-}: ApprovedParams) => {
+}: {
+   to: string;
+   username: string;
+   documentId: string;
+}) {
    await resend.emails.send({
-      from: FROM,
+      from: 'Folio <noreply@yourdomain.com>',
       to,
-      subject: 'Your transcription was approved!',
+      subject: 'Your transcription has been approved',
       html: `
-      <p>Thanks for transcribin, ${username}...</p>
-      `,
+      <p>Hi ${username},</p>
+      <p>Your transcription has been approved.</p>
+      <p><a href="${process.env.CLIENT_URL}/documents/${documentId}">View it here</a></p>
+    `,
    });
-};
+}
 
-export const sendRejectionEmail = async ({
+export async function sendRejectionEmail({
    to,
    username,
    documentId,
    reason,
-}: RejectedParams) => {
+}: {
+   to: string;
+   username: string;
+   documentId: string;
+   reason: string;
+}) {
    await resend.emails.send({
-      from: FROM,
+      from: 'Folio <noreply@yourdomain.com>',
       to,
-      subject: `Sorry ${username}, your transcription was rejected`,
+      subject: 'Your transcription needs revision',
       html: `
-      <div>Rejection reason:</div>
-      <p>${reason}</p>
-      `,
+      <p>Hi ${username},</p>
+      <p>Your transcription has been rejected for the following reason:</p>
+      <blockquote>${reason}</blockquote>
+      <p>Please revise and resubmit.</p>
+      <p><a href="${process.env.CLIENT_URL}/documents/${documentId}">View it here</a></p>
+    `,
    });
-};
+}
