@@ -117,7 +117,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 **Completed:**
 
-- Added `documents` table to schema
+- Added `documents` table to Drizzle schema
 
 - Only authenticated users that have `contributor` globalRole or above can access the `documents/upload` page (there is also another role-check in the Back-End)
 
@@ -171,7 +171,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 **Completed:**
 
-- Added `transcriptions` table to schema
+- Added `transcriptions` table to Drizzle schema
 
 - Only authenticated users that have `contributor` globalRole or above can access the transcription block
 
@@ -216,3 +216,55 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 - esbuild moderate vulnerability via drizzle-kit's dependency on `@esbuild-kit` — dev-only, unexploitable in production. Monitor for a drizzle-kit update that resolves it later
 
 - OTP cannot be tested end-to-end in Vitest since valid codes require intercepting Resend delivery, so only rejection paths are covered
+
+## Sprint 3 — Transcription Review
+
+**Goal:**A logged-in editor can approve or reject a transcription.
+
+**Completed:**
+
+- Only authenticated users that have `editor` globalRole or above can access the review block (on `/documents/:id`)
+
+- Added two tRPC queries: `listQueue` for fetching all submitted transcriptions and `getSubmittedByDocument` for getting specific contributor's transcription (without it, editor would see his own transcription)
+
+- Set up two tRPC mutations: `approve`, which marks the submitted transcription as approved and sends approval email; `reject`, which marks the transcription as rejected and sends rejection mail with rejection reason
+
+- On the Front-End I updated the Document details page to include the transcription review block that contains approve button, rejection reason and reject button (which is disabled if reason is empty). Contributor whose transcription was rejected can see the reason displayed above transcription block, and they can try submitting a new revision
+
+- Added zod validation schemas in `/shared`
+
+**Decisions:**
+
+- `getSubmittedByDocument` added as a separate procedure rather than reusing `getByDocument` — editors need to see the contributor's transcription, not their own slot; reusing the same query would require passing a userId which breaks the ownership model
+
+- Self-review blocked at the procedure level rather than only on the frontend — an editor who is also a contributor cannot approve or reject their own submission even if the UI hides the controls
+
+- Rejection is not terminal — status cycles back through `draft → submitted` after rejection, matching the FromThePage/Scripto pattern; `update` and `submit` procedures updated to accept `rejected` as a valid from-status alongside `draft`
+
+- `isEditor` and `isContributor` helpers imported from `@folio/shared` on both client and server — local `CONTRIBUTOR_ROLES` array removed from `DocumentDetail.tsx` and procedure files
+
+- `@shared` Vite alias added to `vite.config.ts` — previously only worked for type imports (TypeScript strips them at compile time); runtime values like `isEditor` require Vite to resolve the module during bundling
+
+- Cache invalidation via `trpc.useUtils()` instead of threading `refetch` functions — after approve/reject both `getByDocument` and `getSubmittedByDocument` are invalidated so contributor and editor views update without a page reload
+
+- Tests skipped for this sprint — overhead of seeding multiple roles and intercepting email delivery outweighs the benefit at this scale; core logic covered by manual testing
+
+- Refactored Drizzle schemas to NOT infer types, the types are now inferred from zod schemas in `/shared`
+
+**Issues resolved:**
+
+- Editor role users had to log in twice — ProtectedRoute was seeing session: null briefly after login before the session cookie was picked up by useSession; fixed by awaiting refetch() before navigate('/') in Login.tsx, same pattern used in VerifyOtp.tsx
+
+**Known issues carried forward:**
+
+- Resend free tier: only delivers to Resend account owner email in dev. Real domain verification on Resend website deferred to Sprint 9
+
+- Email verification flow untested for non-owner emails as a result
+
+- Docker warns about some vulnerabilities related to Golang packages. No idea what that means, but a quick research showed that it's probably a false-flag warning. Will revisit later
+
+- esbuild moderate vulnerability via drizzle-kit's dependency on `@esbuild-kit` — dev-only, unexploitable in production. Monitor for a drizzle-kit update that resolves it later
+
+- OTP cannot be tested end-to-end in Vitest since valid codes require intercepting Resend delivery, so only rejection paths are covered
+
+- Approved transcription not publicly visible on the document page — only the contributor who wrote it and editors can see it; public display of approved transcriptions deferred to a future sprint
