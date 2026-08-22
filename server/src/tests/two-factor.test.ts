@@ -1,6 +1,6 @@
 import { db } from '@/db/index.js';
 import { twoFactor, user } from '@/db/schema/auth.js';
-import { login, headers, API } from './helpers.js';
+import { login, headers, API } from './helpers/helpers.js';
 import { randomBytes } from 'crypto';
 import { eq } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';

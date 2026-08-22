@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { API, register, login, cleanupUser } from './helpers.js';
+import { API, register, login, cleanupUser } from './helpers/helpers.js';
 import { db } from '@/db/index.js';
 import { user } from '@/db/schema/auth.js';
 import { eq } from 'drizzle-orm';
