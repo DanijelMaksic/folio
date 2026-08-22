@@ -65,15 +65,34 @@ test.describe('Transcription flow', () => {
       await expect(page.getByTestId('transcription-content')).toBeVisible({
          timeout: 15_000,
       });
+
       await page
          .getByTestId('transcription-content')
          .fill('Transcription content.');
 
+      // Wait for save to complete on the network level
+      const saveResponse = page.waitForResponse(
+         (res) =>
+            res.url().includes('transcriptions.update') && res.status() === 200,
+      );
+
       await page.getByRole('button', { name: 'Save' }).click();
+      await saveResponse;
+
       await expect(page.getByTestId('transcription-status')).toHaveText(
          'draft',
       );
+
+      // Wait for revision history fetch before asserting the element
+      const revisionResponse = page.waitForResponse(
+         (res) =>
+            res.url().includes('transcriptions.getRevisions') &&
+            res.status() === 200,
+      );
+
       await page.getByRole('button', { name: 'Show revision history' }).click();
+      await revisionResponse;
+
       await expect(page.getByTestId('transcription-revision')).toBeVisible();
    });
 });
