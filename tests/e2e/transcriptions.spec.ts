@@ -72,10 +72,9 @@ test.describe('Transcription flow', () => {
 
       // Wait for save to complete on the network level
       const saveResponse = page.waitForResponse(
-         (res) =>
-            res.url().includes('transcriptions.update') && res.status() === 200,
+         (res) => res.url().includes('transcriptions.update'), // no status filter
+         { timeout: 15_000 },
       );
-
       await page.getByRole('button', { name: 'Save' }).click();
       const res = await saveResponse;
       expect(res.status()).toBe(200);
