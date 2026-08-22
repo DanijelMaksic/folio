@@ -1,5 +1,5 @@
 import { db } from '@/db/index.js';
-import { user } from '@/db/schema/auth-schema.js';
+import { user } from '@/db/schema/auth.js';
 import { eq } from 'drizzle-orm';
 
 export const API = 'http://localhost:3000';
