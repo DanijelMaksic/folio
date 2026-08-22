@@ -1,5 +1,5 @@
 import { db } from '@/db/index.js';
-import { twoFactor, user } from '@/db/schema/auth-schema.js';
+import { twoFactor, user } from '@/db/schema/auth.js';
 import { login, headers, API } from './helpers.js';
 import { randomBytes } from 'crypto';
 import { eq } from 'drizzle-orm';
