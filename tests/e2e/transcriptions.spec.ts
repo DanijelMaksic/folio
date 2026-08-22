@@ -15,12 +15,12 @@ test.afterAll(async () => {
 });
 
 test.describe('Transcription flow', () => {
+   test.setTimeout(60_000); // CI is slower; upload + transcribe need headroom
+
    test('contributor can transcribe document and see the changes in transcription history', async ({
       page,
    }) => {
       // page is already logged in via fixture
-
-      test.setTimeout(60_000); // CI is slower; upload + transcribe need headroom
 
       // Upload document
       await page.goto('/documents/upload');
@@ -57,6 +57,7 @@ test.describe('Transcription flow', () => {
       const createResponse = page.waitForResponse(
          (res) =>
             res.url().includes('transcriptions.create') && res.status() === 200,
+         { timeout: 15_000 },
       );
       await page.getByRole('button', { name: 'Start transcribing' }).click();
       await createResponse;
@@ -72,12 +73,12 @@ test.describe('Transcription flow', () => {
 
       // Wait for save to complete on the network level
       const saveResponse = page.waitForResponse(
-         (res) => res.url().includes('transcriptions.update'), // no status filter
+         (res) =>
+            res.url().includes('transcriptions.update') && res.status() === 200,
          { timeout: 15_000 },
       );
       await page.getByRole('button', { name: 'Save' }).click();
-      const res = await saveResponse;
-      expect(res.status()).toBe(200);
+      await saveResponse;
 
       await expect(page.getByTestId('transcription-status')).toHaveText(
          'draft',
@@ -88,6 +89,7 @@ test.describe('Transcription flow', () => {
          (res) =>
             res.url().includes('transcriptions.getRevisions') &&
             res.status() === 200,
+         { timeout: 15_000 },
       );
 
       await page.getByRole('button', { name: 'Show revision history' }).click();
