@@ -77,7 +77,7 @@ test.describe('Transcription flow', () => {
       );
 
       await page.getByRole('button', { name: 'Save' }).click();
-      await saveResponse;
+      const res = await saveResponse;
       expect(res.status()).toBe(200);
 
       await expect(page.getByTestId('transcription-status')).toHaveText(
