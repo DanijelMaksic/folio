@@ -37,18 +37,21 @@ test.describe('Transcription flow', () => {
          ),
       });
 
-      await page.getByRole('button', { name: 'Upload' }).click();
-
-      await page.waitForURL(/\/documents\/.+/);
-      await expect(page.getByText(docTitle)).toBeVisible();
-
-      // Wait for transcription panel query to complete before interacting with it
-      await page.waitForResponse(
+      // Register listener just before the action that causes the redirect
+      const transcriptionPanelReady = page.waitForResponse(
          (res) =>
             res.url().includes('transcriptions.getByDocument') &&
             res.status() === 200,
          { timeout: 15_000 },
       );
+
+      await page.getByRole('button', { name: 'Upload' }).click();
+
+      await page.waitForURL(/\/documents\/.+/);
+      await expect(page.getByText(docTitle)).toBeVisible();
+
+      // Now await the response that was already captured
+      await transcriptionPanelReady;
 
       // Transcribe document
       const createResponse = page.waitForResponse(
