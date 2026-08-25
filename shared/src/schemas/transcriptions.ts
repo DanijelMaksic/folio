@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { User } from './auth.js';
 
 export const transcriptionSchema = z.object({
    id: z.string(),
@@ -68,6 +69,7 @@ export const queueItemSchema = z.object({
 export const queueResponseSchema = z.array(queueItemSchema);
 
 export type Transcription = z.infer<typeof transcriptionSchema>;
+export type SubmittedTranscription = Transcription & { user: User };
 export type UpdateTranscriptionInput = z.infer<
    typeof updateTranscriptionSchema
 >;

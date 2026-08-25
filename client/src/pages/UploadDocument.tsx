@@ -5,9 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import type { Document } from '@server/db/schema/index.js';
 import { TRPCClientError } from '@trpc/client';
 import type { AppRouter } from '@server/trpc/router';
+import { Document } from '@shared';
 
 export default function UploadDocument() {
    const navigate = useNavigate();
