@@ -5,6 +5,8 @@ import { isContributor, isEditor } from '@shared';
 import TranscriptionPanel from '@/components/documents/TranscriptionPanel';
 import ReviewPanel from '@/components/documents/ReviewPanel';
 import DocumentViewer from '@/components/documents/DocumentViewer';
+import DocumentTabs from '@/components/documents/DocumentTabs';
+import TranscriptionPlaceholder from '@/components/documents/TranscriptionPlaceholder';
 
 export default function DocumentDetail() {
    const { id } = useParams<{ id: string }>();
@@ -46,16 +48,22 @@ export default function DocumentDetail() {
             )}
          </div>
 
+         {isContributor(user?.globalRole) && <DocumentTabs />}
+
          <div className="grid grid-cols-2 gap-4">
             <DocumentViewer doc={doc} />
 
-            {canTranscribe && id && (
+            {canTranscribe && id ? (
                <TranscriptionPanel
                   transcription={transcription}
                   id={id}
                   doc={doc}
                />
+            ) : (
+               <TranscriptionPlaceholder />
             )}
+
+            {/* {!approvedTranscription && <span>Go transcribe</span>} */}
          </div>
 
          {isEditor(session?.user?.globalRole) &&

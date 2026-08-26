@@ -1,6 +1,6 @@
 import { Textarea } from '@/components/ui/textarea';
 import { trpc } from '@/lib/trpc';
-import { Document, Transcription, TranscriptionRevision } from '@shared';
+import { Document, Transcription } from '@shared';
 import { useEffect, useState } from 'react';
 
 function TranscriptionPanel({
@@ -13,7 +13,6 @@ function TranscriptionPanel({
    doc: Document;
 }) {
    const [transcriptionContent, setTranscriptionContent] = useState('');
-   const [revisionsOpen, setRevisionsOpen] = useState(false);
 
    const isSubmitted = transcription?.status === 'submitted';
    const isApproved = transcription?.status === 'approved';
@@ -36,11 +35,6 @@ function TranscriptionPanel({
       if (transcription?.content)
          setTranscriptionContent(transcription.content);
    }, [transcription?.content]);
-
-   const { data: revisions } = trpc.transcriptions.getRevisions.useQuery(
-      { transcriptionId: transcription?.id ?? '' },
-      { enabled: !!transcription && revisionsOpen },
-   );
 
    function handleSave() {
       if (!transcription) return;
@@ -83,7 +77,7 @@ function TranscriptionPanel({
                   )}
 
                <Textarea
-                  className="min-h-50 text-sm font-mono resize-y disabled:opacity-60"
+                  className="h-90 text-sm font-mono resize-y disabled:opacity-60"
                   value={transcriptionContent}
                   data-testid="transcription-content"
                   onChange={(e) => setTranscriptionContent(e.target.value)}
@@ -115,57 +109,25 @@ function TranscriptionPanel({
                         </button>
                      </>
                   )}
+
                   {isSubmitted && (
                      <p className="text-sm text-muted-foreground">
                         Submitted — awaiting review
                      </p>
                   )}
+
                   {isApproved && (
                      <p className="text-sm text-muted-foreground">
                         Transcription approved
                      </p>
                   )}
+
                   <span
                      data-testid="transcription-status"
                      className="ml-auto text-xs text-muted-foreground capitalize"
                   >
                      {transcription.status}
                   </span>
-               </div>
-
-               <div>
-                  <button
-                     className="text-xs text-muted-foreground underline"
-                     onClick={() => setRevisionsOpen((o) => !o)}
-                  >
-                     {revisionsOpen ? 'Hide' : 'Show'} revision history
-                  </button>
-
-                  {revisionsOpen && (
-                     <ul className="mt-2 space-y-2 max-h-48 overflow-y-auto">
-                        {revisions?.length === 0 && (
-                           <li className="text-xs text-muted-foreground">
-                              No revisions yet.
-                           </li>
-                        )}
-                        {revisions?.map((rev: TranscriptionRevision) => (
-                           <li
-                              key={rev.id}
-                              className="text-xs border rounded p-2 space-y-1"
-                           >
-                              <p className="text-muted-foreground">
-                                 {new Date(rev.savedAt).toLocaleString()}
-                              </p>
-                              <p
-                                 data-testid="transcription-revision"
-                                 className="font-mono whitespace-pre-wrap"
-                              >
-                                 {rev.content}
-                              </p>
-                           </li>
-                        ))}
-                     </ul>
-                  )}
                </div>
             </>
          )}
