@@ -8,6 +8,9 @@ import Documents from '@/pages/Documents';
 import DocumentDetail from '@/pages/DocumentDetail';
 import UploadDocument from '@/pages/UploadDocument';
 import ReviewQueue from '@/pages/ReviewQueue';
+import DisplayTab from '@/components/documents/DisplayTab';
+import TranscribeTab from '@/components/documents/TranscribeTab';
+import RevisionHistoryTab from '@/components/documents/RevisionHistoryTab';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
    const { data: session, isPending } = useSession();
@@ -40,7 +43,16 @@ export default function App() {
                   </ProtectedRoute>
                }
             />
-            <Route path="/documents/:id" element={<DocumentDetail />} />
+            <Route path="/documents/:id/*" element={<DocumentDetail />}>
+               <Route index element={<Navigate to="display" replace />} />
+               <Route path="display" element={<DisplayTab />} />
+               <Route path="transcribe" element={<TranscribeTab />} />
+               <Route
+                  path="revision-history"
+                  element={<RevisionHistoryTab />}
+               />
+               {/* <Route path="*" element={<PageNotFound />} /> */}
+            </Route>
             <Route
                path="/"
                element={

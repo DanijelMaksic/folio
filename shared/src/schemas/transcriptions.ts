@@ -66,6 +66,7 @@ export const queueItemSchema = z.object({
    updatedAt: z.date(),
 });
 
+export const DocumentIdSchema = z.string();
 export const queueResponseSchema = z.array(queueItemSchema);
 
 export type Transcription = z.infer<typeof transcriptionSchema>;

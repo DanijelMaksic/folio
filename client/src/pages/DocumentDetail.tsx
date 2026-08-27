@@ -1,30 +1,21 @@
-import { useParams } from 'react-router-dom';
+import { Outlet, useParams } from 'react-router-dom';
 import { trpc } from '../lib/trpc';
 import { useSession } from '../lib/auth-client';
 import { isContributor, isEditor } from '@shared';
-import TranscriptionPanel from '@/components/documents/TranscriptionPanel';
 import ReviewPanel from '@/components/documents/ReviewPanel';
 import DocumentViewer from '@/components/documents/DocumentViewer';
 import DocumentTabs from '@/components/documents/DocumentTabs';
-import TranscriptionPlaceholder from '@/components/documents/TranscriptionPlaceholder';
 
 export default function DocumentDetail() {
    const { id } = useParams<{ id: string }>();
    const { data: session } = useSession();
    const user = session?.user;
 
+   const canTranscribe = isContributor(user?.globalRole);
+
    const { data: doc, isLoading } = trpc.documents.getById.useQuery({
       id: id!,
    });
-
-   const canTranscribe = isContributor(user?.globalRole);
-
-   const { data: transcription } = trpc.transcriptions.getByDocument.useQuery(
-      { documentId: id! },
-      {
-         enabled: canTranscribe,
-      },
-   );
 
    const { data: submittedTranscription } =
       trpc.transcriptions.getSubmittedByDocument.useQuery(
@@ -37,6 +28,7 @@ export default function DocumentDetail() {
       );
 
    if (isLoading) return <p>Loading...</p>;
+
    if (!doc) return <p>Document not found.</p>;
 
    return (
@@ -48,23 +40,9 @@ export default function DocumentDetail() {
             )}
          </div>
 
-         {isContributor(user?.globalRole) && <DocumentTabs />}
+         {canTranscribe && <DocumentTabs />}
 
-         <div className="grid grid-cols-2 gap-4">
-            <DocumentViewer doc={doc} />
-
-            {canTranscribe && id ? (
-               <TranscriptionPanel
-                  transcription={transcription}
-                  id={id}
-                  doc={doc}
-               />
-            ) : (
-               <TranscriptionPlaceholder />
-            )}
-
-            {/* {!approvedTranscription && <span>Go transcribe</span>} */}
-         </div>
+         <Outlet />
 
          {isEditor(session?.user?.globalRole) &&
             submittedTranscription &&

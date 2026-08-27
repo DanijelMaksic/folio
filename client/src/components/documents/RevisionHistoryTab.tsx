@@ -1,11 +1,11 @@
 import { useSession } from '@/lib/auth-client';
 import { trpc } from '@/lib/trpc';
 import { isContributor, TranscriptionRevision } from '@shared';
-import { useParams } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 
-function RevisionHistory() {
+function RevisionHistoryTab() {
    const { id } = useParams<{ id: string }>();
-   const { data: session } = useSession();
+   const { data: session, isPending } = useSession();
    const user = session?.user;
 
    const canTranscribe = isContributor(user?.globalRole);
@@ -22,11 +22,15 @@ function RevisionHistory() {
       { enabled: !!transcription },
    );
 
+   if (isPending) return null;
+
+   if (!session) return <Navigate to="/login" replace />;
+
    return (
       <div>
          <ul className="mt-2 space-y-2 max-h-48 overflow-y-auto">
             {revisions?.length === 0 && (
-               <li className="text-xs text-muted-foreground">
+               <li className="text-md text-muted-foreground">
                   No revisions yet.
                </li>
             )}
@@ -51,4 +55,4 @@ function RevisionHistory() {
    );
 }
 
-export default RevisionHistory;
+export default RevisionHistoryTab;

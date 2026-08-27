@@ -3,9 +3,10 @@ import {
    transcriptionRevisions,
    transcriptions,
 } from '@/db/schema/transcriptions.js';
-import { protectedProcedure, router } from '@/trpc/trpc.js';
+import { protectedProcedure, publicProcedure, router } from '@/trpc/trpc.js';
 import {
    approveSchema,
+   DocumentIdSchema,
    isContributor,
    isEditor,
    rejectSchema,
@@ -326,5 +327,18 @@ export const transcriptionsRouter = router({
          });
 
          return transcription ?? null;
+      }),
+
+   getApprovedByDocument: publicProcedure
+      .input(z.object({ documentId: z.string() }))
+      .query(async ({ ctx, input }) => {
+         const approved = await db.query.transcriptions.findFirst({
+            where: and(
+               eq(transcriptions.documentId, input.documentId),
+               eq(transcriptions.status, 'approved'),
+            ),
+         });
+
+         return approved ?? null;
       }),
 });
