@@ -45,16 +45,6 @@ export default function App() {
                   }
                />
                <Route path="/documents/:id" element={<DocumentDetail />} />
-               {/* <Route path="/documents/:id/*" element={<DocumentDetail />}>
-                  <Route index element={<Navigate to="display" replace />} />
-                  <Route path="display" element={<DisplayTab />} />
-                  <Route path="transcribe" element={<TranscribeTab />} />
-                  <Route
-                     path="revision-history"
-                     element={<RevisionHistoryTab />}
-                  />
-                  <Route path="*" element={<PageNotFound />} />
-               </Route> */}
                <Route
                   path="/account"
                   element={

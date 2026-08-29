@@ -1,7 +1,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import DisplayTab from '@/components/documents/DisplayTab';
 import TranscribeTab from '@/components/documents/TranscribeTab';
 import RevisionHistoryTab from '@/components/documents/RevisionHistoryTab';
+import OverviewTab from '@/components/documents/OverviewTab';
 
 function DocumentTabs() {
    return (
@@ -12,7 +12,7 @@ function DocumentTabs() {
             <TabsTrigger value="revision-history">Revision History</TabsTrigger>
          </TabsList>
          <TabsContent value="overview">
-            <DisplayTab />
+            <OverviewTab />
          </TabsContent>
          <TabsContent value="transcribe">
             <TranscribeTab />

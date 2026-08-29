@@ -5,7 +5,7 @@ import { trpc } from '@/lib/trpc';
 import { isContributor } from '@shared';
 import { useParams } from 'react-router-dom';
 
-function DisplayTab() {
+function OverviewTab() {
    const { id } = useParams<{ id: string }>();
    const { data: session } = useSession();
    const user = session?.user;
@@ -36,7 +36,6 @@ function DisplayTab() {
                      Status: {approvedTranscription.status}
                   </p>
                </div>
-
                <p>{approvedTranscription.content}</p>
             </div>
          ) : (
@@ -46,4 +45,4 @@ function DisplayTab() {
    );
 }
 
-export default DisplayTab;
+export default OverviewTab;

@@ -26,12 +26,9 @@ function TranscriptionPlaceholder({ type }: { type: string }) {
             )}
 
             {type === 'contributor' && (
-               <Link
-                  to={`/documents/${id}/transcribe`}
-                  className="border rounded-lg px-2 py-1 hover:bg-gray-100 border-gray-400 transition-all"
-               >
-                  Contribute now
-               </Link>
+               <span className="border rounded-lg px-2 py-1 border-gray-400">
+                  Go to Transcribe tab to contribute
+               </span>
             )}
          </div>
       </div>
