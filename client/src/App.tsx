@@ -2,15 +2,14 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { useSession } from './lib/auth-client';
 import Register from './pages/Register';
 import Login from './pages/Login';
-import Home from './pages/Home';
 import VerifyOtp from '@/pages/VerifyOtp';
 import Documents from '@/pages/Documents';
 import DocumentDetail from '@/pages/DocumentDetail';
 import UploadDocument from '@/pages/UploadDocument';
 import ReviewQueue from '@/pages/ReviewQueue';
-import DisplayTab from '@/components/documents/DisplayTab';
-import TranscribeTab from '@/components/documents/TranscribeTab';
-import RevisionHistoryTab from '@/components/documents/RevisionHistoryTab';
+import Layout from '@/components/Layout';
+import Account from './pages/Account';
+import Home from '@/pages/Home';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
    const { data: session, isPending } = useSession();
@@ -23,44 +22,48 @@ export default function App() {
    return (
       <BrowserRouter>
          <Routes>
-            <Route path="/register" element={<Register />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/verify-otp" element={<VerifyOtp />} />
-            <Route path="/documents" element={<Documents />} />
-            <Route
-               path="/documents/upload"
-               element={
-                  <ProtectedRoute>
-                     <UploadDocument />
-                  </ProtectedRoute>
-               }
-            />
-            <Route
-               path="/review"
-               element={
-                  <ProtectedRoute>
-                     <ReviewQueue />
-                  </ProtectedRoute>
-               }
-            />
-            <Route path="/documents/:id/*" element={<DocumentDetail />}>
-               <Route index element={<Navigate to="display" replace />} />
-               <Route path="display" element={<DisplayTab />} />
-               <Route path="transcribe" element={<TranscribeTab />} />
+            <Route element={<Layout />}>
+               <Route path="/" element={<Home />} />
+               <Route path="/register" element={<Register />} />
+               <Route path="/login" element={<Login />} />
+               <Route path="/verify-otp" element={<VerifyOtp />} />
+               <Route path="/documents" element={<Documents />} />
                <Route
-                  path="revision-history"
-                  element={<RevisionHistoryTab />}
+                  path="/documents/upload"
+                  element={
+                     <ProtectedRoute>
+                        <UploadDocument />
+                     </ProtectedRoute>
+                  }
                />
-               {/* <Route path="*" element={<PageNotFound />} /> */}
+               <Route
+                  path="/review"
+                  element={
+                     <ProtectedRoute>
+                        <ReviewQueue />
+                     </ProtectedRoute>
+                  }
+               />
+               <Route path="/documents/:id" element={<DocumentDetail />} />
+               {/* <Route path="/documents/:id/*" element={<DocumentDetail />}>
+                  <Route index element={<Navigate to="display" replace />} />
+                  <Route path="display" element={<DisplayTab />} />
+                  <Route path="transcribe" element={<TranscribeTab />} />
+                  <Route
+                     path="revision-history"
+                     element={<RevisionHistoryTab />}
+                  />
+                  <Route path="*" element={<PageNotFound />} />
+               </Route> */}
+               <Route
+                  path="/account"
+                  element={
+                     <ProtectedRoute>
+                        <Account />
+                     </ProtectedRoute>
+                  }
+               />
             </Route>
-            <Route
-               path="/"
-               element={
-                  <ProtectedRoute>
-                     <Home />
-                  </ProtectedRoute>
-               }
-            />
          </Routes>
       </BrowserRouter>
    );

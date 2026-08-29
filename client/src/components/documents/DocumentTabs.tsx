@@ -1,32 +1,26 @@
-import { NavLink, useParams } from 'react-router-dom';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import DisplayTab from '@/components/documents/DisplayTab';
+import TranscribeTab from '@/components/documents/TranscribeTab';
+import RevisionHistoryTab from '@/components/documents/RevisionHistoryTab';
 
 function DocumentTabs() {
-   const { id } = useParams<{ id: string }>();
-
    return (
-      <div className="flex justify-start items-center gap-6">
-         <Tab title="Overview" to={`/documents/${id}/display`} />
-         <Tab title="Transcribe" to={`/documents/${id}/transcribe`} />
-         <Tab
-            title="Revision History"
-            to={`/documents/${id}/revision-history`}
-         />
-      </div>
-   );
-}
-
-function Tab({ title, to }: { title: string; to: string }) {
-   return (
-      <NavLink
-         to={to}
-         className={({ isActive }: { isActive: boolean }) =>
-            isActive
-               ? 'bg-gray-100 transition-all px-3 py-1.5 rounded-md'
-               : 'transition-all px-3 py-1.5'
-         }
-      >
-         {title}
-      </NavLink>
+      <Tabs defaultValue="overview">
+         <TabsList>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="transcribe">Transcribe</TabsTrigger>
+            <TabsTrigger value="revision-history">Revision History</TabsTrigger>
+         </TabsList>
+         <TabsContent value="overview">
+            <DisplayTab />
+         </TabsContent>
+         <TabsContent value="transcribe">
+            <TranscribeTab />
+         </TabsContent>
+         <TabsContent value="revision-history">
+            <RevisionHistoryTab />
+         </TabsContent>
+      </Tabs>
    );
 }
 

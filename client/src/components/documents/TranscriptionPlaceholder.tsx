@@ -8,7 +8,7 @@ function TranscriptionPlaceholder({ type }: { type: string }) {
 
    return (
       <div className="flex items-center justify-center flex-col gap-6 border rounded-md">
-         <span>Icon</span>
+         <span>Icon Placeholder</span>
          <div className="flex flex-col gap-3 justify-center items-center opacity-50">
             <h2 className="text-lg">No transcriptions yet...</h2>
 

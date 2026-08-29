@@ -3,7 +3,6 @@ import { trpc } from '../lib/trpc';
 import { useSession } from '../lib/auth-client';
 import { isContributor, isEditor } from '@shared';
 import ReviewPanel from '@/components/documents/ReviewPanel';
-import DocumentViewer from '@/components/documents/DocumentViewer';
 import DocumentTabs from '@/components/documents/DocumentTabs';
 
 export default function DocumentDetail() {
@@ -32,7 +31,7 @@ export default function DocumentDetail() {
    if (!doc) return <p>Document not found.</p>;
 
    return (
-      <div className="max-w-full p-6 space-y-6 mx-12">
+      <div className="max-w-full mx-auto py-6 px-12 space-y-3">
          <div>
             <h1 className="text-2xl font-semibold">{doc.title}</h1>
             {doc.description && (

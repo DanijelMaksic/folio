@@ -13,7 +13,7 @@ export default function Login() {
 
    const { refetch } = useSession();
 
-   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
       e.preventDefault();
       setLoading(true);
       setError(null);
@@ -30,7 +30,7 @@ export default function Login() {
          setError(error.message ?? 'Login failed');
       } else if (data && !('twoFactorRedirect' in data)) {
          await refetch();
-         navigate('/');
+         navigate('/documents');
       }
    };
 

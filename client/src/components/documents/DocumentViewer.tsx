@@ -2,7 +2,7 @@ import { Document } from '@shared';
 
 function DocumentViewer({ doc }: { doc: Document }) {
    return (
-      <div className="bg-gray-500 flex justify-center items-center rounded-md">
+      <div className="bg-gray-500 flex justify-center items-center rounded-md overflow-hidden">
          <img
             src={doc.cloudinaryUrl}
             alt={doc.title}
