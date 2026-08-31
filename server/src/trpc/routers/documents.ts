@@ -8,7 +8,6 @@ import { listDocumentsSchema, uploadDocumentSchema } from '@folio/shared';
 import { isContributor } from '@folio/shared';
 
 export const documentsRouter = router({
-   // POST request
    upload: protectedProcedure
       .input(uploadDocumentSchema)
       .mutation(async ({ ctx, input }) => {
@@ -27,7 +26,6 @@ export const documentsRouter = router({
          const [doc] = await ctx.db
             .insert(documents)
             .values({
-               id: crypto.randomUUID(),
                title: input.title,
                description: input.description,
                uploadedBy: ctx.user.id,
