@@ -17,6 +17,10 @@ export const listDocumentsSchema = z.object({
    limit: z.number().int().min(1).max(100).default(20),
 });
 
+export const searchDocumentsSchema = z.object({
+   query: z.string().min(1).max(200),
+});
+
 export const documentSchema = z.object({
    id: z.string(),
    title: z.string(),

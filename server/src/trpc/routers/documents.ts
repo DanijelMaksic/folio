@@ -1,10 +1,14 @@
 import { z } from 'zod';
 import { protectedProcedure, publicProcedure, router } from '@/trpc/trpc.js';
 import { documents } from '@/db/schema/index.js';
-import { eq } from 'drizzle-orm';
+import { eq, ilike } from 'drizzle-orm';
 import cloudinary from '@/lib/cloudinary.js';
 import { TRPCError } from '@trpc/server';
-import { listDocumentsSchema, uploadDocumentSchema } from '@folio/shared';
+import {
+   listDocumentsSchema,
+   searchDocumentsSchema,
+   uploadDocumentSchema,
+} from '@folio/shared';
 import { isContributor } from '@folio/shared';
 
 export const documentsRouter = router({
@@ -69,5 +73,16 @@ export const documentsRouter = router({
             throw new TRPCError({ code: 'NOT_FOUND' });
          }
          return doc;
+      }),
+
+   search: publicProcedure
+      .input(searchDocumentsSchema)
+      .query(async ({ ctx, input }) => {
+         const results = await ctx.db
+            .select()
+            .from(documents)
+            .where(ilike(documents.title, `%${input.query}%`));
+
+         return results;
       }),
 });

@@ -24,6 +24,10 @@ export const collectionSchema = z.object({
    createdAt: z.date(),
 });
 
+export const updateCollectionSchema = createCollectionSchema
+   .partial()
+   .extend({ id: z.string() });
+
 export type CreateCollectionInput = z.infer<typeof createCollectionSchema>;
 export type ListCollectionInput = z.infer<typeof listCollectionsSchema>;
 export type Collection = z.infer<typeof collectionSchema>;

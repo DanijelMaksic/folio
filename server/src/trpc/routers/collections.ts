@@ -4,9 +4,11 @@ import {
    createCollectionSchema,
    isEditor,
    listCollectionsSchema,
+   updateCollectionSchema,
 } from '@folio/shared';
 import { TRPCError } from '@trpc/server';
-import { desc } from 'drizzle-orm';
+import { desc, eq, fillPlaceholders } from 'drizzle-orm';
+import z from 'zod';
 
 export const collectionsRouter = router({
    create: protectedProcedure
@@ -44,5 +46,52 @@ export const collectionsRouter = router({
             .orderBy(desc(collections.createdAt));
 
          return results;
+      }),
+
+   update: protectedProcedure
+      .input(updateCollectionSchema)
+      .mutation(async ({ ctx, input }) => {
+         if (!isEditor(ctx.user.globalRole)) {
+            throw new TRPCError({
+               code: 'FORBIDDEN',
+               message: 'Only editors and above can edit collections',
+            });
+         }
+
+         const { id, ...fields } = input;
+
+         const [updated] = await ctx.db
+            .update(collections)
+            .set(fields)
+            .where(eq(collections.id, id))
+            .returning();
+
+         if (!updated) {
+            throw new TRPCError({ code: 'NOT_FOUND' });
+         }
+
+         return updated;
+      }),
+
+   delete: protectedProcedure
+      .input(z.object({ id: z.string() }))
+      .mutation(async ({ ctx, input }) => {
+         if (!isEditor(ctx.user.globalRole)) {
+            throw new TRPCError({
+               code: 'FORBIDDEN',
+               message: 'Only editors and above can delete collections',
+            });
+         }
+
+         const [deleted] = await ctx.db
+            .delete(collections)
+            .where(eq(collections.id, input.id))
+            .returning();
+
+         if (!deleted) {
+            throw new TRPCError({ code: 'NOT_FOUND' });
+         }
+
+         return deleted;
       }),
 });
