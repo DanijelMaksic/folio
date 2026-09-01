@@ -32,6 +32,7 @@ export const documentSchema = z.object({
    status: z.enum(['processing', 'ready', 'failed']),
    createdAt: z.date(),
    updatedAt: z.date(),
+   uploaderName: z.string(),
 });
 
 export type UploadedDocumentInput = z.infer<typeof uploadDocumentSchema>;

@@ -5,7 +5,7 @@ import { isContributor, isEditor } from '@shared';
 import ReviewPanel from '@/components/documents/ReviewPanel';
 import DocumentTabs from '@/components/documents/DocumentTabs';
 
-export default function DocumentDetail() {
+export default function DocumentDetails() {
    const { id } = useParams<{ id: string }>();
    const { data: session } = useSession();
    const user = session?.user;

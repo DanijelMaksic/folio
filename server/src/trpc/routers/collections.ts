@@ -48,6 +48,24 @@ export const collectionsRouter = router({
          return results;
       }),
 
+   getById: publicProcedure
+      .input(
+         z.object({
+            id: z.string(),
+         }),
+      )
+      .query(async ({ ctx, input }) => {
+         const [collection] = await ctx.db
+            .select()
+            .from(collections)
+            .where(eq(collections.id, input.id));
+
+         if (!collection) {
+            throw new TRPCError({ code: 'NOT_FOUND' });
+         }
+         return collection;
+      }),
+
    update: protectedProcedure
       .input(updateCollectionSchema)
       .mutation(async ({ ctx, input }) => {

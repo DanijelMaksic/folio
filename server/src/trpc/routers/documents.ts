@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { protectedProcedure, publicProcedure, router } from '@/trpc/trpc.js';
-import { documents } from '@/db/schema/index.js';
+import { documents, user } from '@/db/schema/index.js';
 import { eq, ilike } from 'drizzle-orm';
 import cloudinary from '@/lib/cloudinary.js';
 import { TRPCError } from '@trpc/server';
@@ -48,8 +48,16 @@ export const documentsRouter = router({
          const offset = (input.page - 1) * input.limit;
 
          const results = await ctx.db
-            .select()
+            .select({
+               id: documents.id,
+               title: documents.title,
+               status: documents.status,
+               cloudinaryUrl: documents.cloudinaryUrl,
+               uploaderName: user.name,
+               createdAt: documents.createdAt,
+            })
             .from(documents)
+            .innerJoin(user, eq(user.id, documents.uploadedBy))
             .limit(input.limit)
             .offset(offset)
             .orderBy(documents.createdAt);

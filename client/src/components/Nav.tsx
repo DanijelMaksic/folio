@@ -21,6 +21,13 @@ function Nav() {
                   render={<Link to="/documents">Documents</Link>}
                />
             </NavigationMenuItem>
+
+            <NavigationMenuItem>
+               <NavigationMenuLink
+                  render={<Link to="/collections">Collections</Link>}
+               />
+            </NavigationMenuItem>
+
             {!user ? (
                <>
                   <NavigationMenuItem>
@@ -41,6 +48,7 @@ function Nav() {
                         render={<Link to="/account">Account</Link>}
                      />
                   </NavigationMenuItem>
+
                   <Button
                      variant="outline"
                      onClick={() => signOut().then(() => navigate('/'))}
