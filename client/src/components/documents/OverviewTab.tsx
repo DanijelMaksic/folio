@@ -41,6 +41,15 @@ function OverviewTab() {
          ) : (
             <TranscriptionPlaceholder type={placeholderType} />
          )}
+
+         {doc.description && (
+            <div className="flex flex-col gap-2 my-6">
+               <h2 className="text-xl font-bold">Description</h2>
+               <p className="text-muted-foreground text-md">
+                  {doc.description}
+               </p>
+            </div>
+         )}
       </div>
    );
 }

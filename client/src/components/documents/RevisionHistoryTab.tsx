@@ -29,7 +29,7 @@ function RevisionHistoryTab() {
    return (
       <div>
          <ul className="mt-2 space-y-2 max-h-48 overflow-y-auto">
-            {revisions?.length === 0 && (
+            {!revisions && (
                <li className="text-md text-muted-foreground">
                   No revisions yet.
                </li>

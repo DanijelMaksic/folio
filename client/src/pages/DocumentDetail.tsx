@@ -28,16 +28,11 @@ export default function DocumentDetail() {
 
    if (isLoading) return <p>Loading...</p>;
 
-   if (!doc) return <p>Document not found.</p>;
+   if (!doc) return <p>Document not found</p>;
 
    return (
       <div className="max-w-full mx-auto py-6 px-12 space-y-3">
-         <div>
-            <h1 className="text-2xl font-semibold">{doc.title}</h1>
-            {doc.description && (
-               <p className="text-muted-foreground mt-1">{doc.description}</p>
-            )}
-         </div>
+         <h1 className="text-2xl font-semibold">{doc.title}</h1>
 
          {canTranscribe && <DocumentTabs />}
 

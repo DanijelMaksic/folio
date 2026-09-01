@@ -2,19 +2,19 @@ import { collections } from '@/db/schema/collections.js';
 import { protectedProcedure, publicProcedure, router } from '@/trpc/trpc.js';
 import {
    createCollectionSchema,
-   isEditor,
+   isContributor,
    listCollectionsSchema,
    updateCollectionSchema,
 } from '@folio/shared';
 import { TRPCError } from '@trpc/server';
-import { desc, eq, fillPlaceholders } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
 import z from 'zod';
 
 export const collectionsRouter = router({
    create: protectedProcedure
       .input(createCollectionSchema)
       .mutation(async ({ ctx, input }) => {
-         if (!isEditor(ctx.user.globalRole)) {
+         if (!isContributor(ctx.user.globalRole)) {
             throw new TRPCError({
                code: 'FORBIDDEN',
                message: 'Only editors and above can create collections',
@@ -51,7 +51,7 @@ export const collectionsRouter = router({
    update: protectedProcedure
       .input(updateCollectionSchema)
       .mutation(async ({ ctx, input }) => {
-         if (!isEditor(ctx.user.globalRole)) {
+         if (!isContributor(ctx.user.globalRole)) {
             throw new TRPCError({
                code: 'FORBIDDEN',
                message: 'Only editors and above can edit collections',
@@ -76,7 +76,7 @@ export const collectionsRouter = router({
    delete: protectedProcedure
       .input(z.object({ id: z.string() }))
       .mutation(async ({ ctx, input }) => {
-         if (!isEditor(ctx.user.globalRole)) {
+         if (!isContributor(ctx.user.globalRole)) {
             throw new TRPCError({
                code: 'FORBIDDEN',
                message: 'Only editors and above can delete collections',

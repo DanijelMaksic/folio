@@ -10,6 +10,7 @@ import ReviewQueue from '@/pages/ReviewQueue';
 import Layout from '@/components/Layout';
 import Account from './pages/Account';
 import Home from '@/pages/Home';
+import PageNotFound from '@/pages/PageNotFound';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
    const { data: session, isPending } = useSession();
@@ -53,6 +54,7 @@ export default function App() {
                      </ProtectedRoute>
                   }
                />
+               <Route path="*" element={<PageNotFound />} />
             </Route>
          </Routes>
       </BrowserRouter>
