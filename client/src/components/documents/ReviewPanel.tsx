@@ -6,8 +6,10 @@ import { useState } from 'react';
 
 function ReviewPanel({
    submittedTranscription,
+   documentId,
 }: {
    submittedTranscription: SubmittedTranscription;
+   documentId: string;
 }) {
    const [rejectionReason, setRejectionReason] = useState('');
 
@@ -15,15 +17,17 @@ function ReviewPanel({
 
    const approveMutation = trpc.transcriptions.approve.useMutation({
       onSuccess: () => {
-         utils.transcriptions.getByDocument.invalidate();
-         utils.transcriptions.getSubmittedByDocument.invalidate();
+         utils.transcriptions.getByDocument.invalidate({ documentId });
+         utils.transcriptions.getSubmittedByDocument.invalidate({ documentId });
+         utils.documents.getById.invalidate({ id: documentId });
       },
    });
 
    const rejectMutation = trpc.transcriptions.reject.useMutation({
       onSuccess: () => {
-         utils.transcriptions.getByDocument.invalidate();
-         utils.transcriptions.getSubmittedByDocument.invalidate();
+         utils.transcriptions.getByDocument.invalidate({ documentId });
+         utils.transcriptions.getSubmittedByDocument.invalidate({ documentId });
+         utils.documents.getById.invalidate({ id: documentId });
       },
    });
 

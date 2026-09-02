@@ -1,11 +1,15 @@
 import { trpc } from '@/lib/trpc';
 import { useNavigate } from 'react-router-dom';
-import { Document } from '@shared';
+import { Document, isContributor } from '@shared';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import { useSession } from '@/lib/auth-client';
 
 export default function Documents() {
    const navigate = useNavigate();
+   const { data: session } = useSession();
+   const user = session?.user;
+   const canTranscribe = isContributor(user?.globalRole);
 
    const { data, isLoading } = trpc.documents.list.useQuery({
       page: 1,
@@ -18,16 +22,18 @@ export default function Documents() {
       <div className="max-w-4xl mx-auto p-6">
          <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-semibold">Documents</h1>
-            <Button onClick={() => navigate('/documents/upload')}>
-               Upload
-            </Button>
+            {canTranscribe && (
+               <Button onClick={() => navigate('/documents/upload')}>
+                  Upload
+               </Button>
+            )}
          </div>
 
          {!data?.length ? (
             <p className="text-muted-foreground">No documents yet.</p>
          ) : (
             <div className="grid grid-cols-3 gap-4">
-               {data.map((doc: Document) => (
+               {data?.map((doc: Document) => (
                   <DocumentCard doc={doc} key={doc.id} />
                ))}
             </div>
@@ -37,7 +43,8 @@ export default function Documents() {
 }
 
 function DocumentCard({ doc }: { doc: Document }) {
-   const { id, title, status, cloudinaryUrl, uploaderName } = doc;
+   const { id, title, cloudinaryUrl, uploaderName, hasApprovedTranscription } =
+      doc;
 
    return (
       <Link
@@ -56,9 +63,11 @@ function DocumentCard({ doc }: { doc: Document }) {
 
          <div className="z-20 space-y-0.5">
             <div className="space-x-2 text-sm text-gray-300/70">
-               <span className="capitalize">{status}</span>
-               <span>•</span>
                <span>{uploaderName}</span>
+               <span>•</span>
+               <span>
+                  {hasApprovedTranscription ? 'Transcribed' : 'Not transcribed'}
+               </span>
             </div>
 
             <h2

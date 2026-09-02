@@ -1,11 +1,15 @@
 import { trpc } from '@/lib/trpc';
 import { useNavigate } from 'react-router-dom';
-import { Collection } from '@shared';
+import { Collection, isContributor } from '@shared';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import { useSession } from '@/lib/auth-client';
 
 export default function Collections() {
    const navigate = useNavigate();
+   const { data: session } = useSession();
+   const user = session?.user;
+   const canTranscribe = isContributor(user?.globalRole);
 
    const { data: collections, isLoading } = trpc.collections.list.useQuery({
       page: 1,
@@ -18,9 +22,11 @@ export default function Collections() {
       <div className="max-w-4xl mx-auto p-6">
          <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-semibold">Collections</h1>
-            <Button onClick={() => navigate('/collections/create')}>
-               Create a collection
-            </Button>
+            {canTranscribe && (
+               <Button onClick={() => navigate('/collections/create')}>
+                  Create a collection
+               </Button>
+            )}
          </div>
 
          {!collections?.length ? (

@@ -1,3 +1,5 @@
 alias db='docker exec -it folio-postgres-1 psql -U postgres -d folio'
 
-UPDATE "user" SET global_role = 'editor' WHERE email = 'danijel.projects99@gmail.com';
+UPDATE "user" SET global_role = 'contributor' WHERE email = 'danijel.maksic77@gmail.com';
+
+DELETE FROM transcriptions WHERE user_id = 'id';

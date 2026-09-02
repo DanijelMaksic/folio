@@ -1,12 +1,13 @@
 import { z } from 'zod';
 import { protectedProcedure, publicProcedure, router } from '@/trpc/trpc.js';
-import { documents, user } from '@/db/schema/index.js';
-import { eq, ilike } from 'drizzle-orm';
+import { documents, transcriptions, user } from '@/db/schema/index.js';
+import { and, eq, ilike, isNotNull } from 'drizzle-orm';
 import cloudinary from '@/lib/cloudinary.js';
 import { TRPCError } from '@trpc/server';
 import {
    listDocumentsSchema,
    searchDocumentsSchema,
+   updateCollectionSchema,
    uploadDocumentSchema,
 } from '@folio/shared';
 import { isContributor } from '@folio/shared';
@@ -55,14 +56,69 @@ export const documentsRouter = router({
                cloudinaryUrl: documents.cloudinaryUrl,
                uploaderName: user.name,
                createdAt: documents.createdAt,
+               hasApprovedTranscription: isNotNull(transcriptions.id),
             })
             .from(documents)
             .innerJoin(user, eq(user.id, documents.uploadedBy))
+            .leftJoin(
+               transcriptions,
+               and(
+                  eq(transcriptions.documentId, documents.id),
+                  eq(transcriptions.status, 'approved'),
+               ),
+            )
             .limit(input.limit)
             .offset(offset)
             .orderBy(documents.createdAt);
 
          return results;
+      }),
+
+   update: protectedProcedure
+      .input(updateCollectionSchema)
+      .mutation(async ({ ctx, input }) => {
+         if (!isContributor(ctx.user.globalRole)) {
+            throw new TRPCError({
+               code: 'FORBIDDEN',
+               message: 'Only contributors and above can edit documents',
+            });
+         }
+
+         const { id, ...fields } = input;
+
+         const [updated] = await ctx.db
+            .update(documents)
+            .set(fields)
+            .where(eq(documents.id, id))
+            .returning();
+
+         if (!updated) {
+            throw new TRPCError({ code: 'NOT_FOUND' });
+         }
+
+         return updated;
+      }),
+
+   delete: protectedProcedure
+      .input(z.object({ id: z.string() }))
+      .mutation(async ({ ctx, input }) => {
+         if (!isContributor(ctx.user.globalRole)) {
+            throw new TRPCError({
+               code: 'FORBIDDEN',
+               message: 'Only contributors and above can delete documents',
+            });
+         }
+
+         const [deleted] = await ctx.db
+            .delete(documents)
+            .where(eq(documents.id, input.id))
+            .returning();
+
+         if (!deleted) {
+            throw new TRPCError({ code: 'NOT_FOUND' });
+         }
+
+         return deleted;
       }),
 
    getById: publicProcedure

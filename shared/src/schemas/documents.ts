@@ -33,7 +33,12 @@ export const documentSchema = z.object({
    createdAt: z.date(),
    updatedAt: z.date(),
    uploaderName: z.string(),
+   hasApprovedTranscription: z.boolean(),
 });
+
+export const updateDocumentSchema = uploadDocumentSchema
+   .partial()
+   .extend({ id: z.string() });
 
 export type UploadedDocumentInput = z.infer<typeof uploadDocumentSchema>;
 export type ListDocumentsInput = z.infer<typeof listDocumentsSchema>;

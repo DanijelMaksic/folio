@@ -54,9 +54,14 @@ function TranscriptionPanel({
          <div className="flex gap-6 justify-between items-center">
             <h2 className="text-lg font-medium">Transcription</h2>
 
-            <p className="text-sm text-muted-foreground space-y-1 capitalize italic">
-               Status: {doc.status}
-            </p>
+            {transcription?.status && (
+               <p className="text-sm text-muted-foreground space-y-1 capitalize italic">
+                  Status:{' '}
+                  <span data-testid="transcription-status">
+                     {transcription?.status}
+                  </span>
+               </p>
+            )}
          </div>
 
          {!transcription ? (
@@ -121,13 +126,6 @@ function TranscriptionPanel({
                         Transcription approved
                      </p>
                   )}
-
-                  <span
-                     data-testid="transcription-status"
-                     className="ml-auto text-xs text-muted-foreground capitalize"
-                  >
-                     {transcription.status}
-                  </span>
                </div>
             </>
          )}
