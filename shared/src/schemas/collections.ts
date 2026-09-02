@@ -22,6 +22,7 @@ export const collectionSchema = z.object({
    description: z.string().nullable(),
    createdBy: z.string(),
    createdAt: z.date(),
+   creatorName: z.string(),
 });
 
 export const updateCollectionSchema = createCollectionSchema

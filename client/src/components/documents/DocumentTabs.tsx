@@ -3,10 +3,12 @@ import TranscribeTab from '@/components/documents/TranscribeTab';
 import RevisionHistoryTab from '@/components/documents/RevisionHistoryTab';
 import OverviewTab from '@/components/documents/OverviewTab';
 
-function DocumentTabs() {
+function DocumentTabs({ canTranscribe }: { canTranscribe: boolean }) {
+   const hiddenStyle = `${!canTranscribe && 'hidden'}`;
+
    return (
       <Tabs defaultValue="overview">
-         <TabsList>
+         <TabsList className={hiddenStyle}>
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="transcribe">Transcribe</TabsTrigger>
             <TabsTrigger value="revision-history">Revision History</TabsTrigger>

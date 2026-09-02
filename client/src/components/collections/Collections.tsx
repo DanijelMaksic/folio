@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 export default function Collections() {
    const navigate = useNavigate();
 
-   const { data, isLoading } = trpc.collections.list.useQuery({
+   const { data: collections, isLoading } = trpc.collections.list.useQuery({
       page: 1,
       limit: 20,
    });
@@ -23,12 +23,12 @@ export default function Collections() {
             </Button>
          </div>
 
-         {!data?.length ? (
+         {!collections?.length ? (
             <p className="text-muted-foreground">No collections yet.</p>
          ) : (
             <div className="grid grid-cols-3 gap-4">
-               {data.map((collection: Collection) => (
-                  <CollectionCard collection={collection} />
+               {collections.map((collection: Collection) => (
+                  <CollectionCard collection={collection} key={collection.id} />
                ))}
             </div>
          )}
@@ -37,7 +37,7 @@ export default function Collections() {
 }
 
 function CollectionCard({ collection }: { collection: Collection }) {
-   const { id, title } = collection;
+   const { id, title, creatorName } = collection;
 
    return (
       <Link
@@ -55,11 +55,9 @@ function CollectionCard({ collection }: { collection: Collection }) {
          <span />
 
          <div className="z-20 space-y-0.5">
-            <div className="space-x-2 text-sm text-gray-300/70">
-               {/* <span className="capitalize">{status}</span> */}
-               <span>•</span>
-               {/* <span>{uploaderName}</span> */}
-            </div>
+            <span className="space-x-2 text-sm text-gray-300/70">
+               {creatorName}
+            </span>
 
             <h2
                className="text-gray-50 text-xl font-medium font-title leading-9.5 2xl:leading-9 lg:leading-8 md:leading-10"

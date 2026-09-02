@@ -4,8 +4,6 @@ import { Link } from 'react-router-dom';
 function TranscriptionPlaceholder({ type }: { type: string }) {
    // type prop represents the role of the user who looks at the placeholder
 
-   const { id } = useParams<{ id: string }>();
-
    return (
       <div className="flex items-center justify-center flex-col gap-6 border rounded-md">
          <span>Icon Placeholder</span>

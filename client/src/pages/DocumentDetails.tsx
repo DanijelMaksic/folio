@@ -34,7 +34,7 @@ export default function DocumentDetails() {
       <div className="max-w-full mx-auto py-6 px-12 space-y-3">
          <h1 className="text-2xl font-semibold">{doc.title}</h1>
 
-         {canTranscribe && <DocumentTabs />}
+         <DocumentTabs canTranscribe={canTranscribe} />
 
          <Outlet />
 

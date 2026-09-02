@@ -10,7 +10,7 @@ function OverviewTab() {
    const { data: session } = useSession();
    const user = session?.user;
 
-   const { data: doc, isLoading } = trpc.documents.getById.useQuery({
+   const { data: doc } = trpc.documents.getById.useQuery({
       id: id!,
    });
 

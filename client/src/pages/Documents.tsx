@@ -28,7 +28,7 @@ export default function Documents() {
          ) : (
             <div className="grid grid-cols-3 gap-4">
                {data.map((doc: Document) => (
-                  <DocumentCard doc={doc} />
+                  <DocumentCard doc={doc} key={doc.id} />
                ))}
             </div>
          )}

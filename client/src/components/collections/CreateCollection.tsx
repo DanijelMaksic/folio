@@ -15,14 +15,14 @@ export default function CreateCollection() {
    const [description, setDescription] = useState('');
    const [error, setError] = useState('');
 
-   const create = trpc.collections.create.useMutation({
+   const createCollection = trpc.collections.create.useMutation({
       onSuccess: (collection: Collection) =>
          navigate(`/collections/${collection.id}`),
       onError: (err: TRPCClientError<AppRouter>) => setError(err.message),
    });
 
    const handleSubmit = async () => {
-      create.mutate({
+      createCollection.mutate({
          title,
          description,
       });
@@ -52,8 +52,8 @@ export default function CreateCollection() {
 
          {error && <p className="text-sm text-destructive">{error}</p>}
 
-         <Button onClick={handleSubmit} disabled={create.isPending || !title}>
-            {create.isPending ? 'Creating...' : 'Create'}
+         <Button onClick={handleSubmit} disabled={createCollection.isPending || !title}>
+            {createCollection.isPending ? 'Creating...' : 'Create'}
          </Button>
       </div>
    );

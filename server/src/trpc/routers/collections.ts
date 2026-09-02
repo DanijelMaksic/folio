@@ -1,3 +1,4 @@
+import { user } from '@/db/schema/auth.js';
 import { collections } from '@/db/schema/collections.js';
 import { protectedProcedure, publicProcedure, router } from '@/trpc/trpc.js';
 import {
@@ -17,7 +18,7 @@ export const collectionsRouter = router({
          if (!isContributor(ctx.user.globalRole)) {
             throw new TRPCError({
                code: 'FORBIDDEN',
-               message: 'Only editors and above can create collections',
+               message: 'Only contributors and above can create collections',
             });
          }
 
@@ -39,8 +40,15 @@ export const collectionsRouter = router({
          const offset = (input.page - 1) * input.limit;
 
          const results = await ctx.db
-            .select()
+            .select({
+               id: collections.id,
+               title: collections.title,
+               description: collections.description,
+               createdBy: collections.createdBy,
+               creatorName: user.name,
+            })
             .from(collections)
+            .innerJoin(user, eq(user.id, collections.createdBy))
             .limit(input.limit)
             .offset(offset)
             .orderBy(desc(collections.createdAt));
@@ -72,7 +80,7 @@ export const collectionsRouter = router({
          if (!isContributor(ctx.user.globalRole)) {
             throw new TRPCError({
                code: 'FORBIDDEN',
-               message: 'Only editors and above can edit collections',
+               message: 'Only contributors and above can edit collections',
             });
          }
 
@@ -97,7 +105,7 @@ export const collectionsRouter = router({
          if (!isContributor(ctx.user.globalRole)) {
             throw new TRPCError({
                code: 'FORBIDDEN',
-               message: 'Only editors and above can delete collections',
+               message: 'Only contributors and above can delete collections',
             });
          }
 
