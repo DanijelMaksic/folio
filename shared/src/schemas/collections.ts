@@ -32,7 +32,7 @@ export const collectionSchema = z.object({
 
 export const updateCollectionSchema = createCollectionSchema
    .partial()
-   .extend({ id: z.string(), collectionId: z.string() });
+   .extend({ id: z.string(), collectionId: z.string().nullable().optional() });
 
 export type CreateCollectionInput = z.infer<typeof createCollectionSchema>;
 export type ListCollectionInput = z.infer<typeof listCollectionsSchema>;

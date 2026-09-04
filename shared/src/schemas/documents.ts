@@ -32,7 +32,7 @@ export const documentSchema = z.object({
    status: z.enum(['processing', 'ready', 'failed']),
    createdAt: z.date(),
    updatedAt: z.date(),
-   uploaderName: z.string(),
+   uploaderName: z.string().nullable().optional(),
    hasApprovedTranscription: z.boolean(),
    collectionId: z.string().nullable().optional(),
 });

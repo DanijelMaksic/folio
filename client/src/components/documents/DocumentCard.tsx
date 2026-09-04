@@ -21,13 +21,21 @@ export function DocumentCard({ doc }: { doc: Document }) {
          <span />
 
          <div className="z-20 space-y-0.5">
-            <div className="space-x-2 text-sm text-gray-300/70">
-               <span>{uploaderName}</span>
-               <span>•</span>
-               <span>
+            {!uploaderName ? (
+               <span className="space-x-2 text-sm text-gray-300/70">
                   {hasApprovedTranscription ? 'Transcribed' : 'Not transcribed'}
                </span>
-            </div>
+            ) : (
+               <div className="space-x-2 text-sm text-gray-300/70">
+                  <span>{uploaderName}</span>
+                  <span>•</span>
+                  <span>
+                     {hasApprovedTranscription
+                        ? 'Transcribed'
+                        : 'Not transcribed'}
+                  </span>
+               </div>
+            )}
 
             <h2
                className="text-gray-50 text-xl font-medium font-title leading-9.5 2xl:leading-9 lg:leading-8 md:leading-10"

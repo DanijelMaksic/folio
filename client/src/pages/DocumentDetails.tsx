@@ -94,6 +94,11 @@ export default function DocumentDetails() {
       setIsEditOpen(true);
    };
 
+   const handleCollectionOpen = () => {
+      setSelectedCollectionId(document?.collectionId ?? null);
+      setIsCollectionOpen(true);
+   };
+
    const handleEditSubmit = () => {
       editDocument.mutate({
          id: id!,
@@ -124,11 +129,7 @@ export default function DocumentDetails() {
 
             {canTranscribe && isMyDocument && !editor && (
                <div className="flex gap-3 items-center justify-center">
-                  <Button
-                     onClick={() => {
-                        setIsCollectionOpen(true);
-                     }}
-                  >
+                  <Button onClick={handleCollectionOpen}>
                      {inCollection ? 'Change collection' : 'Add to collection'}
                   </Button>
 
@@ -145,12 +146,8 @@ export default function DocumentDetails() {
 
             {editor && (
                <div className="flex gap-3 items-center justify-center">
-                  <Button
-                     onClick={() => {
-                        setIsCollectionOpen(true);
-                     }}
-                  >
-                     Add to collection
+                  <Button onClick={handleCollectionOpen}>
+                     {inCollection ? 'Change collection' : 'Add to collection'}
                   </Button>
 
                   <Button onClick={handleEditOpen}>Edit</Button>

@@ -8,7 +8,7 @@ import { AppRouter } from '@server/trpc/router';
 import { Document, isContributor, isEditor } from '@shared';
 import { TRPCClientError } from '@trpc/client';
 import { useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 function CollectionDetails() {
    const [editError, setEditError] = useState('');
@@ -112,7 +112,7 @@ function CollectionDetails() {
             )}
          </div>
 
-         <p>{collection.description}</p>
+         <p className="text-gray-500 mb-8">{collection.description}</p>
 
          {!savedDocuments?.length ? (
             <p className="text-muted-foreground">No saved documents yet.</p>
