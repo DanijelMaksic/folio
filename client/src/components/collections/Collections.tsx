@@ -52,11 +52,15 @@ function CollectionCard({ collection }: { collection: Collection }) {
       >
          <span className="absolute -inset-px m-0 bg-linear-to-t from-gray-800 group-hover:from-gray-900 z-10 pointer-events-none rounded-xl md:rounded-2xl transition duration-300 group-hover:saturate-120" />
 
-         {/* <img
-            src={cloudinaryUrl}
-            alt="Document image"
-            className="absolute inset-0 h-full w-full object-cover rounded-xl md:rounded-2xl"
-         /> */}
+         {collection.coverImageUrl ? (
+            <img
+               src={collection.coverImageUrl}
+               alt="Document image"
+               className="absolute inset-0 h-full w-full object-cover rounded-xl md:rounded-2xl"
+            />
+         ) : (
+            <div className="absolute inset-0 bg-muted rounded-xl" />
+         )}
 
          <span />
 

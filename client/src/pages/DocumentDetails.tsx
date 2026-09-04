@@ -2,7 +2,7 @@ import { Outlet, useNavigate, useParams } from 'react-router-dom';
 import { trpc } from '../lib/trpc';
 import { Button } from '@/components/ui/button';
 import { useSession } from '../lib/auth-client';
-import { isContributor, isEditor } from '@shared';
+import { Collection, isContributor, isEditor } from '@shared';
 import ReviewPanel from '@/components/documents/ReviewPanel';
 import DocumentTabs from '@/components/documents/DocumentTabs';
 import { useState } from 'react';
@@ -14,8 +14,10 @@ import { Input } from '@/components/ui/input';
 export default function DocumentDetails() {
    const [editError, setEditError] = useState('');
    const [deleteError, setDeleteError] = useState('');
+   const [collectionError, setCollectionError] = useState('');
    const [isEditOpen, setIsEditOpen] = useState(false);
    const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+   const [isCollectionOpen, setIsCollectionOpen] = useState(false);
    const [editTitle, setEditTitle] = useState('');
    const [editDescription, setEditDescription] = useState('');
 
@@ -31,6 +33,19 @@ export default function DocumentDetails() {
    const { data: document, isLoading } = trpc.documents.getById.useQuery({
       id: id!,
    });
+
+   const [selectedCollectionId, setSelectedCollectionId] = useState(
+      document?.collectionId ?? null,
+   );
+
+   const inCollection = !!document?.collectionId;
+
+   const { data: collections, isPending } =
+      trpc.collections.getCurrentUserCollections.useQuery({
+         page: 1,
+         limit: 9,
+         userId: user?.id,
+      });
 
    const isMyDocument = document?.uploadedBy === user?.id;
 
@@ -50,6 +65,16 @@ export default function DocumentDetails() {
       },
       onError: (err: TRPCClientError<AppRouter>) => {
          setDeleteError(err.message);
+      },
+   });
+
+   const addToCollection = trpc.documents.update.useMutation({
+      onSuccess: () => {
+         utils.documents.getById.invalidate({ id: id! });
+         setIsCollectionOpen(false);
+      },
+      onError: (err: TRPCClientError<AppRouter>) => {
+         setCollectionError(err.message);
       },
    });
 
@@ -77,6 +102,13 @@ export default function DocumentDetails() {
       });
    };
 
+   const handleAddToCollection = () => {
+      addToCollection.mutate({
+         id: id!,
+         collectionId: selectedCollectionId,
+      });
+   };
+
    const handleDelete = async () => {
       deleteDocument.mutate({ id });
    };
@@ -92,6 +124,14 @@ export default function DocumentDetails() {
 
             {canTranscribe && isMyDocument && !editor && (
                <div className="flex gap-3 items-center justify-center">
+                  <Button
+                     onClick={() => {
+                        setIsCollectionOpen(true);
+                     }}
+                  >
+                     {inCollection ? 'Change collection' : 'Add to collection'}
+                  </Button>
+
                   <Button onClick={handleEditOpen}>Edit</Button>
 
                   <Button
@@ -105,6 +145,14 @@ export default function DocumentDetails() {
 
             {editor && (
                <div className="flex gap-3 items-center justify-center">
+                  <Button
+                     onClick={() => {
+                        setIsCollectionOpen(true);
+                     }}
+                  >
+                     Add to collection
+                  </Button>
+
                   <Button onClick={handleEditOpen}>Edit</Button>
 
                   <Button
@@ -204,6 +252,61 @@ export default function DocumentDetails() {
                         className="bg-red-700"
                      >
                         {deleteDocument.isPending ? 'Deleting...' : 'Delete'}
+                     </Button>
+                  </div>
+               </div>
+            </div>
+         )}
+
+         {isCollectionOpen && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+               <div className="bg-background rounded-xl p-6 w-full max-w-md space-y-4">
+                  <h2 className="text-lg font-semibold">Add to collection</h2>
+
+                  <div className="grid grid-cols-3 gap-3">
+                     {isPending ? (
+                        <p>Loading...</p>
+                     ) : (
+                        collections?.map((collection: Collection) => (
+                           <button
+                              key={collection.id}
+                              onClick={() => {
+                                 setSelectedCollectionId(
+                                    selectedCollectionId === collection.id
+                                       ? null
+                                       : collection.id,
+                                 );
+                              }}
+                              className={`border border-gray-300 rounded-md p-4 ${collection.id === selectedCollectionId && 'bg-gray-300'}`}
+                           >
+                              {collection.title}
+                           </button>
+                        ))
+                     )}
+                  </div>
+
+                  {collectionError && (
+                     <p className="text-sm text-destructive">
+                        {collectionError}
+                     </p>
+                  )}
+
+                  <div className="flex justify-end gap-2">
+                     <Button
+                        variant="outline"
+                        onClick={() => {
+                           setIsCollectionOpen(false);
+                           setCollectionError('');
+                        }}
+                     >
+                        Cancel
+                     </Button>
+
+                     <Button
+                        onClick={handleAddToCollection}
+                        disabled={addToCollection.isPending}
+                     >
+                        {addToCollection.isPending ? 'Saving...' : 'Save'}
                      </Button>
                   </div>
                </div>

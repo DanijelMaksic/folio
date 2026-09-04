@@ -1,3 +1,4 @@
+import { db } from '@/db/index.js';
 import { user } from '@/db/schema/auth.js';
 import { collections } from '@/db/schema/collections.js';
 import { protectedProcedure, publicProcedure, router } from '@/trpc/trpc.js';
@@ -5,10 +6,11 @@ import {
    createCollectionSchema,
    isContributor,
    listCollectionsSchema,
+   listMyCollectionsSchema,
    updateCollectionSchema,
 } from '@folio/shared';
 import { TRPCError } from '@trpc/server';
-import { desc, eq } from 'drizzle-orm';
+import { desc, eq, sql } from 'drizzle-orm';
 import z from 'zod';
 
 export const collectionsRouter = router({
@@ -22,7 +24,7 @@ export const collectionsRouter = router({
             });
          }
 
-         const [collection] = await ctx.db
+         const [collection] = await db
             .insert(collections)
             .values({
                title: input.title,
@@ -39,13 +41,19 @@ export const collectionsRouter = router({
       .query(async ({ ctx, input }) => {
          const offset = (input.page - 1) * input.limit;
 
-         const results = await ctx.db
+         const results = await db
             .select({
                id: collections.id,
                title: collections.title,
                description: collections.description,
                createdBy: collections.createdBy,
                creatorName: user.name,
+               coverImageUrl: sql<string | null>`(
+                  SELECT cloudinary_url FROM documents
+                  WHERE collection_id = ${collections.id}
+                  ORDER BY created_at ASC
+                  LIMIT 1
+                   )`,
             })
             .from(collections)
             .innerJoin(user, eq(user.id, collections.createdBy))
@@ -63,7 +71,7 @@ export const collectionsRouter = router({
          }),
       )
       .query(async ({ ctx, input }) => {
-         const [collection] = await ctx.db
+         const [collection] = await db
             .select()
             .from(collections)
             .where(eq(collections.id, input.id));
@@ -72,6 +80,23 @@ export const collectionsRouter = router({
             throw new TRPCError({ code: 'NOT_FOUND' });
          }
          return collection;
+      }),
+
+   // Fetches the current user's collections
+   getCurrentUserCollections: protectedProcedure
+      .input(listMyCollectionsSchema)
+      .query(async ({ ctx, input }) => {
+         const offset = (input.page - 1) * input.limit;
+
+         const result = await db
+            .select()
+            .from(collections)
+            .where(eq(collections.createdBy, input.userId))
+            .limit(input.limit)
+            .offset(offset)
+            .orderBy(desc(collections.createdAt));
+
+         return result ?? null;
       }),
 
    update: protectedProcedure
@@ -86,7 +111,7 @@ export const collectionsRouter = router({
 
          const { id, ...fields } = input;
 
-         const [updated] = await ctx.db
+         const [updated] = await db
             .update(collections)
             .set(fields)
             .where(eq(collections.id, id))
@@ -109,7 +134,7 @@ export const collectionsRouter = router({
             });
          }
 
-         const [deleted] = await ctx.db
+         const [deleted] = await db
             .delete(collections)
             .where(eq(collections.id, input.id))
             .returning();

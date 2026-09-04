@@ -1,13 +1,14 @@
+import { DocumentCard } from '@/components/documents/DocumentCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useSession } from '@/lib/auth-client';
 import { trpc } from '@/lib/trpc';
 import { AppRouter } from '@server/trpc/router';
-import { isContributor, isEditor } from '@shared';
+import { Document, isContributor, isEditor } from '@shared';
 import { TRPCClientError } from '@trpc/client';
 import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 
 function CollectionDetails() {
    const [editError, setEditError] = useState('');
@@ -26,9 +27,15 @@ function CollectionDetails() {
 
    const utils = trpc.useUtils();
 
-   const { data: collection, isLoading } = trpc.collections.getById.useQuery({
-      id: id!,
-   });
+   const { data: collection, isLoadingCollections } =
+      trpc.collections.getById.useQuery({
+         id: id!,
+      });
+
+   const { data: savedDocuments, isLoadingDocs } =
+      trpc.documents.getByCollection.useQuery({
+         collectionId: id!,
+      });
 
    const isMyCollection = collection?.createdBy === user?.id;
 
@@ -69,7 +76,7 @@ function CollectionDetails() {
       deleteCollection.mutate({ id });
    };
 
-   if (isLoading) return <p>Loading...</p>;
+   if (isLoadingCollections) return <p>Loading...</p>;
 
    if (!collection) return <p>Collection not found</p>;
 
@@ -106,6 +113,16 @@ function CollectionDetails() {
          </div>
 
          <p>{collection.description}</p>
+
+         {!savedDocuments?.length ? (
+            <p className="text-muted-foreground">No saved documents yet.</p>
+         ) : (
+            <div className="grid grid-cols-3 gap-4">
+               {savedDocuments?.map((doc: Document) => (
+                  <DocumentCard doc={doc} key={doc.id} />
+               ))}
+            </div>
+         )}
 
          {isEditOpen && (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">

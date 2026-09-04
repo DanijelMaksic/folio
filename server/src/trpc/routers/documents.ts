@@ -1,16 +1,17 @@
 import { z } from 'zod';
 import { protectedProcedure, publicProcedure, router } from '@/trpc/trpc.js';
 import { documents, transcriptions, user } from '@/db/schema/index.js';
-import { and, eq, ilike, isNotNull } from 'drizzle-orm';
+import { and, desc, eq, ilike, isNotNull } from 'drizzle-orm';
 import cloudinary from '@/lib/cloudinary.js';
 import { TRPCError } from '@trpc/server';
 import {
    listDocumentsSchema,
    searchDocumentsSchema,
-   updateCollectionSchema,
+   updateDocumentSchema,
    uploadDocumentSchema,
 } from '@folio/shared';
 import { isContributor } from '@folio/shared';
+import { db } from '@/db/index.js';
 
 export const documentsRouter = router({
    upload: protectedProcedure
@@ -28,7 +29,7 @@ export const documentsRouter = router({
             resource_type: 'auto',
          });
 
-         const [doc] = await ctx.db
+         const [doc] = await db
             .insert(documents)
             .values({
                title: input.title,
@@ -48,7 +49,7 @@ export const documentsRouter = router({
       .query(async ({ ctx, input }) => {
          const offset = (input.page - 1) * input.limit;
 
-         const results = await ctx.db
+         const results = await db
             .select({
                id: documents.id,
                title: documents.title,
@@ -69,13 +70,24 @@ export const documentsRouter = router({
             )
             .limit(input.limit)
             .offset(offset)
-            .orderBy(documents.createdAt);
+            .orderBy(desc(documents.createdAt));
 
          return results;
       }),
 
+   getByCollection: protectedProcedure
+      .input(z.object({ collectionId: z.string() }))
+      .query(async ({ ctx, input }) => {
+         const results = db
+            .select()
+            .from(documents)
+            .where(eq(documents.collectionId, input.collectionId));
+
+         return results ?? null;
+      }),
+
    update: protectedProcedure
-      .input(updateCollectionSchema)
+      .input(updateDocumentSchema)
       .mutation(async ({ ctx, input }) => {
          if (!isContributor(ctx.user.globalRole)) {
             throw new TRPCError({
@@ -86,7 +98,7 @@ export const documentsRouter = router({
 
          const { id, ...fields } = input;
 
-         const [updated] = await ctx.db
+         const [updated] = await db
             .update(documents)
             .set(fields)
             .where(eq(documents.id, id))
@@ -109,7 +121,7 @@ export const documentsRouter = router({
             });
          }
 
-         const [deleted] = await ctx.db
+         const [deleted] = await db
             .delete(documents)
             .where(eq(documents.id, input.id))
             .returning();
@@ -128,7 +140,7 @@ export const documentsRouter = router({
          }),
       )
       .query(async ({ ctx, input }) => {
-         const [doc] = await ctx.db
+         const [doc] = await db
             .select()
             .from(documents)
             .where(eq(documents.id, input.id));
@@ -142,7 +154,7 @@ export const documentsRouter = router({
    search: publicProcedure
       .input(searchDocumentsSchema)
       .query(async ({ ctx, input }) => {
-         const results = await ctx.db
+         const results = await db
             .select()
             .from(documents)
             .where(ilike(documents.title, `%${input.query}%`));
