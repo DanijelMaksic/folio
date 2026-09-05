@@ -19,6 +19,7 @@ export const listDocumentsSchema = z.object({
 
 export const searchDocumentsSchema = z.object({
    query: z.string().min(1).max(200),
+   collectionId: z.string().nullable().optional(),
 });
 
 export const documentSchema = z.object({

@@ -30,6 +30,10 @@ export const collectionSchema = z.object({
    coverImageUrl: z.string().nullable().optional(),
 });
 
+export const searchCollectionsSchema = z.object({
+   query: z.string().min(1).max(200),
+});
+
 export const updateCollectionSchema = createCollectionSchema
    .partial()
    .extend({ id: z.string(), collectionId: z.string().nullable().optional() });

@@ -75,7 +75,7 @@ export const documentsRouter = router({
          return results;
       }),
 
-   getByCollection: protectedProcedure
+   getByCollection: publicProcedure
       .input(z.object({ collectionId: z.string() }))
       .query(async ({ ctx, input }) => {
          const results = db
@@ -157,7 +157,15 @@ export const documentsRouter = router({
          const results = await db
             .select()
             .from(documents)
-            .where(ilike(documents.title, `%${input.query}%`));
+            .where(
+               and(
+                  ilike(documents.title, `%${input.query}%`),
+                  input.collectionId
+                     ? eq(documents.collectionId, input.collectionId)
+                     : undefined,
+               ),
+            )
+            .limit(20);
 
          return results;
       }),

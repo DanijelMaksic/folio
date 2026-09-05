@@ -32,7 +32,7 @@ export function DocumentCard({ doc }: { doc: Document }) {
                   <span>
                      {hasApprovedTranscription
                         ? 'Transcribed'
-                        : 'Not transcribed'}
+                        : 'Not Transcribed'}
                   </span>
                </div>
             )}

@@ -7,10 +7,11 @@ import {
    isContributor,
    listCollectionsSchema,
    listMyCollectionsSchema,
+   searchCollectionsSchema,
    updateCollectionSchema,
 } from '@folio/shared';
 import { TRPCError } from '@trpc/server';
-import { desc, eq, sql } from 'drizzle-orm';
+import { desc, eq, ilike, sql } from 'drizzle-orm';
 import z from 'zod';
 
 export const collectionsRouter = router({
@@ -144,5 +145,31 @@ export const collectionsRouter = router({
          }
 
          return deleted;
+      }),
+
+   search: publicProcedure
+      .input(searchCollectionsSchema)
+      .query(async ({ ctx, input }) => {
+         const results = await db
+            .select({
+               id: collections.id,
+               title: collections.title,
+               description: collections.description,
+               createdBy: collections.createdBy,
+               createdAt: collections.createdAt,
+               creatorName: user.username,
+               coverImageUrl: sql<string | null>`(
+                  SELECT cloudinary_url FROM documents
+                  WHERE collection_id = ${collections.id}
+                  ORDER BY created_at ASC
+                  LIMIT 1
+                   )`,
+            })
+            .from(collections)
+            .leftJoin(user, eq(collections.createdBy, user.id))
+            .where(ilike(collections.title, `%${input.query}%`))
+            .limit(20);
+
+         return results;
       }),
 });

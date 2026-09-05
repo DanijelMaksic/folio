@@ -7,8 +7,10 @@ import { trpc } from '@/lib/trpc';
 import { AppRouter } from '@server/trpc/router';
 import { Document, isContributor, isEditor } from '@shared';
 import { TRPCClientError } from '@trpc/client';
+import { SearchIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { ButtonGroup } from '@/components/ui/button-group';
 
 function CollectionDetails() {
    const [editError, setEditError] = useState('');
@@ -82,11 +84,25 @@ function CollectionDetails() {
 
    return (
       <div className="max-w-4xl mx-auto py-6 px-12 space-y-3">
-         <div className="flex items-center justify-between gap-3">
+         <div className="grid grid-cols-[3fr_2fr_0.5fr] gap-3">
             <h1 className="text-2xl font-semibold">{collection.title}</h1>
 
+            <ButtonGroup className="w-full">
+               <Input
+                  placeholder="Search documents..."
+                  className="border-gray-400"
+               />
+               <Button
+                  variant="outline"
+                  aria-label="Search"
+                  className="border-gray-400"
+               >
+                  <SearchIcon />
+               </Button>
+            </ButtonGroup>
+
             {canTranscribe && isMyCollection && !editor && (
-               <div className="flex gap-3 items-center justify-center">
+               <div className="flex gap-2 items-center justify-center">
                   <Button onClick={handleEditOpen}>Edit</Button>
 
                   <Button
