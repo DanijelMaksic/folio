@@ -7,17 +7,39 @@ import { DocumentCard } from '@/components/documents/DocumentCard.js';
 import { Input } from '@/components/ui/input';
 import { ButtonGroup } from '@/components/ui/button-group';
 import { Plus, SearchIcon } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 export default function Documents() {
    const navigate = useNavigate();
    const { data: session } = useSession();
    const user = session?.user;
    const canTranscribe = isContributor(user?.globalRole);
+   const [search, setSearch] = useState('');
+   const [debouncedSearch, setDebouncedSearch] = useState('');
 
-   const { data, isLoading } = trpc.documents.list.useQuery({
+   const { data: documents, isLoading } = trpc.documents.list.useQuery({
       page: 1,
       limit: 20,
    });
+
+   useEffect(() => {
+      const t = setTimeout(() => setDebouncedSearch(search), 500);
+      return () => clearTimeout(t);
+   }, [search]);
+
+   const { data: searchResults } = trpc.documents.search.useQuery(
+      {
+         query: debouncedSearch,
+      },
+      {
+         enabled: debouncedSearch.length > 0,
+         placeholderData: (prev: Document) => prev,
+         staleTime: 1000,
+      },
+   );
+
+   const isSearchActive = debouncedSearch.length > 0;
+   const displayedDocuments = isSearchActive ? searchResults : documents;
 
    if (isLoading) return <p>Loading...</p>;
 
@@ -29,6 +51,8 @@ export default function Documents() {
             <ButtonGroup className="flex-1 max-w-sm">
                <Input
                   placeholder="Search documents..."
+                  onChange={(e) => setSearch(e.target.value)}
+                  value={search}
                   className="border-gray-400 w-full"
                />
                <Button
@@ -61,11 +85,13 @@ export default function Documents() {
             )}
          </div>
 
-         {!data?.length ? (
-            <p className="text-muted-foreground">No documents yet.</p>
+         {!displayedDocuments?.length ? (
+            <p className="text-muted-foreground">
+               {isSearchActive ? 'No documents found.' : 'No documents yet.'}
+            </p>
          ) : (
-            <div className="grid grid-cols-3 gap-4">
-               {data?.map((doc: Document) => (
+            <div className="grid grid-cols-3 gap-4 transition-opacity duration-150">
+               {displayedDocuments.map((doc: Document) => (
                   <DocumentCard doc={doc} key={doc.id} />
                ))}
             </div>

@@ -10,6 +10,14 @@ import { TRPCClientError } from '@trpc/client';
 import { AppRouter } from '@server/trpc/router';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
+import {
+   DropdownMenu,
+   DropdownMenuContent,
+   DropdownMenuGroup,
+   DropdownMenuItem,
+   DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { EllipsisVertical } from 'lucide-react';
 
 export default function DocumentDetails() {
    const [editError, setEditError] = useState('');
@@ -128,20 +136,31 @@ export default function DocumentDetails() {
             <h1 className="text-2xl font-semibold">{document.title}</h1>
 
             {canTranscribe && isMyDocument && !editor && (
-               <div className="flex gap-3 items-center justify-center">
-                  <Button onClick={handleCollectionOpen}>
-                     {inCollection ? 'Change collection' : 'Add to collection'}
-                  </Button>
-
-                  <Button onClick={handleEditOpen}>Edit</Button>
-
-                  <Button
-                     className="bg-red-700"
-                     onClick={() => setIsDeleteOpen(true)}
-                  >
-                     Delete
-                  </Button>
-               </div>
+               <DropdownMenu>
+                  <DropdownMenuTrigger
+                     render={
+                        <Button variant="outline" className="border-gray-400">
+                           <EllipsisVertical />
+                        </Button>
+                     }
+                  />
+                  <DropdownMenuContent>
+                     <DropdownMenuGroup>
+                        <DropdownMenuItem onClick={handleCollectionOpen}>
+                           {inCollection ? 'Manage' : 'Save'}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleEditOpen}>
+                           Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                           className="text-red-600 focus:bg-red-100 focus:text-red-700 transition-all"
+                           onClick={() => setIsDeleteOpen(true)}
+                        >
+                           Delete
+                        </DropdownMenuItem>
+                     </DropdownMenuGroup>
+                  </DropdownMenuContent>
+               </DropdownMenu>
             )}
 
             {editor && (

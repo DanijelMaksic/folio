@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { protectedProcedure, publicProcedure, router } from '@/trpc/trpc.js';
 import { documents, transcriptions, user } from '@/db/schema/index.js';
-import { and, desc, eq, ilike, isNotNull } from 'drizzle-orm';
+import { and, desc, eq, ilike, isNotNull, sql } from 'drizzle-orm';
 import cloudinary from '@/lib/cloudinary.js';
 import { TRPCError } from '@trpc/server';
 import {
@@ -155,8 +155,22 @@ export const documentsRouter = router({
       .input(searchDocumentsSchema)
       .query(async ({ ctx, input }) => {
          const results = await db
-            .select()
+            .select({
+               id: documents.id,
+               title: documents.title,
+               description: documents.description,
+               uploadedBy: documents.uploadedBy,
+               uploaderName: user.username,
+               collectionId: documents.collectionId,
+               cloudinaryUrl: documents.cloudinaryUrl,
+               cloudinaryPublicId: documents.cloudinaryPublicId,
+               version: documents.version,
+               status: documents.status,
+               createdAt: documents.createdAt,
+               updatedAt: documents.updatedAt,
+            })
             .from(documents)
+            .leftJoin(user, eq(documents.uploadedBy, user.id))
             .where(
                and(
                   ilike(documents.title, `%${input.query}%`),

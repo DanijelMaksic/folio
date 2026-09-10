@@ -27,16 +27,19 @@ export default function Collections() {
       return () => clearTimeout(t);
    }, [search]);
 
-   const { data: searchResults, isLoading: isLoadingSearch } =
-      trpc.collections.search.useQuery(
-         {
-            query: search,
-         },
-         { enabled: search.length > 0 },
-      );
+   const { data: searchResults } = trpc.collections.search.useQuery(
+      {
+         query: debouncedSearch,
+      },
+      {
+         enabled: debouncedSearch.length > 0,
+         placeholderData: (prev: Document) => prev,
+         staleTime: 1000,
+      },
+   );
 
-   const displayedCollections =
-      search && searchResults ? searchResults : collections;
+   const isSearchActive = debouncedSearch.length > 0;
+   const displayedCollections = isSearchActive ? searchResults : collections;
 
    if (isLoading) return <p>Loading...</p>;
 
@@ -77,12 +80,12 @@ export default function Collections() {
 
          {!displayedCollections?.length ? (
             <p className="text-muted-foreground">
-               {debouncedSearch
+               {isSearchActive
                   ? 'No collections found.'
                   : 'No collections yet.'}
             </p>
          ) : (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4 transition-opacity duration-150">
                {displayedCollections.map((collection: Collection) => (
                   <CollectionCard collection={collection} key={collection.id} />
                ))}

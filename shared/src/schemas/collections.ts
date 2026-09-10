@@ -31,7 +31,7 @@ export const collectionSchema = z.object({
 });
 
 export const searchCollectionsSchema = z.object({
-   query: z.string().min(1).max(200),
+   query: z.string().max(200),
 });
 
 export const updateCollectionSchema = createCollectionSchema
