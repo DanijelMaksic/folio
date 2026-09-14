@@ -23,8 +23,13 @@ function DocumentTabs({
          {!approvedTranscription && (
             <TabsList className={hiddenStyle}>
                <TabsTrigger value="overview">Overview</TabsTrigger>
-               <TabsTrigger value="transcribe">Transcribe</TabsTrigger>
-               <TabsTrigger value="revision-history">
+               <TabsTrigger value="transcribe" data-testid="transcribe-tab-btn">
+                  Transcribe
+               </TabsTrigger>
+               <TabsTrigger
+                  value="revision-history"
+                  data-testid="revision-tab-btn"
+               >
                   Revision History
                </TabsTrigger>
             </TabsList>

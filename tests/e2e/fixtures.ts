@@ -14,7 +14,7 @@ export const test = base.extend({
       await page.getByLabel('Email').fill(testUser.email);
       await page.getByLabel('Password').fill(testUser.password);
       await page.getByRole('button', { name: 'Sign in' }).click();
-      await page.waitForURL('/');
+      await page.waitForURL('/documents');
 
       await use(page);
    },

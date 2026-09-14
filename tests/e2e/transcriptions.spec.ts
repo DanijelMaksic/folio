@@ -8,7 +8,7 @@ const testUser = {
    name: 'E2E Transcription user',
 };
 
-const docTitle = 'Document';
+const docTitle = 'Test Document';
 
 test.afterAll(async () => {
    await cleanupUser(testUser.email);
@@ -38,6 +38,7 @@ test.describe('Transcription flow', () => {
       await page.waitForURL(/\/documents\/.+/);
       await expect(page.getByText(docTitle)).toBeVisible();
 
+      await page.getByTestId('transcribe-tab-btn').click();
       await page.getByRole('button', { name: 'Start transcribing' }).click();
       await expect(page.getByTestId('transcription-content')).toBeVisible();
 
@@ -50,7 +51,7 @@ test.describe('Transcription flow', () => {
          'draft',
       );
 
-      await page.getByRole('button', { name: 'Show revision history' }).click();
+      await page.getByTestId('revision-tab-btn').click();
       await expect(page.getByTestId('transcription-revision')).toBeVisible();
    });
 });
