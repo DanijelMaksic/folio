@@ -18,6 +18,7 @@ import {
    DropdownMenuItem,
    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import SearchBar from '@/components/SearchBar';
 
 function CollectionDetails() {
    const [editError, setEditError] = useState('');
@@ -117,22 +118,12 @@ function CollectionDetails() {
             <h1 className="text-2xl font-semibold">{collection.title}</h1>
 
             <div className="flex items-center justify-end gap-3">
-               {displayedDocuments?.length ? (
-                  <ButtonGroup className="w-full">
-                     <Input
-                        placeholder="Search documents..."
-                        onChange={(e) => setSearch(e.target.value)}
-                        value={search}
-                        className="border-gray-400"
-                     />
-                     <Button
-                        variant="outline"
-                        aria-label="Search"
-                        className="border-gray-400"
-                     >
-                        <SearchIcon />
-                     </Button>
-                  </ButtonGroup>
+               {savedDocuments?.length ? (
+                  <SearchBar
+                     placeholder="Search documents..."
+                     value={search}
+                     onChange={setSearch}
+                  />
                ) : null}
 
                {canTranscribe && isMyCollection && !editor && (

@@ -5,15 +5,19 @@ import { SearchIcon } from 'lucide-react';
 
 function SearchBar({
    placeholder,
-   handler,
+   onChange,
+   value,
 }: {
    placeholder: string;
-   handler: Function;
+   onChange: (value: string) => void;
+   value: string;
 }) {
    return (
       <ButtonGroup className="flex-1 max-w-sm">
          <Input
-            placeholder="Search documents..."
+            placeholder={placeholder}
+            onChange={(e) => onChange(e.target.value)}
+            value={value}
             className="border-gray-400 w-full"
          />
          <Button

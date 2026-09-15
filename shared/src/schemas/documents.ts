@@ -27,7 +27,6 @@ export const documentSchema = z.object({
    title: z.string(),
    description: z.string().nullable(),
    uploadedBy: z.string(),
-   version: z.number().int().min(1),
    cloudinaryPublicId: z.string(),
    cloudinaryUrl: z.string(),
    status: z.enum(['processing', 'ready', 'failed']),

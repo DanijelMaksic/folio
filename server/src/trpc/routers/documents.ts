@@ -37,7 +37,6 @@ export const documentsRouter = router({
                uploadedBy: ctx.user.id,
                cloudinaryPublicId: uploaded.public_id,
                cloudinaryUrl: uploaded.secure_url,
-               version: 1,
             })
             .returning();
 
@@ -164,7 +163,6 @@ export const documentsRouter = router({
                collectionId: documents.collectionId,
                cloudinaryUrl: documents.cloudinaryUrl,
                cloudinaryPublicId: documents.cloudinaryPublicId,
-               version: documents.version,
                status: documents.status,
                createdAt: documents.createdAt,
                updatedAt: documents.updatedAt,

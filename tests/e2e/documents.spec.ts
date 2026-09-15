@@ -46,3 +46,14 @@ test.describe('Document upload flow', () => {
       await expect(page.getByText(docTitle)).toBeVisible({ timeout: 15_000 });
    });
 });
+
+test.describe('Document browsing flow', () => {
+   test('user can search for the document by title and see it in results', async ({
+      page,
+   }) => {
+      await page.goto('/documents');
+
+      await page.getByTestId('search-bar').fill(docTitle);
+      await expect(page.getByText(docTitle)).toBeVisible();
+   });
+});

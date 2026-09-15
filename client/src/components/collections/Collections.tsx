@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Plus, SearchIcon } from 'lucide-react';
 import { ButtonGroup } from '@/components/ui/button-group';
 import { useEffect, useState } from 'react';
+import SearchBar from '@/components/SearchBar';
 
 export default function Collections() {
    const navigate = useNavigate();
@@ -48,21 +49,11 @@ export default function Collections() {
          <div className="flex justify-between gap-3 items-center mb-6">
             <h1 className="text-2xl font-semibold">Collections</h1>
 
-            <ButtonGroup className="flex-1 max-w-sm">
-               <Input
-                  placeholder="Search collections..."
-                  className="border-gray-400 w-full"
-                  onChange={(e) => setSearch(e.target.value)}
-                  value={search}
-               />
-               <Button
-                  variant="outline"
-                  aria-label="Search"
-                  className="border-gray-400"
-               >
-                  <SearchIcon />
-               </Button>
-            </ButtonGroup>
+            <SearchBar
+               placeholder="Search collections..."
+               value={search}
+               onChange={setSearch}
+            />
 
             <span></span>
 

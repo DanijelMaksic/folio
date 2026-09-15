@@ -12,7 +12,6 @@ export const documents = pgTable('documents', {
    uploadedBy: text()
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
-   version: integer().notNull(),
    cloudinaryPublicId: text().notNull(),
    cloudinaryUrl: text().notNull(),
    status: documentStatusEnum().notNull().default('ready'),

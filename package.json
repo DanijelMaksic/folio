@@ -11,7 +11,7 @@
       "dev": "concurrently \"npm run dev -w server\" \"npm run dev -w client\"",
       "dev:ci": "concurrently \"npm run dev -w server\" \"npm run dev -w client\"",
       "preview": "vite preview",
-      "test:unit": "vitest run --passWithNoTests",
+      "test:server": "npm run test:unit --workspace=server",
       "test:e2e": "playwright test",
       "build-only": "vite build"
    },
