@@ -43,17 +43,7 @@ export async function cleanupUser(email: string) {
    await db.delete(user).where(eq(user.email, email));
 }
 
-export default async function globalSetup() {
-   await seedUser(
-      {
-         email: 'test_e2e_docs@example.com',
-         password: 'Password123!',
-         username: 'e2edocs',
-         name: 'E2E Docs user',
-      },
-      'contributor',
-   );
-}
+export default async function globalSetup() {}
 
 export async function cleanupCloudinaryFolder(folder: string) {
    cloudinary.config({

@@ -15,6 +15,13 @@
       "when": 1789556029534,
       "tag": "0001_amused_impossible_man",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789559643585,
+      "tag": "0002_glossy_salo",
+      "breakpoints": true
     }
   ]
 }

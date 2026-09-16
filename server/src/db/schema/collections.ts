@@ -9,6 +9,6 @@ export const collections = pgTable('collections', {
    description: text(),
    createdBy: text()
       .notNull()
-      .references(() => user.id),
+      .references(() => user.id, { onDelete: 'cascade' }),
    createdAt: timestamp().notNull().defaultNow(),
 });
