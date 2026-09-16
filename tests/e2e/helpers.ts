@@ -39,3 +39,18 @@ export async function testSearch(page: Page, url: string, title: string) {
    await page.getByTestId('search-bar').fill(title);
    await expect(page.getByText(title)).toBeVisible();
 }
+
+export async function testAddDocToCol(page: Page, title: string) {
+   await page.getByTestId('doc-dropdown-btn').click();
+   await expect(page.getByText('Save')).toBeVisible();
+
+   await page.getByTestId('doc-save-modal-btn').click();
+   await expect(page.getByText('Add to collection')).toBeVisible();
+   await page.getByRole('button', { name: title }).click();
+   await page.getByRole('button', { name: 'Save' }).click();
+
+   await page.goto('/collections');
+   await page.getByText(title).click();
+   await page.waitForURL(/\/collections\/.+/);
+   await expect(page.getByText('Collection Document')).toBeVisible();
+}

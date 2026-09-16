@@ -1,6 +1,7 @@
 import { test, expect } from './fixtures.js';
 import {
    createTestCollection,
+   testAddDocToCol,
    testSearch,
    uploadTestDocument,
 } from './helpers.js';
@@ -67,19 +68,7 @@ test.describe('Collection CRUD operations', () => {
       // page is already logged in via fixture
       await createTestCollection(page, title);
       await uploadTestDocument(page, 'Collection Document');
-
-      await page.getByTestId('doc-dropdown-btn').click();
-      await expect(page.getByText('Save')).toBeVisible();
-
-      await page.getByTestId('doc-save-modal-btn').click();
-      await expect(page.getByText('Add to collection')).toBeVisible();
-      await page.getByRole('button', { name: title }).click();
-      await page.getByRole('button', { name: 'Save' }).click();
-
-      await page.goto('/collections');
-      await page.getByText(title).click();
-      await page.waitForURL(/\/collections\/.+/);
-      await expect(page.getByText('Collection Document')).toBeVisible();
+      await testAddDocToCol(page, title);
    });
 
    test('contributor can remove a document from a collection', async ({
@@ -89,19 +78,7 @@ test.describe('Collection CRUD operations', () => {
       // page is already logged in via fixture
       await createTestCollection(page, title);
       await uploadTestDocument(page, 'Collection Document');
-
-      await page.getByTestId('doc-dropdown-btn').click();
-      await expect(page.getByText('Save')).toBeVisible();
-
-      await page.getByTestId('doc-save-modal-btn').click();
-      await expect(page.getByText('Add to collection')).toBeVisible();
-      await page.getByRole('button', { name: title }).click();
-      await page.getByRole('button', { name: 'Save' }).click();
-
-      await page.goto('/collections');
-      await page.getByText(title).click();
-      await page.waitForURL(/\/collections\/.+/);
-      await expect(page.getByText('Collection Document')).toBeVisible();
+      await testAddDocToCol(page, title);
 
       await page.goto('/documents');
       await page.getByText('Collection Document').click();
