@@ -80,7 +80,7 @@ describe('documents.upload', () => {
 
       expect(result).toMatchObject({ title: 'Test Document' });
       expect(mockUpload).toHaveBeenCalledWith('data:image/png;base64,abc123', {
-         folder: 'folio',
+         folder: 'folio/documents',
          resource_type: 'auto',
       });
    });
@@ -370,6 +370,6 @@ describe('documents.search', () => {
          collectionId: 'col-1',
       });
 
-      expect(result[0]).toMatchObject({collectionId: "col-1"})
+      expect(result[0]).toMatchObject({ collectionId: 'col-1' });
    });
 });
