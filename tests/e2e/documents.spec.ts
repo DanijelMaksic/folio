@@ -1,5 +1,5 @@
 import { test, expect } from './fixtures.js';
-import { cleanupUser } from './globalSetup.js';
+import { cleanupUser } from './global-setup.js';
 
 const testUser = {
    email: 'test_e2e_docs@example.com',
@@ -11,6 +11,7 @@ const testUser = {
 const docTitle = 'E2E Test Document';
 
 test.afterAll(async () => {
+   await cleanupCloudinaryFolder('folio/documents');
    await cleanupUser(testUser.email);
 });
 

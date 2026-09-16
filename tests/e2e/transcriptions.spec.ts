@@ -1,5 +1,5 @@
 import { test, expect } from './fixtures.js';
-import { cleanupUser } from './globalSetup';
+import { cleanupUser } from './global-setup.js';
 
 const testUser = {
    email: 'test_e2e_transcriptions@example.com',
