@@ -8,7 +8,7 @@ test.afterAll(async () => {
    await cleanupCloudinaryFolder('folio/documents');
 });
 
-test.describe('Document upload flow', () => {
+test.describe('Document CRUD operations', () => {
    test('contributor can upload a document and see it in the list', async ({
       page,
       auth,
@@ -22,6 +22,41 @@ test.describe('Document upload flow', () => {
       await page.getByText(title).click();
       await page.waitForURL(/\/documents\/.+/);
       await expect(page.getByText(title)).toBeVisible({ timeout: 15_000 });
+   });
+
+   test('contributor can edit a document', async ({ page, auth }) => {
+      // page is already logged in via fixture
+      await uploadTestDocument(page, title);
+
+      await page.getByTestId('doc-dropdown-btn').click();
+      await expect(page.getByText('Edit')).toBeVisible();
+
+      await page.getByTestId('doc-edit-modal-btn').click();
+      await expect(page.getByText('Edit Document')).toBeVisible();
+
+      const titleInput = page.getByLabel('Title');
+      await expect(titleInput).toHaveValue(title);
+      await titleInput.fill('Edited title');
+
+      await page.getByRole('button', { name: 'Save' }).click();
+      await expect(page.getByText('Edited title')).toBeVisible({
+         timeout: 15_000,
+      });
+   });
+
+   test('contributor can delete a document', async ({ page, auth }) => {
+      // page is already logged in via fixture
+      await uploadTestDocument(page, title);
+
+      await page.getByTestId('doc-dropdown-btn').click();
+      await expect(page.getByText('Delete')).toBeVisible();
+
+      await page.getByTestId('doc-delete-modal-btn').click();
+      await expect(page.getByText('Delete Document')).toBeVisible();
+
+      await page.getByRole('button', { name: 'Delete' }).click();
+      await page.waitForURL('/documents');
+      await expect(page.getByText(title)).not.toBeVisible();
    });
 });
 

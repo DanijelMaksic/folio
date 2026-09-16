@@ -132,6 +132,7 @@ function CollectionDetails() {
                         render={
                            <Button
                               variant="outline"
+                              data-testid="collection-dropdown-btn"
                               className="border-gray-400"
                            >
                               <EllipsisVertical />
@@ -140,11 +141,15 @@ function CollectionDetails() {
                      />
                      <DropdownMenuContent>
                         <DropdownMenuGroup>
-                           <DropdownMenuItem onClick={handleEditOpen}>
+                           <DropdownMenuItem
+                              onClick={handleEditOpen}
+                              data-testid="collection-edit-modal-btn"
+                           >
                               Edit
                            </DropdownMenuItem>
                            <DropdownMenuItem
                               className="text-red-600 focus:bg-red-100 focus:text-red-700 transition-all"
+                              data-testid="collection-delete-modal-btn"
                               onClick={() => setIsDeleteOpen(true)}
                            >
                               Delete
@@ -189,17 +194,29 @@ function CollectionDetails() {
                   <h2 className="text-lg font-semibold">Edit Collection</h2>
 
                   <div className="space-y-2">
-                     <label className="text-sm font-medium">Title</label>
+                     <label
+                        className="text-sm font-medium"
+                        htmlFor="title-field"
+                     >
+                        Title
+                     </label>
                      <Input
                         value={editTitle}
+                        id="title-field"
                         onChange={(e) => setEditTitle(e.target.value)}
                      />
                   </div>
 
                   <div className="space-y-2">
-                     <label className="text-sm font-medium">Description</label>
+                     <label
+                        className="text-sm font-medium"
+                        htmlFor="description-field"
+                     >
+                        Description
+                     </label>
                      <Textarea
                         value={editDescription}
+                        id="description-field"
                         onChange={(e) => setEditDescription(e.target.value)}
                      />
                   </div>

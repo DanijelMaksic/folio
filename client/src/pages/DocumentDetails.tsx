@@ -139,22 +139,33 @@ export default function DocumentDetails() {
                <DropdownMenu>
                   <DropdownMenuTrigger
                      render={
-                        <Button variant="outline" className="border-gray-400">
+                        <Button
+                           variant="outline"
+                           className="border-gray-400"
+                           data-testid="doc-dropdown-btn"
+                        >
                            <EllipsisVertical />
                         </Button>
                      }
                   />
                   <DropdownMenuContent>
                      <DropdownMenuGroup>
-                        <DropdownMenuItem onClick={handleCollectionOpen}>
+                        <DropdownMenuItem
+                           onClick={handleCollectionOpen}
+                           data-testid="doc-save-modal-btn"
+                        >
                            {inCollection ? 'Manage' : 'Save'}
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={handleEditOpen}>
+                        <DropdownMenuItem
+                           onClick={handleEditOpen}
+                           data-testid="doc-edit-modal-btn"
+                        >
                            Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem
                            className="text-red-600 focus:bg-red-100 focus:text-red-700 transition-all"
                            onClick={() => setIsDeleteOpen(true)}
+                           data-testid="doc-delete-modal-btn"
                         >
                            Delete
                         </DropdownMenuItem>
@@ -201,17 +212,29 @@ export default function DocumentDetails() {
                   <h2 className="text-lg font-semibold">Edit Document</h2>
 
                   <div className="space-y-2">
-                     <label className="text-sm font-medium">Title</label>
+                     <label
+                        className="text-sm font-medium"
+                        htmlFor="doc-title-field"
+                     >
+                        Title
+                     </label>
                      <Input
                         value={editTitle}
+                        id="doc-title-field"
                         onChange={(e) => setEditTitle(e.target.value)}
                      />
                   </div>
 
                   <div className="space-y-2">
-                     <label className="text-sm font-medium">Description</label>
+                     <label
+                        className="text-sm font-medium"
+                        htmlFor="doc-description-field"
+                     >
+                        Description
+                     </label>
                      <Textarea
                         value={editDescription}
+                        id="doc-description-field"
                         onChange={(e) => setEditDescription(e.target.value)}
                      />
                   </div>
