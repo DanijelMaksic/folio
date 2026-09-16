@@ -75,7 +75,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Vitest tests the registration, login, session and 2FA flows.
 
-- `globalSetup.ts`starts and tears down the Express server around the Vitest test suite, allowing integration tests to hit real HTTP endpoints without a separately running server process.
+- `global-setup.ts`starts and tears down the Express server around the Vitest test suite, allowing integration tests to hit real HTTP endpoints without a separately running server process.
 
 **Decisions:**
 
@@ -197,7 +197,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Refactored e2e test helpers from a shared `helpers.ts` into Playwright fixtures (`fixtures.ts`), extending the base `test` function — login steps are now handled automatically per test via the overridden `page` fixture, solving the inlined login antipattern carried forward from Sprint 2
 
-- `globalSetup.ts` handles user seeding before the suite runs, removing the need for `beforeAll` in individual test files
+- `global-setup.ts` handles user seeding before the suite runs, removing the need for `beforeAll` in individual test files
 
 **Issues resolved:**
 

@@ -18,6 +18,7 @@ function SearchBar({
             placeholder={placeholder}
             onChange={(e) => onChange(e.target.value)}
             value={value}
+            data-testid="search-bar"
             className="border-gray-400 w-full"
          />
          <Button

@@ -1,5 +1,5 @@
 import { test, expect } from './fixtures.js';
-import { cleanupUser } from './global-setup.js';
+import { cleanupCloudinaryFolder, cleanupUser } from './global-setup.js';
 
 const testUser = {
    email: 'test_e2e_docs@example.com',

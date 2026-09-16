@@ -25,7 +25,7 @@ export const documentsRouter = router({
          }
 
          const uploaded = await cloudinary.uploader.upload(input.fileBase64, {
-            folder: 'folio',
+            folder: 'folio/documents',
             resource_type: 'auto',
          });
 

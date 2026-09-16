@@ -9,7 +9,7 @@ if (!process.env.CI) {
 export default defineConfig({
    testDir: './tests/e2e',
    reporter: [['html', { open: 'on-failure' }]],
-   globalSetup: './tests/e2e/globalSetup.ts',
+   globalSetup: './tests/e2e/global-setup.ts',
    webServer: [
       {
          command: process.env.CI
