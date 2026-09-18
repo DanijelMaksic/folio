@@ -25,7 +25,7 @@ export async function createTestCollection(page: Page, title: string) {
    await page.goto('/collections/create');
 
    await page.getByLabel('Title').fill(title);
-   await page.getByLabel('Description').fill('Create by Playwright');
+   await page.getByLabel('Description').fill('Created by Playwright');
 
    await page.getByRole('button', { name: 'Create' }).click();
    await page.waitForURL(/\/collections\/.+/);
@@ -40,17 +40,21 @@ export async function testSearch(page: Page, url: string, title: string) {
    await expect(page.getByText(title)).toBeVisible();
 }
 
-export async function testAddDocToCol(page: Page, title: string) {
+export async function testAddDocToCol(
+   page: Page,
+   colTitle: string,
+   docTitle: string,
+) {
    await page.getByTestId('doc-dropdown-btn').click();
    await expect(page.getByText('Save')).toBeVisible();
 
    await page.getByTestId('doc-save-modal-btn').click();
    await expect(page.getByText('Add to collection')).toBeVisible();
-   await page.getByRole('button', { name: title }).click();
+   await page.getByRole('button', { name: colTitle }).click();
    await page.getByRole('button', { name: 'Save' }).click();
 
    await page.goto('/collections');
-   await page.getByText(title).click();
+   await page.getByText(colTitle).click();
    await page.waitForURL(/\/collections\/.+/);
-   await expect(page.getByText('Collection Document')).toBeVisible();
+   await expect(page.getByText(docTitle)).toBeVisible();
 }
