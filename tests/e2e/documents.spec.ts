@@ -28,10 +28,10 @@ test.describe('Document CRUD operations', () => {
       // page is already logged in via fixture
       await uploadTestDocument(page, title);
 
-      await page.getByTestId('doc-dropdown-btn').click();
+      await page.getByTestId('actions-dropdown-btn').click();
       await expect(page.getByText('Edit')).toBeVisible();
 
-      await page.getByTestId('doc-edit-modal-btn').click();
+      await page.getByTestId('edit-modal-btn').click();
       await expect(page.getByText('Edit Document')).toBeVisible();
 
       const titleInput = page.getByLabel('Title');
@@ -48,10 +48,10 @@ test.describe('Document CRUD operations', () => {
       // page is already logged in via fixture
       await uploadTestDocument(page, title);
 
-      await page.getByTestId('doc-dropdown-btn').click();
+      await page.getByTestId('actions-dropdown-btn').click();
       await expect(page.getByText('Delete')).toBeVisible();
 
-      await page.getByTestId('doc-delete-modal-btn').click();
+      await page.getByTestId('delete-modal-btn').click();
       await expect(page.getByText('Delete Document')).toBeVisible();
 
       await page.getByRole('button', { name: 'Delete' }).click();

@@ -7,7 +7,7 @@ import Documents from '@/pages/Documents';
 import DocumentDetails from '@/pages/DocumentDetails';
 import UploadDocument from '@/pages/UploadDocument';
 import ReviewQueue from '@/pages/ReviewQueue';
-import Layout from '@/components/Layout';
+import Layout from '@/components/shared/Layout';
 import Account from './pages/Account';
 import Home from '@/pages/Home';
 import PageNotFound from '@/pages/PageNotFound';

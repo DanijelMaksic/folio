@@ -8,16 +8,10 @@ import DocumentTabs from '@/components/documents/DocumentTabs';
 import { useState } from 'react';
 import { TRPCClientError } from '@trpc/client';
 import { AppRouter } from '@server/trpc/router';
-import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
-import {
-   DropdownMenu,
-   DropdownMenuContent,
-   DropdownMenuGroup,
-   DropdownMenuItem,
-   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { EllipsisVertical } from 'lucide-react';
+import DeleteModal from '@/components/shared/DeleteModal';
+import EditModal from '@/components/shared/EditModal';
+import ActionsMenu from '@/components/shared/ActionsMenu';
+import CollectionPickerModal from '@/components/documents/CollectionPickerModal';
 
 export default function DocumentDetails() {
    const [editError, setEditError] = useState('');
@@ -48,7 +42,7 @@ export default function DocumentDetails() {
 
    const inCollection = !!document?.collectionId;
 
-   const { data: collections, isPending } =
+   const { data: collections, isLoading: isLoadingCollections } =
       trpc.collections.getCurrentUserCollections.useQuery({
          page: 1,
          limit: 9,
@@ -135,61 +129,13 @@ export default function DocumentDetails() {
          <div className="flex items-center justify-between gap-3">
             <h1 className="text-2xl font-semibold">{document.title}</h1>
 
-            {canTranscribe && isMyDocument && !editor && (
-               <DropdownMenu>
-                  <DropdownMenuTrigger
-                     render={
-                        <Button
-                           variant="outline"
-                           className="border-gray-400"
-                           data-testid="doc-dropdown-btn"
-                        >
-                           <EllipsisVertical />
-                        </Button>
-                     }
-                  />
-                  <DropdownMenuContent>
-                     <DropdownMenuGroup>
-                        <DropdownMenuItem
-                           onClick={handleCollectionOpen}
-                           data-testid="doc-save-modal-btn"
-                        >
-                           {inCollection ? 'Manage' : 'Save'}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                           onClick={handleEditOpen}
-                           data-testid="doc-edit-modal-btn"
-                        >
-                           Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                           className="text-red-600 focus:bg-red-100 focus:text-red-700 transition-all"
-                           onClick={() => setIsDeleteOpen(true)}
-                           data-testid="doc-delete-modal-btn"
-                        >
-                           Delete
-                        </DropdownMenuItem>
-                     </DropdownMenuGroup>
-                  </DropdownMenuContent>
-               </DropdownMenu>
-            )}
-
-            {editor && (
-               <div className="flex gap-3 items-center justify-center">
-                  <Button onClick={handleCollectionOpen}>
-                     {inCollection ? 'Change collection' : 'Add to collection'}
-                  </Button>
-
-                  <Button onClick={handleEditOpen}>Edit</Button>
-
-                  <Button
-                     className="bg-red-700"
-                     onClick={() => setIsDeleteOpen(true)}
-                  >
-                     Delete
-                  </Button>
-               </div>
-            )}
+            <ActionsMenu
+               show={canTranscribe && (isMyDocument || editor)}
+               onEdit={handleEditOpen}
+               onDelete={() => setIsDeleteOpen(true)}
+               onSaveToCollection={handleCollectionOpen}
+               inCollection={inCollection}
+            />
          </div>
 
          {id && <DocumentTabs canTranscribe={canTranscribe} documentId={id} />}
@@ -207,149 +153,49 @@ export default function DocumentDetails() {
             )}
 
          {isEditOpen && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-               <div className="bg-background rounded-xl p-6 w-full max-w-md space-y-4">
-                  <h2 className="text-lg font-semibold">Edit Document</h2>
-
-                  <div className="space-y-2">
-                     <label
-                        className="text-sm font-medium"
-                        htmlFor="doc-title-field"
-                     >
-                        Title
-                     </label>
-                     <Input
-                        value={editTitle}
-                        id="doc-title-field"
-                        onChange={(e) => setEditTitle(e.target.value)}
-                     />
-                  </div>
-
-                  <div className="space-y-2">
-                     <label
-                        className="text-sm font-medium"
-                        htmlFor="doc-description-field"
-                     >
-                        Description
-                     </label>
-                     <Textarea
-                        value={editDescription}
-                        id="doc-description-field"
-                        onChange={(e) => setEditDescription(e.target.value)}
-                     />
-                  </div>
-
-                  {editError && (
-                     <p className="text-sm text-destructive">{editError}</p>
-                  )}
-
-                  <div className="flex justify-end gap-2">
-                     <Button
-                        variant="outline"
-                        onClick={() => {
-                           setIsEditOpen(false);
-                           setEditError('');
-                        }}
-                     >
-                        Cancel
-                     </Button>
-
-                     <Button
-                        onClick={handleEditSubmit}
-                        disabled={editDocument.isPending}
-                     >
-                        {editDocument.isPending ? 'Saving...' : 'Save'}
-                     </Button>
-                  </div>
-               </div>
-            </div>
+            <EditModal
+               heading="Edit Document"
+               error={editError}
+               title={editTitle}
+               description={editDescription}
+               isPending={editDocument.isPending}
+               onTitleChange={setEditTitle}
+               onDescriptionChange={setEditDescription}
+               onEdit={handleEditSubmit}
+               onClose={() => {
+                  setIsEditOpen(false);
+                  setEditError('');
+               }}
+            />
          )}
 
          {isDeleteOpen && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-               <div className="bg-background rounded-xl p-6 w-full max-w-md space-y-4">
-                  <h2 className="text-lg font-semibold">Delete Document</h2>
-
-                  {deleteError && (
-                     <p className="text-sm text-destructive">{deleteError}</p>
-                  )}
-
-                  <div className="flex justify-end gap-2">
-                     <Button
-                        variant="outline"
-                        onClick={() => {
-                           setIsDeleteOpen(false);
-                           setDeleteError('');
-                        }}
-                     >
-                        Cancel
-                     </Button>
-
-                     <Button
-                        onClick={handleDelete}
-                        disabled={deleteDocument.isPending}
-                        className="bg-red-700"
-                     >
-                        {deleteDocument.isPending ? 'Deleting...' : 'Delete'}
-                     </Button>
-                  </div>
-               </div>
-            </div>
+            <DeleteModal
+               heading="Delete Document"
+               error={deleteError}
+               isPending={deleteDocument.isPending}
+               onDelete={handleDelete}
+               onClose={() => {
+                  setIsDeleteOpen(false);
+                  setDeleteError('');
+               }}
+            />
          )}
 
          {isCollectionOpen && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-               <div className="bg-background rounded-xl p-6 w-full max-w-md space-y-4">
-                  <h2 className="text-lg font-semibold">Add to collection</h2>
-
-                  <div className="grid grid-cols-3 gap-3">
-                     {isPending ? (
-                        <p>Loading...</p>
-                     ) : (
-                        collections?.map((collection: Collection) => (
-                           <button
-                              key={collection.id}
-                              onClick={() => {
-                                 setSelectedCollectionId(
-                                    selectedCollectionId === collection.id
-                                       ? null
-                                       : collection.id,
-                                 );
-                              }}
-                              className={`border border-gray-300 rounded-md p-4 ${collection.id === selectedCollectionId && 'bg-gray-300'}`}
-                           >
-                              {collection.title}
-                           </button>
-                        ))
-                     )}
-                  </div>
-
-                  {collectionError && (
-                     <p className="text-sm text-destructive">
-                        {collectionError}
-                     </p>
-                  )}
-
-                  <div className="flex justify-end gap-2">
-                     <Button
-                        variant="outline"
-                        onClick={() => {
-                           setIsCollectionOpen(false);
-                           setCollectionError('');
-                        }}
-                     >
-                        Cancel
-                     </Button>
-
-                     <Button
-                        onClick={handleAddToCollection}
-                        disabled={addToCollection.isPending}
-                     >
-                        {addToCollection.isPending ? 'Saving...' : 'Save'}
-                     </Button>
-                  </div>
-               </div>
-            </div>
+            <CollectionPickerModal
+               collections={collections}
+               selectedId={selectedCollectionId}
+               error={collectionError}
+               addToColPending={addToCollection.isPending}
+               isLoadingCollections={isLoadingCollections}
+               onSelect={setSelectedCollectionId}
+               onSave={handleAddToCollection}
+               onClose={() => {
+                  setIsCollectionOpen(false);
+                  setCollectionError('');
+               }}
+            />
          )}
       </div>
    );

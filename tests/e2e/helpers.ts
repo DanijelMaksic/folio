@@ -45,10 +45,10 @@ export async function testAddDocToCol(
    colTitle: string,
    docTitle: string,
 ) {
-   await page.getByTestId('doc-dropdown-btn').click();
+   await page.getByTestId('actions-dropdown-btn').click();
    await expect(page.getByText('Save')).toBeVisible();
 
-   await page.getByTestId('doc-save-modal-btn').click();
+   await page.getByTestId('save-modal-btn').click();
    await expect(page.getByText('Add to collection')).toBeVisible();
    await page.getByRole('button', { name: colTitle }).click();
    await page.getByRole('button', { name: 'Save' }).click();

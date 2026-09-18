@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { ButtonGroup } from '@/components/ui/button-group';
 import { Plus, SearchIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import SearchBar from '@/components/SearchBar';
+import SearchBar from '@/components/shared/SearchBar';
 
 export default function Documents() {
    const navigate = useNavigate();

@@ -31,10 +31,10 @@ test.describe('Collection CRUD operations', () => {
       // page is already logged in via fixture
       await createTestCollection(page, colTitle);
 
-      await page.getByTestId('collection-dropdown-btn').click();
+      await page.getByTestId('actions-dropdown-btn').click();
       await expect(page.getByText('Edit')).toBeVisible();
 
-      await page.getByTestId('collection-edit-modal-btn').click();
+      await page.getByTestId('edit-modal-btn').click();
       await expect(page.getByText('Edit Collection')).toBeVisible();
 
       const titleInput = page.getByLabel('Title');
@@ -51,10 +51,10 @@ test.describe('Collection CRUD operations', () => {
       // page is already logged in via fixture
       await createTestCollection(page, colTitle);
 
-      await page.getByTestId('collection-dropdown-btn').click();
+      await page.getByTestId('actions-dropdown-btn').click();
       await expect(page.getByText('Delete')).toBeVisible();
 
-      await page.getByTestId('collection-delete-modal-btn').click();
+      await page.getByTestId('delete-modal-btn').click();
       await expect(page.getByText('Delete Collection')).toBeVisible();
 
       await page.getByRole('button', { name: 'Delete' }).click();
@@ -87,9 +87,9 @@ test.describe('Collection CRUD operations', () => {
       await page.getByText(docTitle).click();
 
       // remove the document from the collection
-      await page.getByTestId('doc-dropdown-btn').click();
+      await page.getByTestId('actions-dropdown-btn').click();
       await expect(page.getByText('Manage')).toBeVisible();
-      await page.getByTestId('doc-save-modal-btn').click();
+      await page.getByTestId('save-modal-btn').click();
       await expect(page.getByText('Add to collection')).toBeVisible();
       await page.getByRole('button', { name: colTitle }).click(); // toggling the collection where document is saved = removing
       await page.getByRole('button', { name: 'Save' }).click();
