@@ -1,8 +1,7 @@
 import { Outlet, useNavigate, useParams } from 'react-router-dom';
 import { trpc } from '../lib/trpc';
-import { Button } from '@/components/ui/button';
 import { useSession } from '../lib/auth-client';
-import { Collection, isContributor, isEditor } from '@shared';
+import { isContributor, isEditor } from '@shared';
 import ReviewPanel from '@/components/documents/ReviewPanel';
 import DocumentTabs from '@/components/documents/DocumentTabs';
 import { useState } from 'react';

@@ -4,11 +4,10 @@ import { Document, isContributor } from '@shared';
 import { Button } from '@/components/ui/button';
 import { useSession } from '@/lib/auth-client';
 import { DocumentCard } from '@/components/documents/DocumentCard.js';
-import { Input } from '@/components/ui/input';
-import { ButtonGroup } from '@/components/ui/button-group';
-import { Plus, SearchIcon } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import SearchBar from '@/components/shared/SearchBar';
+import TranscriptionFilter from '@/components/documents/TranscriptionFilter';
 
 export default function Documents() {
    const navigate = useNavigate();
@@ -55,14 +54,7 @@ export default function Documents() {
                onChange={setSearch}
             />
 
-            <ButtonGroup className="border border-gray-400 rounded-md p-0.5">
-               <Button className="bg-gray-200 text-black hover:text-white rounded-md">
-                  Transcribed
-               </Button>
-               <Button className="bg-gray-0 text-black rounded-md hover:text-white">
-                  Not Transcribed
-               </Button>
-            </ButtonGroup>
+            <TranscriptionFilter />
 
             {canTranscribe ? (
                <Button onClick={() => navigate('/documents/upload')}>
