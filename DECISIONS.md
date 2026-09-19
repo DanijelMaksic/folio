@@ -99,7 +99,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 **Known issues carried forward:**
 
-- Resend free tier: only delivers to Resend account owner email in dev. Real domain verification on Resend website deferred to Sprint 9.
+- Resend free tier: only delivers to Resend account owner email in dev. Real domain verification on Resend website deferred to Sprint 7.
 
 - Email verification flow untested for non-owner emails as a result
 
@@ -151,7 +151,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 **Known issues carried forward:**
 
-- Resend free tier: only delivers to Resend account owner email in dev. Real domain verification on Resend website deferred to Sprint 9
+- Resend free tier: only delivers to Resend account owner email in dev. Real domain verification on Resend website deferred to Sprint 7
 
 - Email verification flow untested for non-owner emails as a result
 
@@ -205,7 +205,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 **Known issues carried forward:**
 
-- Resend free tier: only delivers to Resend account owner email in dev. Real domain verification on Resend website deferred to Sprint 9
+- Resend free tier: only delivers to Resend account owner email in dev. Real domain verification on Resend website deferred to Sprint 7
 
 - Email verification flow untested for non-owner emails as a result
 
@@ -217,7 +217,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - OTP cannot be tested end-to-end in Vitest since valid codes require intercepting Resend delivery, so only rejection paths are covered
 
-## Sprint 3 — Transcription Review
+## Sprint 4 — Transcription Review
 
 **Goal:**A logged-in editor can approve or reject a transcription.
 
@@ -257,7 +257,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 **Known issues carried forward:**
 
-- Resend free tier: only delivers to Resend account owner email in dev. Real domain verification on Resend website deferred to Sprint 9
+- Resend free tier: only delivers to Resend account owner email in dev. Real domain verification on Resend website deferred to Sprint 7
 
 - Email verification flow untested for non-owner emails as a result
 
@@ -268,3 +268,85 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 - OTP cannot be tested end-to-end in Vitest since valid codes require intercepting Resend delivery, so only rejection paths are covered
 
 - Approved transcription not publicly visible on the document page — only the contributor who wrote it and editors can see it; public display of approved transcriptions deferred to a future sprint
+
+## Sprint 5 — Collections
+
+**Goal:**A logged-in contributor can create a collection.
+
+**Completed:**
+
+- Added `collections` table to Drizzle schema with `title`, `description` and `createdBy` fields; cover image derived from first document in collection via subquery
+
+- Added tRPC `collections.ts` router with `create`, `list`, `getById`, `getCurrentUserCollections`, `update`, `delete`, and `search` procedures
+
+- Added `update` and `delete` procedures to `documents.ts` tRPC router
+
+- Documents are assignable to collections via `collectionId` FK on the `documents` table; update procedure extended with `collectionId` nullable field
+
+- Added `getByCollection` procedure to `documents` router for fetching all documents within a collection
+
+- On the Front-End, built `/collections` page with a grid of `CollectionCard` components, `/collections/create` page, and `/collections/:id` detail page showing collection info and its documents
+
+- Collection detail page includes edit/delete modals and a search input that filters documents within that collection by passing `collectionId` to `documents.search`
+
+- "Add to collection" / "Change collection" flow added to `DocumentDetails` — opens a modal with the user's collections, toggling selection saves the `collectionId` via `documents.update`
+
+- Search added to `/documents` and `/collections` pages with debounce, flicker mitigation via `placeholderData` and `staleTime`, and an "no results" empty state
+
+- Client-side transcription status filter added to `/documents` using `hasApprovedTranscription` from existing list data — no additional procedure needed
+
+- `SearchBar` extracted into a standalone reusable component
+
+- `EditModal`, `DeleteModal`, `ActionsMenu`, and `CollectionPickerModal` extracted as shared components, replacing duplicated modal markup in `DocumentDetails` and `CollectionDetails`
+
+- Vitest mock-based unit tests written for `documents`, `collections`, `transcriptions`, and `admin` routers
+
+- Playwright e2e tests written for document upload, document search, collection creation, and collection search flows; fixture refactored to auto-seed and auto-cleanup a unique user per test
+
+**Decisions:**
+
+- Chose `ilike` for search over full-text search — sufficient for title matching at this scale; full-text search deferred until a later sprint if needed
+
+- Search is driven by a single debounced input (500ms) rather than a submit button — results update as the user types, with `placeholderData: (prev) => prev` and `staleTime: 1000` keeping previous results visible during fetch to prevent flicker
+
+- Cover image for a collection is derived via a subquery from the first document in the collection ordered by `created_at` — no separate image field on the collection, avoids redundant storage
+
+- Collection assignment lives on the document (`collectionId` FK) rather than a join table — collections in this app are simple one-to-many groupings, a join table would be over-engineering at this scale
+
+- `getCurrentUserCollections` takes `userId` as input rather than reading from `ctx.user` — allows the query to be reused flexibly, though currently only called with the session user's id
+
+- Shifted unit tests from integration-style (real DB calls) to mock-based (vi.mock on db/index.js) — faster, no DB dependency, and easier to assert exact values passed to DB calls; Playwright e2e covers the real DB path
+
+- Playwright fixture refactored to auto-seed and auto-cleanup a unique user per test via `seedUser`/`cleanupUser` — eliminates shared user state between test files that caused cross-file test failures when one file's afterAll deleted the shared user before another file finished
+
+- `SearchBar` extracted into a reusable component with an `onChange: (value: string) => void` prop rather than exposing the raw `ChangeEventHandler` — hides event plumbing inside the component and gives consumers a simpler string-based API
+
+- `EditModal`, `DeleteModal`, `ActionsMenu`, and `CollectionPickerModal` extracted as shared/reusable components — both `DocumentDetails` and `CollectionDetails` were duplicating the same modal markup; shared components fix styling and behavior in one place
+
+- `data-testid` values on `ActionsMenu` kept generic (e.g. `edit-modal-btn`) rather than page-prefixed — avoids needing extra props per page and works since the two menus never appear on the same page simultaneously
+
+**Issues resolved:**
+
+- Cross-file Playwright test failures caused by shared test user — `afterAll` in `documents.test.ts` deleted the user before `collections.test.ts` finished; fixed by refactoring the fixture to seed and clean up a unique user per test automatically
+
+- `ChangeEventHandler` type error in `SearchBar` — `ChangeEventHandler` without a generic defaults to `Element`, which has no `value`; fixed by typing the prop as `onChange: (value: string) => void` and handling the event internally
+
+- Collections modal showed empty list — `getCurrentUserCollections` was firing before `user` was available; fixed by adding `enabled: !!user?.id` to the query options
+
+- `ActionsMenu` save/manage button only appeared when document was already in a collection — condition was `inCollection` instead of `onSaveToCollection`; fixed to show whenever the prop is passed
+
+- Authenticated tRPC callers in unit tests threw `UNAUTHORIZED` — `ctx.user` was never set because the test helper only passed `session` but procedures check `ctx.user`; fixed by passing `user` directly in the caller context, matching what `createContext` produces in production
+
+**Known issues carried forward:**
+
+- Resend free tier: only delivers to Resend account owner email in dev. Real domain verification on Resend website deferred to Sprint 7
+
+- Email verification flow untested for non-owner emails as a result
+
+- Docker warns about some vulnerabilities related to Golang packages. No idea what that means, but a quick research showed that it's probably a false-flag warning. Will revisit later
+
+- esbuild moderate vulnerability via drizzle-kit's dependency on `@esbuild-kit` — dev-only, unexploitable in production. Monitor for a drizzle-kit update that resolves it later
+
+- OTP cannot be tested end-to-end in Vitest since valid codes require intercepting Resend delivery, so only rejection paths are covered
+
+- Review queue has no navigation link — deferred to Sprint 6
