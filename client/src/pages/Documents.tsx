@@ -9,6 +9,8 @@ import { useEffect, useState } from 'react';
 import SearchBar from '@/components/shared/SearchBar';
 import TranscriptionFilter from '@/components/documents/TranscriptionFilter';
 
+export type statusType = 'all documents' | 'transcribed' | 'not transcribed';
+
 export default function Documents() {
    const navigate = useNavigate();
    const { data: session } = useSession();
@@ -16,6 +18,7 @@ export default function Documents() {
    const canTranscribe = isContributor(user?.globalRole);
    const [search, setSearch] = useState('');
    const [debouncedSearch, setDebouncedSearch] = useState('');
+   const [status, setStatus] = useState<statusType>('all documents');
 
    const { data: documents, isLoading } = trpc.documents.list.useQuery({
       page: 1,
@@ -41,11 +44,17 @@ export default function Documents() {
    const isSearchActive = debouncedSearch.length > 0;
    const displayedDocuments = isSearchActive ? searchResults : documents;
 
+   const filteredDocuments = displayedDocuments?.filter((doc: Document) => {
+      if (status === 'transcribed') return doc.hasApprovedTranscription;
+      if (status === 'not transcribed') return !doc.hasApprovedTranscription;
+      return true; // all
+   });
+
    if (isLoading) return <p>Loading...</p>;
 
    return (
       <div className="max-w-4xl mx-auto p-6">
-         <div className="flex justify-between items-center mb-6">
+         <div className="grid grid-cols-[2fr_3fr_1fr_0.1fr] gap-5 mb-6">
             <h1 className="text-2xl font-semibold">Documents</h1>
 
             <SearchBar
@@ -54,7 +63,7 @@ export default function Documents() {
                onChange={setSearch}
             />
 
-            <TranscriptionFilter />
+            <TranscriptionFilter onSetStatus={setStatus} status={status} />
 
             {canTranscribe ? (
                <Button onClick={() => navigate('/documents/upload')}>
@@ -68,13 +77,15 @@ export default function Documents() {
             )}
          </div>
 
-         {!displayedDocuments?.length ? (
+         {!filteredDocuments?.length ? (
             <p className="text-muted-foreground">
-               {isSearchActive ? 'No documents found.' : 'No documents yet.'}
+               {isSearchActive
+                  ? 'No results found for your search.'
+                  : 'No documents found.'}
             </p>
          ) : (
             <div className="grid grid-cols-3 gap-4 transition-opacity duration-150">
-               {displayedDocuments.map((doc: Document) => (
+               {filteredDocuments.map((doc: Document) => (
                   <DocumentCard doc={doc} key={doc.id} />
                ))}
             </div>

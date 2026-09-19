@@ -13,7 +13,7 @@ function SearchBar({
    value: string;
 }) {
    return (
-      <ButtonGroup className="flex-1 max-w-sm">
+      <ButtonGroup className="w-xs">
          <Input
             placeholder={placeholder}
             onChange={(e) => onChange(e.target.value)}

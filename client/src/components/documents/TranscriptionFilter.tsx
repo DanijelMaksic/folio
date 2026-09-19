@@ -6,15 +6,20 @@ import {
    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { Dispatch, SetStateAction } from 'react';
+import { statusType } from '@/pages/Documents';
 
-function TranscriptionFilter() {
-   const [status, setStatus] = useState<
-      'all documents' | 'transcribed' | 'not transcribed'
-   >('all documents');
+interface TranscriptionFilterProps {
+   onSetStatus: Dispatch<SetStateAction<statusType>>;
+   status: statusType;
+}
 
+function TranscriptionFilter({
+   onSetStatus,
+   status,
+}: TranscriptionFilterProps) {
    return (
-      <div className="flex items-center justify-center gap-3">
+      <div className="flex items-center justify-center gap-3 w-44">
          <span>Show:</span>
 
          <DropdownMenu>
@@ -23,7 +28,7 @@ function TranscriptionFilter() {
                   <Button
                      variant="outline"
                      data-testid="actions-dropdown-btn"
-                     className=" capitalize"
+                     className=" capitalize w-31"
                   >
                      {status}
                   </Button>
@@ -31,14 +36,17 @@ function TranscriptionFilter() {
             />
             <DropdownMenuContent>
                <DropdownMenuGroup>
-                  <DropdownMenuItem onClick={() => setStatus('all documents')}>
+                  <DropdownMenuItem
+                     onClick={() => onSetStatus('all documents')}
+                  >
                      All Documents
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setStatus('transcribed')}>
+                  <DropdownMenuItem onClick={() => onSetStatus('transcribed')}>
                      Transcribed
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                     onClick={() => setStatus('not transcribed')}
+                     onClick={() => onSetStatus('not transcribed')}
+                     className="w-max"
                   >
                      Not Transcribed
                   </DropdownMenuItem>
