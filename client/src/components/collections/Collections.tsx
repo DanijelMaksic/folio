@@ -1,3 +1,5 @@
+import { useSearchParams } from 'react-router-dom';
+import AppPagination from '@/components/shared/AppPagination';
 import { trpc } from '@/lib/trpc';
 import { useNavigate } from 'react-router-dom';
 import { Collection, isContributor } from '@shared';
@@ -12,14 +14,34 @@ import SearchBar from '@/components/shared/SearchBar';
 
 export default function Collections() {
    const navigate = useNavigate();
+   const [searchParams, setSearchParams] = useSearchParams();
    const { data: session } = useSession();
    const user = session?.user;
    const canTranscribe = isContributor(user?.globalRole);
    const [search, setSearch] = useState('');
    const [debouncedSearch, setDebouncedSearch] = useState('');
 
-   const { data: collections, isLoading } = trpc.collections.list.useQuery({
-      page: 1,
+   const rawPage = Number(searchParams.get('page')) || 1;
+   const page = rawPage > 0 ? rawPage : 1;
+
+   const handlePageChange = (newPage: number) => {
+      setSearchParams((prev) => {
+         const next = new URLSearchParams(prev);
+         next.set('page', String(newPage));
+         return next;
+      });
+   };
+
+   useEffect(() => {
+      setSearchParams((prev) => {
+         const next = new URLSearchParams(prev);
+         next.set('page', '1');
+         return next;
+      });
+   }, [debouncedSearch]);
+
+   const { data, isLoading } = trpc.collections.list.useQuery({
+      page,
       limit: 20,
    });
 
@@ -29,18 +51,19 @@ export default function Collections() {
    }, [search]);
 
    const { data: searchResults } = trpc.collections.search.useQuery(
-      {
-         query: debouncedSearch,
-      },
+      { query: debouncedSearch },
       {
          enabled: debouncedSearch.length > 0,
-         placeholderData: (prev: Document) => prev,
+         placeholderData: (prev: Collection) => prev,
          staleTime: 1000,
       },
    );
 
    const isSearchActive = debouncedSearch.length > 0;
-   const displayedCollections = isSearchActive ? searchResults : collections;
+   const displayedCollections = isSearchActive
+      ? searchResults
+      : data?.collections;
+   const totalPages = data?.totalPages ?? 1;
 
    if (isLoading) return <p>Loading...</p>;
 
@@ -81,6 +104,14 @@ export default function Collections() {
                   <CollectionCard collection={collection} key={collection.id} />
                ))}
             </div>
+         )}
+
+         {!isSearchActive && (
+            <AppPagination
+               currentPage={page}
+               totalPages={totalPages}
+               onPageChange={handlePageChange}
+            />
          )}
       </div>
    );

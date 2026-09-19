@@ -11,7 +11,7 @@ import {
    updateCollectionSchema,
 } from '@folio/shared';
 import { TRPCError } from '@trpc/server';
-import { desc, eq, ilike, sql } from 'drizzle-orm';
+import { count, desc, eq, ilike, sql } from 'drizzle-orm';
 import z from 'zod';
 
 export const collectionsRouter = router({
@@ -42,27 +42,35 @@ export const collectionsRouter = router({
       .query(async ({ ctx, input }) => {
          const offset = (input.page - 1) * input.limit;
 
-         const results = await db
-            .select({
-               id: collections.id,
-               title: collections.title,
-               description: collections.description,
-               createdBy: collections.createdBy,
-               creatorName: user.name,
-               coverImageUrl: sql<string | null>`(
-                  SELECT cloudinary_url FROM documents
-                  WHERE collection_id = ${collections.id}
-                  ORDER BY created_at ASC
-                  LIMIT 1
-                   )`,
-            })
-            .from(collections)
-            .innerJoin(user, eq(user.id, collections.createdBy))
-            .limit(input.limit)
-            .offset(offset)
-            .orderBy(desc(collections.createdAt));
+         const [results, [{ total }]] = await Promise.all([
+            db
+               .select({
+                  id: collections.id,
+                  title: collections.title,
+                  description: collections.description,
+                  createdBy: collections.createdBy,
+                  creatorName: user.name,
+                  coverImageUrl: sql<string | null>`(
+                        SELECT cloudinary_url FROM documents
+                        WHERE collection_id = ${collections.id}
+                        ORDER BY created_at ASC
+                        LIMIT 1
+                    )`,
+               })
+               .from(collections)
+               .innerJoin(user, eq(user.id, collections.createdBy))
+               .limit(input.limit)
+               .offset(offset)
+               .orderBy(desc(collections.createdAt)),
 
-         return results;
+            db.select({ total: count() }).from(collections),
+         ]);
+
+         return {
+            collections: results,
+            totalCount: Number(total),
+            totalPages: Math.ceil(Number(total) / input.limit),
+         };
       }),
 
    getById: publicProcedure

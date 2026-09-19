@@ -271,7 +271,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 ## Sprint 5 — Collections
 
-**Goal:**A logged-in contributor can create a collection.
+**Goal:** A logged-in contributor can create a collection.
 
 **Completed:**
 
@@ -350,3 +350,15 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 - OTP cannot be tested end-to-end in Vitest since valid codes require intercepting Resend delivery, so only rejection paths are covered
 
 - Review queue has no navigation link — deferred to Sprint 6
+
+## Sprint 6 — PDF pipeline
+
+**Goal:**
+
+**Completed:**
+
+**Decisions:**
+
+**Issues resolved:**
+
+**Known issues carried forward:**

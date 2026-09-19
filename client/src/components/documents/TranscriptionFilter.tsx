@@ -6,12 +6,11 @@ import {
    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { Dispatch, SetStateAction } from 'react';
-import { statusType } from '@/pages/Documents';
+import { StatusType } from '@/pages/Documents';
 
 interface TranscriptionFilterProps {
-   onSetStatus: Dispatch<SetStateAction<statusType>>;
-   status: statusType;
+   onSetStatus: (status: StatusType) => void;
+   status: StatusType;
 }
 
 function TranscriptionFilter({
@@ -30,7 +29,7 @@ function TranscriptionFilter({
                      data-testid="actions-dropdown-btn"
                      className=" capitalize w-31"
                   >
-                     {status}
+                     {status === 'not-transcribed' ? 'not transcribed' : status}
                   </Button>
                }
             />
@@ -45,7 +44,7 @@ function TranscriptionFilter({
                      Transcribed
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                     onClick={() => onSetStatus('not transcribed')}
+                     onClick={() => onSetStatus('not-transcribed')}
                      className="w-max"
                   >
                      Not Transcribed

@@ -1,5 +1,5 @@
 import { trpc } from '@/lib/trpc';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Document, isContributor } from '@shared';
 import { Button } from '@/components/ui/button';
 import { useSession } from '@/lib/auth-client';
@@ -8,27 +8,74 @@ import { Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import SearchBar from '@/components/shared/SearchBar';
 import TranscriptionFilter from '@/components/documents/TranscriptionFilter';
+import AppPagination from '@/components/shared/AppPagination';
 
-export type statusType = 'all documents' | 'transcribed' | 'not transcribed';
+export type StatusType = 'all documents' | 'transcribed' | 'not-transcribed';
+
+const VALID_STATUSES: StatusType[] = [
+   'all documents',
+   'transcribed',
+   'not-transcribed',
+];
 
 export default function Documents() {
    const navigate = useNavigate();
+   const [searchParams, setSearchParams] = useSearchParams();
    const { data: session } = useSession();
    const user = session?.user;
    const canTranscribe = isContributor(user?.globalRole);
    const [search, setSearch] = useState('');
    const [debouncedSearch, setDebouncedSearch] = useState('');
-   const [status, setStatus] = useState<statusType>('all documents');
 
-   const { data: documents, isLoading } = trpc.documents.list.useQuery({
-      page: 1,
-      limit: 20,
-   });
+   const rawStatus = searchParams.get('status') as StatusType | null;
+   const status: StatusType =
+      rawStatus && VALID_STATUSES.includes(rawStatus)
+         ? rawStatus
+         : 'all documents';
+
+   const rawPage = Number(searchParams.get('page')) || 1;
+   const page = rawPage > 0 ? rawPage : 1;
+
+   const handlePageChange = (newPage: number) => {
+      setSearchParams((prev) => {
+         const next = new URLSearchParams(prev);
+         next.set('page', String(newPage));
+         return next;
+      });
+   };
+
+   const handleSetStatus = (newStatus: StatusType) => {
+      setSearchParams((prev) => {
+         const next = new URLSearchParams(prev);
+         if (newStatus === 'all documents') {
+            next.delete('status');
+         } else {
+            next.set('status', newStatus);
+         }
+         return next;
+      });
+   };
+
+   // Reset to page 1 when filter or search changes
+   useEffect(() => {
+      setSearchParams((prev) => {
+         const next = new URLSearchParams(prev);
+         next.set('page', '1');
+         return next;
+      });
+   }, [status, debouncedSearch]);
 
    useEffect(() => {
       const t = setTimeout(() => setDebouncedSearch(search), 500);
       return () => clearTimeout(t);
    }, [search]);
+
+   const { data, isLoading } = trpc.documents.list.useQuery({
+      page,
+      limit: 20,
+      status,
+      // search: debouncedSearch,
+   });
 
    const { data: searchResults } = trpc.documents.search.useQuery(
       {
@@ -41,12 +88,16 @@ export default function Documents() {
       },
    );
 
+   // data is now { documents, totalCount, totalPages }
+   const documents = data?.documents;
+   const totalPages = data?.totalPages ?? 1;
+
    const isSearchActive = debouncedSearch.length > 0;
    const displayedDocuments = isSearchActive ? searchResults : documents;
 
    const filteredDocuments = displayedDocuments?.filter((doc: Document) => {
       if (status === 'transcribed') return doc.hasApprovedTranscription;
-      if (status === 'not transcribed') return !doc.hasApprovedTranscription;
+      if (status === 'not-transcribed') return !doc.hasApprovedTranscription;
       return true; // all
    });
 
@@ -63,7 +114,10 @@ export default function Documents() {
                onChange={setSearch}
             />
 
-            <TranscriptionFilter onSetStatus={setStatus} status={status} />
+            <TranscriptionFilter
+               onSetStatus={handleSetStatus}
+               status={status}
+            />
 
             {canTranscribe ? (
                <Button onClick={() => navigate('/documents/upload')}>
@@ -90,6 +144,12 @@ export default function Documents() {
                ))}
             </div>
          )}
+
+         <AppPagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+         />
       </div>
    );
 }

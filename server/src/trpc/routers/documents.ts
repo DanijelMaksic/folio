@@ -12,6 +12,7 @@ import {
 } from '@folio/shared';
 import { isContributor } from '@folio/shared';
 import { db } from '@/db/index.js';
+import { count } from 'drizzle-orm';
 
 export const documentsRouter = router({
    upload: protectedProcedure
@@ -48,30 +49,38 @@ export const documentsRouter = router({
       .query(async ({ ctx, input }) => {
          const offset = (input.page - 1) * input.limit;
 
-         const results = await db
-            .select({
-               id: documents.id,
-               title: documents.title,
-               status: documents.status,
-               cloudinaryUrl: documents.cloudinaryUrl,
-               uploaderName: user.name,
-               createdAt: documents.createdAt,
-               hasApprovedTranscription: isNotNull(transcriptions.id),
-            })
-            .from(documents)
-            .innerJoin(user, eq(user.id, documents.uploadedBy))
-            .leftJoin(
-               transcriptions,
-               and(
-                  eq(transcriptions.documentId, documents.id),
-                  eq(transcriptions.status, 'approved'),
-               ),
-            )
-            .limit(input.limit)
-            .offset(offset)
-            .orderBy(desc(documents.createdAt));
+         const [results, [{ total }]] = await Promise.all([
+            db
+               .select({
+                  id: documents.id,
+                  title: documents.title,
+                  status: documents.status,
+                  cloudinaryUrl: documents.cloudinaryUrl,
+                  uploaderName: user.name,
+                  createdAt: documents.createdAt,
+                  hasApprovedTranscription: isNotNull(transcriptions.id),
+               })
+               .from(documents)
+               .innerJoin(user, eq(user.id, documents.uploadedBy))
+               .leftJoin(
+                  transcriptions,
+                  and(
+                     eq(transcriptions.documentId, documents.id),
+                     eq(transcriptions.status, 'approved'),
+                  ),
+               )
+               .limit(input.limit)
+               .offset(offset)
+               .orderBy(desc(documents.createdAt)),
 
-         return results;
+            db.select({ total: count() }).from(documents),
+         ]);
+
+         return {
+            documents: results,
+            totalCount: Number(total),
+            totalPages: Math.ceil(Number(total) / input.limit),
+         };
       }),
 
    getByCollection: publicProcedure
