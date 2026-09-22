@@ -111,7 +111,6 @@ describe('documents.upload', () => {
 });
 
 // ── list ───────────────────────
-
 describe('documents.list', () => {
    it('returns a list of documents', async () => {
       const mockResults = [
@@ -126,13 +125,16 @@ describe('documents.list', () => {
          },
       ];
 
+      // First select: paginated results
       mockSelect.mockReturnValueOnce({
          from: vi.fn(() => ({
             innerJoin: vi.fn(() => ({
                leftJoin: vi.fn(() => ({
-                  limit: vi.fn(() => ({
-                     offset: vi.fn(() => ({
-                        orderBy: vi.fn().mockResolvedValueOnce(mockResults),
+                  where: vi.fn(() => ({
+                     limit: vi.fn(() => ({
+                        offset: vi.fn(() => ({
+                           orderBy: vi.fn().mockResolvedValueOnce(mockResults),
+                        })),
                      })),
                   })),
                })),
@@ -140,11 +142,22 @@ describe('documents.list', () => {
          })),
       });
 
+      // Second select: count query
+      mockSelect.mockReturnValueOnce({
+         from: vi.fn(() => ({
+            leftJoin: vi.fn(() => ({
+               where: vi.fn().mockResolvedValueOnce([{ total: 1 }]),
+            })),
+         })),
+      });
+
       const caller = createUnauthenticatedCaller();
       const result = await caller.documents.list({ page: 1, limit: 20 });
 
-      expect(result).toHaveLength(1);
-      expect(result[0]).toMatchObject({ title: 'Test Document' });
+      expect(result.documents).toHaveLength(1);
+      expect(result.documents[0]).toMatchObject({ title: 'Test Document' });
+      expect(result.totalCount).toBe(1);
+      expect(result.totalPages).toBe(1);
    });
 });
 

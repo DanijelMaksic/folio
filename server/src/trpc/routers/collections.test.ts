@@ -93,7 +93,6 @@ describe('collections.create', () => {
 });
 
 // ── list ───────────────────────
-
 describe('collections.list', () => {
    it('returns a list of collections', async () => {
       const mockResults = [
@@ -107,23 +106,35 @@ describe('collections.list', () => {
          },
       ];
 
+      // First select: paginated results
       mockSelect.mockReturnValueOnce({
          from: vi.fn(() => ({
             innerJoin: vi.fn(() => ({
-               limit: vi.fn(() => ({
-                  offset: vi.fn(() => ({
-                     orderBy: vi.fn().mockResolvedValueOnce(mockResults),
+               where: vi.fn(() => ({
+                  limit: vi.fn(() => ({
+                     offset: vi.fn(() => ({
+                        orderBy: vi.fn().mockResolvedValueOnce(mockResults),
+                     })),
                   })),
                })),
             })),
          })),
       });
 
+      // Second select: count query
+      mockSelect.mockReturnValueOnce({
+         from: vi.fn(() => ({
+            where: vi.fn().mockResolvedValueOnce([{ total: 1 }]),
+         })),
+      });
+
       const caller = createUnauthenticatedCaller();
       const result = await caller.collections.list({ page: 1, limit: 20 });
 
-      expect(result).toHaveLength(1);
-      expect(result[0]).toMatchObject({ title: 'Test Collection' });
+      expect(result.collections).toHaveLength(1);
+      expect(result.collections[0]).toMatchObject({ title: 'Test Collection' });
+      expect(result.totalCount).toBe(1);
+      expect(result.totalPages).toBe(1);
    });
 });
 
@@ -290,52 +301,5 @@ describe('collections.delete', () => {
       await expect(
          caller.collections.delete({ id: 'col-1' }),
       ).rejects.toMatchObject({ code: 'UNAUTHORIZED' });
-   });
-});
-
-// ── search ───────────────────────
-
-describe('collections.search', () => {
-   it('returns matching collections', async () => {
-      const mockResults = [
-         {
-            ...mockCollection,
-            creatorName: 'testUser',
-            coverImageUrl: null,
-         },
-      ];
-
-      mockSelect.mockReturnValueOnce({
-         from: vi.fn(() => ({
-            leftJoin: vi.fn(() => ({
-               where: vi.fn(() => ({
-                  limit: vi.fn().mockResolvedValueOnce(mockResults),
-               })),
-            })),
-         })),
-      });
-
-      const caller = createUnauthenticatedCaller();
-      const result = await caller.collections.search({ query: 'Test' });
-
-      expect(result).toHaveLength(1);
-      expect(result[0]).toMatchObject({ title: 'Test Collection' });
-   });
-
-   it('returns empty array when no collections match', async () => {
-      mockSelect.mockReturnValueOnce({
-         from: vi.fn(() => ({
-            leftJoin: vi.fn(() => ({
-               where: vi.fn(() => ({
-                  limit: vi.fn().mockResolvedValueOnce([]),
-               })),
-            })),
-         })),
-      });
-
-      const caller = createUnauthenticatedCaller();
-      const result = await caller.collections.search({ query: 'nonexistent' });
-
-      expect(result).toHaveLength(0);
    });
 });
