@@ -14,6 +14,7 @@ export const createCollectionSchema = z.object({
 export const listCollectionsSchema = z.object({
    page: z.number().int().min(1).default(1),
    limit: z.number().int().min(1).max(100).default(20),
+   search: z.string().optional(),
 });
 
 export const listMyCollectionsSchema = listCollectionsSchema.extend({
@@ -28,10 +29,6 @@ export const collectionSchema = z.object({
    createdAt: z.date(),
    creatorName: z.string(),
    coverImageUrl: z.string().nullable().optional(),
-});
-
-export const searchCollectionsSchema = z.object({
-   query: z.string().max(200),
 });
 
 export const updateCollectionSchema = createCollectionSchema

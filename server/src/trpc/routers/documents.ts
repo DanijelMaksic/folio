@@ -1,12 +1,11 @@
 import { z } from 'zod';
 import { protectedProcedure, publicProcedure, router } from '@/trpc/trpc.js';
 import { documents, transcriptions, user } from '@/db/schema/index.js';
-import { and, desc, eq, ilike, isNotNull, sql } from 'drizzle-orm';
+import { and, desc, eq, ilike, isNotNull, isNull, sql } from 'drizzle-orm';
 import cloudinary from '@/lib/cloudinary.js';
 import { TRPCError } from '@trpc/server';
 import {
    listDocumentsSchema,
-   searchDocumentsSchema,
    updateDocumentSchema,
    uploadDocumentSchema,
 } from '@folio/shared';
@@ -49,6 +48,18 @@ export const documentsRouter = router({
       .query(async ({ ctx, input }) => {
          const offset = (input.page - 1) * input.limit;
 
+         const where = and(
+            input.search
+               ? ilike(documents.title, `%${input.search}%`)
+               : undefined,
+            input.status === 'transcribed'
+               ? isNotNull(transcriptions.id)
+               : undefined,
+            input.status === 'not-transcribed'
+               ? isNull(transcriptions.id)
+               : undefined,
+         );
+
          const [results, [{ total }]] = await Promise.all([
             db
                .select({
@@ -69,11 +80,22 @@ export const documentsRouter = router({
                      eq(transcriptions.status, 'approved'),
                   ),
                )
+               .where(where)
                .limit(input.limit)
                .offset(offset)
                .orderBy(desc(documents.createdAt)),
 
-            db.select({ total: count() }).from(documents),
+            db
+               .select({ total: count() })
+               .from(documents)
+               .leftJoin(
+                  transcriptions,
+                  and(
+                     eq(transcriptions.documentId, documents.id),
+                     eq(transcriptions.status, 'approved'),
+                  ),
+               )
+               .where(where),
          ]);
 
          return {
@@ -157,37 +179,5 @@ export const documentsRouter = router({
             throw new TRPCError({ code: 'NOT_FOUND' });
          }
          return doc;
-      }),
-
-   search: publicProcedure
-      .input(searchDocumentsSchema)
-      .query(async ({ ctx, input }) => {
-         const results = await db
-            .select({
-               id: documents.id,
-               title: documents.title,
-               description: documents.description,
-               uploadedBy: documents.uploadedBy,
-               uploaderName: user.username,
-               collectionId: documents.collectionId,
-               cloudinaryUrl: documents.cloudinaryUrl,
-               cloudinaryPublicId: documents.cloudinaryPublicId,
-               status: documents.status,
-               createdAt: documents.createdAt,
-               updatedAt: documents.updatedAt,
-            })
-            .from(documents)
-            .leftJoin(user, eq(documents.uploadedBy, user.id))
-            .where(
-               and(
-                  ilike(documents.title, `%${input.query}%`),
-                  input.collectionId
-                     ? eq(documents.collectionId, input.collectionId)
-                     : undefined,
-               ),
-            )
-            .limit(20);
-
-         return results;
       }),
 });

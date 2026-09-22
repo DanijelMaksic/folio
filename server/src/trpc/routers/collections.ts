@@ -7,7 +7,6 @@ import {
    isContributor,
    listCollectionsSchema,
    listMyCollectionsSchema,
-   searchCollectionsSchema,
    updateCollectionSchema,
 } from '@folio/shared';
 import { TRPCError } from '@trpc/server';
@@ -41,6 +40,9 @@ export const collectionsRouter = router({
       .input(listCollectionsSchema)
       .query(async ({ ctx, input }) => {
          const offset = (input.page - 1) * input.limit;
+         const where = input.search
+            ? ilike(collections.title, `%${input.search}%`)
+            : undefined;
 
          const [results, [{ total }]] = await Promise.all([
             db
@@ -59,11 +61,12 @@ export const collectionsRouter = router({
                })
                .from(collections)
                .innerJoin(user, eq(user.id, collections.createdBy))
+               .where(where)
                .limit(input.limit)
                .offset(offset)
                .orderBy(desc(collections.createdAt)),
 
-            db.select({ total: count() }).from(collections),
+            db.select({ total: count() }).from(collections).where(where),
          ]);
 
          return {
@@ -153,31 +156,5 @@ export const collectionsRouter = router({
          }
 
          return deleted;
-      }),
-
-   search: publicProcedure
-      .input(searchCollectionsSchema)
-      .query(async ({ ctx, input }) => {
-         const results = await db
-            .select({
-               id: collections.id,
-               title: collections.title,
-               description: collections.description,
-               createdBy: collections.createdBy,
-               createdAt: collections.createdAt,
-               creatorName: user.username,
-               coverImageUrl: sql<string | null>`(
-                  SELECT cloudinary_url FROM documents
-                  WHERE collection_id = ${collections.id}
-                  ORDER BY created_at ASC
-                  LIMIT 1
-                   )`,
-            })
-            .from(collections)
-            .leftJoin(user, eq(collections.createdBy, user.id))
-            .where(ilike(collections.title, `%${input.query}%`))
-            .limit(20);
-
-         return results;
       }),
 });

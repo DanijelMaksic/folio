@@ -6,9 +6,7 @@ import { Collection, isContributor } from '@shared';
 import { Button } from '@/components/ui/button';
 import { useSession } from '@/lib/auth-client';
 import { CollectionCard } from '@/components/collections/CollectionCard';
-import { Input } from '@/components/ui/input';
-import { Plus, SearchIcon } from 'lucide-react';
-import { ButtonGroup } from '@/components/ui/button-group';
+import { Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import SearchBar from '@/components/shared/SearchBar';
 
@@ -18,11 +16,10 @@ export default function Collections() {
    const { data: session } = useSession();
    const user = session?.user;
    const canTranscribe = isContributor(user?.globalRole);
-   const [search, setSearch] = useState('');
-   const [debouncedSearch, setDebouncedSearch] = useState('');
 
-   const rawPage = Number(searchParams.get('page')) || 1;
-   const page = rawPage > 0 ? rawPage : 1;
+   const page = Math.max(Number(searchParams.get('page')) || 1, 1);
+   const search = searchParams.get('search') ?? '';
+   const [inputValue, setInputValue] = useState(search);
 
    const handlePageChange = (newPage: number) => {
       setSearchParams((prev) => {
@@ -32,40 +29,40 @@ export default function Collections() {
       });
    };
 
+   // Debounce writes to URL
    useEffect(() => {
-      setSearchParams((prev) => {
-         const next = new URLSearchParams(prev);
-         next.set('page', '1');
-         return next;
-      });
-   }, [debouncedSearch]);
-
-   const { data, isLoading } = trpc.collections.list.useQuery({
-      page,
-      limit: 20,
-   });
-
-   useEffect(() => {
-      const t = setTimeout(() => setDebouncedSearch(search), 300);
+      const t = setTimeout(() => {
+         setSearchParams(
+            (prev) => {
+               const next = new URLSearchParams(prev);
+               if (inputValue) {
+                  next.set('search', inputValue);
+               } else {
+                  next.delete('search');
+               }
+               next.set('page', '1');
+               return next;
+            },
+            { replace: true },
+         );
+      }, 300);
       return () => clearTimeout(t);
-   }, [search]);
+   }, [inputValue]);
 
-   const { data: searchResults } = trpc.collections.search.useQuery(
-      { query: debouncedSearch },
+   const { data, isLoading } = trpc.collections.list.useQuery(
       {
-         enabled: debouncedSearch.length > 0,
+         page,
+         limit: 20,
+         search: search || undefined,
+      },
+      {
          placeholderData: (prev: Collection) => prev,
          staleTime: 1000,
       },
    );
 
-   const isSearchActive = debouncedSearch.length > 0;
-   const displayedCollections = isSearchActive
-      ? searchResults
-      : data?.collections;
-   const totalPages = data?.totalPages ?? 1;
-
-   if (isLoading) return <p>Loading...</p>;
+   const collections = data?.collections ?? [];
+   const totalPages = data?.pages ?? 1;
 
    return (
       <div className="max-w-4xl mx-auto p-6">
@@ -74,8 +71,8 @@ export default function Collections() {
 
             <SearchBar
                placeholder="Search collections..."
-               value={search}
-               onChange={setSearch}
+               value={inputValue}
+               onChange={setInputValue}
             />
 
             <span></span>
@@ -92,27 +89,25 @@ export default function Collections() {
             )}
          </div>
 
-         {!displayedCollections?.length ? (
+         {isLoading ? (
+            <p>Loading...</p>
+         ) : !collections.length ? (
             <p className="text-muted-foreground">
-               {isSearchActive
-                  ? 'No collections found.'
-                  : 'No collections yet.'}
+               {search ? 'No collections found.' : 'No collections yet.'}
             </p>
          ) : (
             <div className="grid grid-cols-3 gap-4 transition-opacity duration-150">
-               {displayedCollections.map((collection: Collection) => (
+               {collections.map((collection: Collection) => (
                   <CollectionCard collection={collection} key={collection.id} />
                ))}
             </div>
          )}
 
-         {!isSearchActive && (
-            <AppPagination
-               currentPage={page}
-               totalPages={totalPages}
-               onPageChange={handlePageChange}
-            />
-         )}
+         <AppPagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+         />
       </div>
    );
 }

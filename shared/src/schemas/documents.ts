@@ -15,11 +15,10 @@ export const uploadDocumentSchema = z.object({
 export const listDocumentsSchema = z.object({
    page: z.number().int().min(1).default(1),
    limit: z.number().int().min(1).max(100).default(20),
-});
-
-export const searchDocumentsSchema = z.object({
-   query: z.string().max(200),
-   collectionId: z.string().nullable().optional(),
+   search: z.string().optional(),
+   status: z
+      .enum(['all-documents', 'transcribed', 'not-transcribed'])
+      .optional(),
 });
 
 export const documentSchema = z.object({

@@ -10,10 +10,10 @@ import SearchBar from '@/components/shared/SearchBar';
 import TranscriptionFilter from '@/components/documents/TranscriptionFilter';
 import AppPagination from '@/components/shared/AppPagination';
 
-export type StatusType = 'all documents' | 'transcribed' | 'not-transcribed';
+export type StatusType = 'all-documents' | 'transcribed' | 'not-transcribed';
 
 const VALID_STATUSES: StatusType[] = [
-   'all documents',
+   'all-documents',
    'transcribed',
    'not-transcribed',
 ];
@@ -24,17 +24,16 @@ export default function Documents() {
    const { data: session } = useSession();
    const user = session?.user;
    const canTranscribe = isContributor(user?.globalRole);
-   const [search, setSearch] = useState('');
-   const [debouncedSearch, setDebouncedSearch] = useState('');
+
+   const page = Math.max(Number(searchParams.get('page')) || 1, 1);
+   const search = searchParams.get('search') ?? '';
+   const [inputValue, setInputValue] = useState(search);
 
    const rawStatus = searchParams.get('status') as StatusType | null;
    const status: StatusType =
       rawStatus && VALID_STATUSES.includes(rawStatus)
          ? rawStatus
-         : 'all documents';
-
-   const rawPage = Number(searchParams.get('page')) || 1;
-   const page = rawPage > 0 ? rawPage : 1;
+         : 'all-documents';
 
    const handlePageChange = (newPage: number) => {
       setSearchParams((prev) => {
@@ -47,61 +46,50 @@ export default function Documents() {
    const handleSetStatus = (newStatus: StatusType) => {
       setSearchParams((prev) => {
          const next = new URLSearchParams(prev);
-         if (newStatus === 'all documents') {
+         if (newStatus === 'all-documents') {
             next.delete('status');
          } else {
             next.set('status', newStatus);
          }
+         next.set('page', '1');
          return next;
       });
    };
 
-   // Reset to page 1 when filter or search changes
    useEffect(() => {
-      setSearchParams((prev) => {
-         const next = new URLSearchParams(prev);
-         next.set('page', '1');
-         return next;
-      });
-   }, [status, debouncedSearch]);
-
-   useEffect(() => {
-      const t = setTimeout(() => setDebouncedSearch(search), 500);
+      const t = setTimeout(() => {
+         setSearchParams(
+            (prev) => {
+               const next = new URLSearchParams(prev);
+               if (inputValue) {
+                  next.set('search', inputValue);
+               } else {
+                  next.delete('search');
+               }
+               next.set('page', '1');
+               return next;
+            },
+            { replace: true },
+         );
+      }, 300);
       return () => clearTimeout(t);
-   }, [search]);
+   }, [inputValue]);
 
-   const { data, isLoading } = trpc.documents.list.useQuery({
-      page,
-      limit: 20,
-      status,
-      // search: debouncedSearch,
-   });
-
-   const { data: searchResults } = trpc.documents.search.useQuery(
+   const { data, isLoading } = trpc.documents.list.useQuery(
       {
-         query: debouncedSearch,
+         page,
+         limit: 20,
+         status,
+         search: search || undefined,
       },
       {
-         enabled: debouncedSearch.length > 0,
          placeholderData: (prev: Document) => prev,
          staleTime: 1000,
       },
    );
 
-   // data is now { documents, totalCount, totalPages }
-   const documents = data?.documents;
+   const documents = data?.documents ?? [];
    const totalPages = data?.totalPages ?? 1;
-
-   const isSearchActive = debouncedSearch.length > 0;
-   const displayedDocuments = isSearchActive ? searchResults : documents;
-
-   const filteredDocuments = displayedDocuments?.filter((doc: Document) => {
-      if (status === 'transcribed') return doc.hasApprovedTranscription;
-      if (status === 'not-transcribed') return !doc.hasApprovedTranscription;
-      return true; // all
-   });
-
-   if (isLoading) return <p>Loading...</p>;
 
    return (
       <div className="max-w-4xl mx-auto p-6">
@@ -110,8 +98,8 @@ export default function Documents() {
 
             <SearchBar
                placeholder="Search documents..."
-               value={search}
-               onChange={setSearch}
+               value={inputValue}
+               onChange={setInputValue}
             />
 
             <TranscriptionFilter
@@ -131,15 +119,17 @@ export default function Documents() {
             )}
          </div>
 
-         {!filteredDocuments?.length ? (
+         {isLoading ? (
+            <p>Loading...</p>
+         ) : !documents.length ? (
             <p className="text-muted-foreground">
-               {isSearchActive
+               {search
                   ? 'No results found for your search.'
                   : 'No documents found.'}
             </p>
          ) : (
             <div className="grid grid-cols-3 gap-4 transition-opacity duration-150">
-               {filteredDocuments.map((doc: Document) => (
+               {documents.map((doc: Document) => (
                   <DocumentCard doc={doc} key={doc.id} />
                ))}
             </div>
