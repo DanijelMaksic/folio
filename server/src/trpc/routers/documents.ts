@@ -6,6 +6,7 @@ import cloudinary from '@/lib/cloudinary.js';
 import { TRPCError } from '@trpc/server';
 import {
    listDocumentsSchema,
+   searchDocumentsSchema,
    updateDocumentSchema,
    uploadDocumentSchema,
 } from '@folio/shared';
@@ -179,5 +180,37 @@ export const documentsRouter = router({
             throw new TRPCError({ code: 'NOT_FOUND' });
          }
          return doc;
+      }),
+
+   search: publicProcedure
+      .input(searchDocumentsSchema)
+      .query(async ({ ctx, input }) => {
+         const results = await db
+            .select({
+               id: documents.id,
+               title: documents.title,
+               description: documents.description,
+               uploadedBy: documents.uploadedBy,
+               uploaderName: user.username,
+               collectionId: documents.collectionId,
+               cloudinaryUrl: documents.cloudinaryUrl,
+               cloudinaryPublicId: documents.cloudinaryPublicId,
+               status: documents.status,
+               createdAt: documents.createdAt,
+               updatedAt: documents.updatedAt,
+            })
+            .from(documents)
+            .leftJoin(user, eq(documents.uploadedBy, user.id))
+            .where(
+               and(
+                  ilike(documents.title, `%${input.query}%`),
+                  input.collectionId
+                     ? eq(documents.collectionId, input.collectionId)
+                     : undefined,
+               ),
+            )
+            .limit(20);
+
+         return results;
       }),
 });

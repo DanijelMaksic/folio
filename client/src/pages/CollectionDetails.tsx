@@ -1,21 +1,11 @@
 import { DocumentCard } from '@/components/documents/DocumentCard';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { useSession } from '@/lib/auth-client';
 import { trpc } from '@/lib/trpc';
 import { AppRouter } from '@server/trpc/router';
 import { Document, isContributor, isEditor } from '@shared';
 import { TRPCClientError } from '@trpc/client';
-import { EllipsisVertical } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import {
-   DropdownMenu,
-   DropdownMenuContent,
-   DropdownMenuGroup,
-   DropdownMenuItem,
-   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import SearchBar from '@/components/shared/SearchBar';
 import DeleteModal from '@/components/shared/DeleteModal';
 import EditModal from '@/components/shared/EditModal';
@@ -45,7 +35,7 @@ function CollectionDetails() {
       return () => clearTimeout(t);
    }, [search]);
 
-   const { data: collection, isLoadingCollection } =
+   const { data: collection, isLoading: isLoadingCollection } =
       trpc.collections.getById.useQuery({
          id: id!,
       });

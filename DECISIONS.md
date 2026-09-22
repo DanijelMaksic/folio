@@ -357,7 +357,11 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 **Completed:**
 
+- Moved search from local state to URL; removed the separate search procedure as the search is now part of the list query
+
 **Decisions:**
+
+- Move search state from local state to URL, resulting in less and more readable code
 
 **Issues resolved:**
 
