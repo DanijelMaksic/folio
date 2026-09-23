@@ -11,6 +11,7 @@ import DeleteModal from '@/components/shared/DeleteModal';
 import EditModal from '@/components/shared/EditModal';
 import ActionsMenu from '@/components/shared/ActionsMenu';
 import CollectionPickerModal from '@/components/documents/CollectionPickerModal';
+import { useViewerStore } from '@/store/useViewerStore';
 
 export default function DocumentDetails() {
    const [editError, setEditError] = useState('');
@@ -21,6 +22,7 @@ export default function DocumentDetails() {
    const [isCollectionOpen, setIsCollectionOpen] = useState(false);
    const [editTitle, setEditTitle] = useState('');
    const [editDescription, setEditDescription] = useState('');
+   const { resetViewerState } = useViewerStore();
 
    const { id } = useParams<{ id: string }>();
    const { data: session } = useSession();
@@ -42,11 +44,14 @@ export default function DocumentDetails() {
    const inCollection = !!document?.collectionId;
 
    const { data: collections, isLoading: isLoadingCollections } =
-      trpc.collections.getCurrentUserCollections.useQuery({
-         page: 1,
-         limit: 9,
-         userId: user?.id,
-      });
+      trpc.collections.getCurrentUserCollections.useQuery(
+         {
+            page: 1,
+            limit: 9,
+            userId: user?.id,
+         },
+         { enabled: !!user },
+      );
 
    const isMyDocument = document?.uploadedBy === user?.id;
 
@@ -65,6 +70,7 @@ export default function DocumentDetails() {
          navigate('/documents', { replace: true });
       },
       onError: (err: TRPCClientError<AppRouter>) => {
+         resetViewerState(document.id);
          setDeleteError(err.message);
       },
    });

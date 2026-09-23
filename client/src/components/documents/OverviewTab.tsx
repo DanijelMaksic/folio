@@ -10,7 +10,7 @@ function OverviewTab() {
    const { data: session } = useSession();
    const user = session?.user;
 
-   const { data: doc } = trpc.documents.getById.useQuery({
+   const { data: document } = trpc.documents.getById.useQuery({
       id: id!,
    });
 
@@ -25,7 +25,7 @@ function OverviewTab() {
 
    return (
       <div className="grid grid-cols-2 gap-4">
-         <DocumentViewer doc={doc} />
+         <DocumentViewer document={document} />
 
          {approvedTranscription ? (
             <div className="space-y-3 border rounded-md p-4">
@@ -42,11 +42,11 @@ function OverviewTab() {
             <TranscriptionPlaceholder type={placeholderType} />
          )}
 
-         {doc.description && (
+         {document.description && (
             <div className="flex flex-col gap-2 my-6">
                <h2 className="text-xl font-bold">Description</h2>
                <p className="text-muted-foreground text-md">
-                  {doc.description}
+                  {document.description}
                </p>
             </div>
          )}
