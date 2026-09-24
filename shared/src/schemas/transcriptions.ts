@@ -3,7 +3,7 @@ import type { User } from './auth.js';
 
 export const transcriptionSchema = z.object({
    id: z.string(),
-   documentId: z.string(),
+   pageId: z.string(),
    userId: z.string(),
    content: z.string(),
    status: z.enum(['draft', 'submitted', 'approved', 'rejected']),
@@ -28,23 +28,6 @@ export const transcriptionRevisionSchema = z.object({
    savedAt: z.date(),
 });
 
-// Use this schema only if you want to combine approve and reject into one modal on Front-End
-// export const reviewTranscriptionSchema = z
-//    .object({
-//       id: z.string(),
-//       decision: z.enum(['approved', 'rejected']),
-//       reason: z.string().min(1, 'Rejection reason is required'),
-//    })
-//    .refine(
-//       (val) =>
-//          val.decision !== 'rejected' ||
-//          (val.reason !== undefined && val.reason.length > 0),
-//       {
-//          message: 'Rejection reason is required when rejecting',
-//          path: ['reason'],
-//       },
-//    );
-
 export const approveSchema = z.object({
    transcriptionId: z.string(),
 });
@@ -59,6 +42,8 @@ export const rejectSchema = z.object({
 
 export const queueItemSchema = z.object({
    id: z.string(),
+   pageId: z.string(),
+   pageNumber: z.number(),
    documentId: z.string(),
    documentTitle: z.string(),
    contributorUsername: z.string(),
@@ -78,9 +63,6 @@ export type SubmitTranscriptionInput = z.infer<
    typeof submitTranscriptionSchema
 >;
 export type TranscriptionRevision = z.infer<typeof transcriptionRevisionSchema>;
-// export type ReviewTranscriptionInput = z.infer<
-//    typeof reviewTranscriptionSchema
-// >;
 export type QueueItem = z.infer<typeof queueItemSchema>;
 export type QueueResponse = z.infer<typeof queueResponseSchema>;
 export type ApproveInput = z.infer<typeof approveSchema>;

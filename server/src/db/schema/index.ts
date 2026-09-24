@@ -4,3 +4,4 @@ export * from './documents.js';
 export * from './collections.js';
 export * from './transcriptions.js';
 export * from './relations.js';
+export * from './document-pages.js';

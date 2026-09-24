@@ -10,6 +10,7 @@ export const uploadDocumentSchema = z.object({
       .max(1000, 'Description cannot be longer than 1000 characters')
       .optional(),
    fileBase64: z.string(),
+   fileType: z.enum(['image', 'pdf']),
 });
 
 export const listDocumentsSchema = z.object({
@@ -26,25 +27,37 @@ export const searchDocumentsSchema = z.object({
    collectionId: z.string().nullable().optional(),
 });
 
+export const documentPageSchema = z.object({
+   id: z.string(),
+   documentId: z.string(),
+   pageNumber: z.number(),
+   imageUrl: z.string(),
+   cloudinaryPublicId: z.string(),
+   createdAt: z.date(),
+});
+
 export const documentSchema = z.object({
    id: z.string(),
    title: z.string(),
    description: z.string().nullable(),
    uploadedBy: z.string(),
-   cloudinaryPublicId: z.string(),
-   cloudinaryUrl: z.string(),
+   r2Key: z.string().nullable(),
    status: z.enum(['processing', 'ready', 'failed']),
    createdAt: z.date(),
    updatedAt: z.date(),
-   uploaderName: z.string().nullable().optional(),
    hasApprovedTranscription: z.boolean(),
+   uploaderName: z.string().nullable().optional(),
    collectionId: z.string().nullable().optional(),
+   pageCount: z.number().optional(),
+   coverImageUrl: z.string().nullable().optional(),
 });
 
 export const updateDocumentSchema = uploadDocumentSchema
+   .omit({ fileBase64: true, fileType: true })
    .partial()
    .extend({ id: z.string(), collectionId: z.string().nullable().optional() });
 
 export type UploadedDocumentInput = z.infer<typeof uploadDocumentSchema>;
 export type ListDocumentsInput = z.infer<typeof listDocumentsSchema>;
 export type Document = z.infer<typeof documentSchema>;
+export type DocumentPage = z.infer<typeof documentPageSchema>;

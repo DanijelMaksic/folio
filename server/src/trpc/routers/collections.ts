@@ -53,11 +53,13 @@ export const collectionsRouter = router({
                   createdBy: collections.createdBy,
                   creatorName: user.name,
                   coverImageUrl: sql<string | null>`(
-                        SELECT cloudinary_url FROM documents
-                        WHERE collection_id = ${collections.id}
-                        ORDER BY created_at ASC
-                        LIMIT 1
-                    )`,
+                     SELECT dp.image_url FROM document_pages dp
+                     INNER JOIN documents d ON d.id = dp.document_id
+                     WHERE d.collection_id = ${collections.id}
+                     AND dp.page_number = 1
+                     ORDER BY d.created_at ASC
+                     LIMIT 1
+                  )`,
                })
                .from(collections)
                .innerJoin(user, eq(user.id, collections.createdBy))

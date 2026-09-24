@@ -1,7 +1,8 @@
 import { z } from 'zod';
 import { protectedProcedure, publicProcedure, router } from '@/trpc/trpc.js';
-import { documents, transcriptions, user } from '@/db/schema/index.js';
-import { and, desc, eq, ilike, isNotNull, isNull, sql } from 'drizzle-orm';
+import { documents, documentPages } from '@/db/schema/index.js';
+import { user } from '@/db/schema/index.js';
+import { and, desc, eq, ilike, sql } from 'drizzle-orm';
 import cloudinary from '@/lib/cloudinary.js';
 import { TRPCError } from '@trpc/server';
 import {
@@ -14,6 +15,13 @@ import { isContributor } from '@folio/shared';
 import { db } from '@/db/index.js';
 import { count } from 'drizzle-orm';
 
+const coverImageSubquery = (documentId: string) => sql<string | null>`(
+  SELECT image_url FROM document_pages
+  WHERE document_id = ${documentId}
+  AND page_number = 1
+  LIMIT 1
+)`;
+
 export const documentsRouter = router({
    upload: protectedProcedure
       .input(uploadDocumentSchema)
@@ -25,9 +33,31 @@ export const documentsRouter = router({
             });
          }
 
+         if (input.fileType === 'pdf') {
+            // Create document with processing status, r2Key placeholder
+            // BullMQ job will handle splitting and page creation
+            const [doc] = await db
+               .insert(documents)
+               .values({
+                  title: input.title,
+                  description: input.description,
+                  uploadedBy: ctx.user.id,
+                  r2Key: `documents/${crypto.randomUUID()}.pdf`,
+                  status: 'processing',
+               })
+               .returning();
+
+            // TODO: upload to R2 and enqueue BullMQ job in Sprint 6
+            // await uploadToR2(doc.r2Key, input.fileBase64);
+            // await pdfQueue.add('process-pdf', { documentId: doc.id, r2Key: doc.r2Key });
+
+            return doc;
+         }
+
+         // Single image — upload to Cloudinary and create page immediately
          const uploaded = await cloudinary.uploader.upload(input.fileBase64, {
             folder: 'folio/documents',
-            resource_type: 'auto',
+            resource_type: 'image',
          });
 
          const [doc] = await db
@@ -36,10 +66,16 @@ export const documentsRouter = router({
                title: input.title,
                description: input.description,
                uploadedBy: ctx.user.id,
-               cloudinaryPublicId: uploaded.public_id,
-               cloudinaryUrl: uploaded.secure_url,
+               status: 'ready',
             })
             .returning();
+
+         await db.insert(documentPages).values({
+            documentId: doc.id,
+            pageNumber: 1,
+            imageUrl: uploaded.secure_url,
+            cloudinaryPublicId: uploaded.public_id,
+         });
 
          return doc;
       }),
@@ -49,54 +85,42 @@ export const documentsRouter = router({
       .query(async ({ ctx, input }) => {
          const offset = (input.page - 1) * input.limit;
 
-         const where = and(
-            input.search
-               ? ilike(documents.title, `%${input.search}%`)
-               : undefined,
-            input.status === 'transcribed'
-               ? isNotNull(transcriptions.id)
-               : undefined,
-            input.status === 'not-transcribed'
-               ? isNull(transcriptions.id)
-               : undefined,
-         );
+         const where = input.search
+            ? ilike(documents.title, `%${input.search}%`)
+            : undefined;
 
          const [results, [{ total }]] = await Promise.all([
             db
                .select({
                   id: documents.id,
                   title: documents.title,
+                  description: documents.description,
+                  uploadedBy: documents.uploadedBy,
+                  collectionId: documents.collectionId,
+                  r2Key: documents.r2Key,
                   status: documents.status,
-                  cloudinaryUrl: documents.cloudinaryUrl,
-                  uploaderName: user.name,
                   createdAt: documents.createdAt,
-                  hasApprovedTranscription: isNotNull(transcriptions.id),
+                  updatedAt: documents.updatedAt,
+                  uploaderName: user.name,
+                  coverImageUrl: sql<string | null>`(
+              SELECT image_url FROM document_pages
+              WHERE document_id = ${documents.id}
+              AND page_number = 1
+              LIMIT 1
+            )`,
+                  pageCount: sql<number>`(
+              SELECT COUNT(*) FROM document_pages
+              WHERE document_id = ${documents.id}
+            )`,
                })
                .from(documents)
                .innerJoin(user, eq(user.id, documents.uploadedBy))
-               .leftJoin(
-                  transcriptions,
-                  and(
-                     eq(transcriptions.documentId, documents.id),
-                     eq(transcriptions.status, 'approved'),
-                  ),
-               )
                .where(where)
                .limit(input.limit)
                .offset(offset)
                .orderBy(desc(documents.createdAt)),
 
-            db
-               .select({ total: count() })
-               .from(documents)
-               .leftJoin(
-                  transcriptions,
-                  and(
-                     eq(transcriptions.documentId, documents.id),
-                     eq(transcriptions.status, 'approved'),
-                  ),
-               )
-               .where(where),
+            db.select({ total: count() }).from(documents).where(where),
          ]);
 
          return {
@@ -106,15 +130,70 @@ export const documentsRouter = router({
          };
       }),
 
+   getById: publicProcedure
+      .input(z.object({ id: z.string() }))
+      .query(async ({ ctx, input }) => {
+         const [doc] = await db
+            .select({
+               id: documents.id,
+               title: documents.title,
+               description: documents.description,
+               uploadedBy: documents.uploadedBy,
+               collectionId: documents.collectionId,
+               r2Key: documents.r2Key,
+               status: documents.status,
+               createdAt: documents.createdAt,
+               updatedAt: documents.updatedAt,
+               uploaderName: user.name,
+               coverImageUrl: sql<string | null>`(
+            SELECT image_url FROM document_pages
+            WHERE document_id = ${documents.id}
+            AND page_number = 1
+            LIMIT 1
+          )`,
+               pageCount: sql<number>`(
+            SELECT COUNT(*) FROM document_pages
+            WHERE document_id = ${documents.id}
+          )`,
+            })
+            .from(documents)
+            .innerJoin(user, eq(user.id, documents.uploadedBy))
+            .where(eq(documents.id, input.id));
+
+         if (!doc) throw new TRPCError({ code: 'NOT_FOUND' });
+
+         return doc;
+      }),
+
    getByCollection: publicProcedure
       .input(z.object({ collectionId: z.string() }))
       .query(async ({ ctx, input }) => {
-         const results = db
-            .select()
+         const results = await db
+            .select({
+               id: documents.id,
+               title: documents.title,
+               description: documents.description,
+               uploadedBy: documents.uploadedBy,
+               collectionId: documents.collectionId,
+               r2Key: documents.r2Key,
+               status: documents.status,
+               createdAt: documents.createdAt,
+               updatedAt: documents.updatedAt,
+               coverImageUrl: sql<string | null>`(
+            SELECT image_url FROM document_pages
+            WHERE document_id = ${documents.id}
+            AND page_number = 1
+            LIMIT 1
+          )`,
+               pageCount: sql<number>`(
+            SELECT COUNT(*) FROM document_pages
+            WHERE document_id = ${documents.id}
+          )`,
+            })
             .from(documents)
             .where(eq(documents.collectionId, input.collectionId));
 
-         return results ?? null;
+         return results;
       }),
 
    update: protectedProcedure
@@ -135,9 +214,7 @@ export const documentsRouter = router({
             .where(eq(documents.id, id))
             .returning();
 
-         if (!updated) {
-            throw new TRPCError({ code: 'NOT_FOUND' });
-         }
+         if (!updated) throw new TRPCError({ code: 'NOT_FOUND' });
 
          return updated;
       }),
@@ -157,29 +234,9 @@ export const documentsRouter = router({
             .where(eq(documents.id, input.id))
             .returning();
 
-         if (!deleted) {
-            throw new TRPCError({ code: 'NOT_FOUND' });
-         }
+         if (!deleted) throw new TRPCError({ code: 'NOT_FOUND' });
 
          return deleted;
-      }),
-
-   getById: publicProcedure
-      .input(
-         z.object({
-            id: z.string(),
-         }),
-      )
-      .query(async ({ ctx, input }) => {
-         const [doc] = await db
-            .select()
-            .from(documents)
-            .where(eq(documents.id, input.id));
-
-         if (!doc) {
-            throw new TRPCError({ code: 'NOT_FOUND' });
-         }
-         return doc;
       }),
 
    search: publicProcedure
@@ -191,13 +248,22 @@ export const documentsRouter = router({
                title: documents.title,
                description: documents.description,
                uploadedBy: documents.uploadedBy,
-               uploaderName: user.username,
+               uploaderName: user.name,
                collectionId: documents.collectionId,
-               cloudinaryUrl: documents.cloudinaryUrl,
-               cloudinaryPublicId: documents.cloudinaryPublicId,
+               r2Key: documents.r2Key,
                status: documents.status,
                createdAt: documents.createdAt,
                updatedAt: documents.updatedAt,
+               coverImageUrl: sql<string | null>`(
+            SELECT image_url FROM document_pages
+            WHERE document_id = ${documents.id}
+            AND page_number = 1
+            LIMIT 1
+          )`,
+               pageCount: sql<number>`(
+            SELECT COUNT(*) FROM document_pages
+            WHERE document_id = ${documents.id}
+          )`,
             })
             .from(documents)
             .leftJoin(user, eq(documents.uploadedBy, user.id))

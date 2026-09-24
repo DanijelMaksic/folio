@@ -2,6 +2,7 @@ import { pgTable, text, timestamp, index, unique } from 'drizzle-orm/pg-core';
 import { transcriptionStatusEnum } from './enums.js';
 import { user } from './auth.js';
 import { documents } from './documents.js';
+import { documentPages } from '@/db/schema/document-pages.js';
 
 export const transcriptions = pgTable(
    'transcriptions',
@@ -9,9 +10,9 @@ export const transcriptions = pgTable(
       id: text()
          .primaryKey()
          .$defaultFn(() => crypto.randomUUID()),
-      documentId: text()
+      pageId: text()
          .notNull()
-         .references(() => documents.id, { onDelete: 'cascade' }),
+         .references(() => documentPages.id, { onDelete: 'cascade' }),
       userId: text()
          .notNull()
          .references(() => user.id, { onDelete: 'cascade' }),
@@ -22,12 +23,12 @@ export const transcriptions = pgTable(
       updatedAt: timestamp().notNull().defaultNow(),
    },
    (table) => [
-      index('transcriptions_document_id_idx').on(table.documentId),
-      index('transcriptions_user_id_idx').on(table.userId),
-      unique('transcriptions_document_user_unique').on(
-         table.documentId,
+      unique('transcriptions_page_id_user_id_unique').on(
+         table.pageId,
          table.userId,
       ),
+      index('transcriptions_page_id_idx').on(table.pageId),
+      index('transcriptions_user_id_idx').on(table.userId),
    ],
 );
 

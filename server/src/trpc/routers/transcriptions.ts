@@ -3,10 +3,10 @@ import {
    transcriptionRevisions,
    transcriptions,
 } from '@/db/schema/transcriptions.js';
+import { documentPages } from '@/db/schema/document-pages.js';
 import { protectedProcedure, publicProcedure, router } from '@/trpc/trpc.js';
 import {
    approveSchema,
-   DocumentIdSchema,
    isContributor,
    isEditor,
    rejectSchema,
@@ -19,27 +19,27 @@ import { documents } from '@/db/schema/documents.js';
 import { user } from '@/db/schema/auth.js';
 
 export const transcriptionsRouter = router({
-   // Fetches the current user's transcription for a given document
-   getByDocument: protectedProcedure
-      .input(z.object({ documentId: z.string() }))
+   // Fetches the current user's transcription for a given page
+   getByPage: protectedProcedure
+      .input(z.object({ pageId: z.string() }))
       .query(async ({ ctx, input }) => {
-         const result = await db
+         const [result] = await db
             .select()
             .from(transcriptions)
             .where(
                and(
-                  eq(transcriptions.documentId, input.documentId),
+                  eq(transcriptions.pageId, input.pageId),
                   eq(transcriptions.userId, ctx.user.id),
                ),
             )
             .limit(1);
 
-         return result[0] ?? null;
+         return result ?? null;
       }),
 
-   // Creates a new transcription for a document, or returns the existing one
+   // Creates a new transcription for a page, or returns the existing one
    create: protectedProcedure
-      .input(z.object({ documentId: z.string() }))
+      .input(z.object({ pageId: z.string() }))
       .mutation(async ({ ctx, input }) => {
          if (!isContributor(ctx.user.globalRole)) {
             throw new TRPCError({
@@ -53,7 +53,7 @@ export const transcriptionsRouter = router({
             .from(transcriptions)
             .where(
                and(
-                  eq(transcriptions.documentId, input.documentId),
+                  eq(transcriptions.pageId, input.pageId),
                   eq(transcriptions.userId, ctx.user.id),
                ),
             )
@@ -64,7 +64,7 @@ export const transcriptionsRouter = router({
          const [created] = await db
             .insert(transcriptions)
             .values({
-               documentId: input.documentId,
+               pageId: input.pageId,
                userId: ctx.user.id,
             })
             .returning();
@@ -82,14 +82,10 @@ export const transcriptionsRouter = router({
             .where(eq(transcriptions.id, input.transcriptionId))
             .limit(1);
 
-         // Existence check — throws NOT_FOUND if the transcription doesn't exist
          if (!existing) throw new TRPCError({ code: 'NOT_FOUND' });
-
-         // Ownership check — throws FORBIDDEN if it belongs to a different user
          if (existing.userId !== ctx.user.id)
             throw new TRPCError({ code: 'FORBIDDEN' });
 
-         // Status check — throws FORBIDDEN if already submitted or approved (locks editing)
          if (existing.status !== 'draft' && existing.status !== 'rejected') {
             throw new TRPCError({
                code: 'FORBIDDEN',
@@ -111,7 +107,7 @@ export const transcriptionsRouter = router({
          return updated;
       }),
 
-   // Marks a transcription as submitted (final)
+   // Marks a transcription as submitted
    submit: protectedProcedure
       .input(z.object({ transcriptionId: z.string() }))
       .mutation(async ({ ctx, input }) => {
@@ -121,9 +117,7 @@ export const transcriptionsRouter = router({
             .where(eq(transcriptions.id, input.transcriptionId))
             .limit(1);
 
-         if (!existing) {
-            throw new TRPCError({ code: 'NOT_FOUND' });
-         }
+         if (!existing) throw new TRPCError({ code: 'NOT_FOUND' });
          if (existing.userId !== ctx.user.id)
             throw new TRPCError({ code: 'FORBIDDEN' });
 
@@ -162,9 +156,8 @@ export const transcriptionsRouter = router({
             .limit(1);
 
          if (!existing) throw new TRPCError({ code: 'NOT_FOUND' });
-         if (existing.userId !== ctx.user.id) {
+         if (existing.userId !== ctx.user.id)
             throw new TRPCError({ code: 'FORBIDDEN' });
-         }
 
          return db
             .select()
@@ -189,14 +182,17 @@ export const transcriptionsRouter = router({
       const queue = await db
          .select({
             id: transcriptions.id,
-            documentId: transcriptions.documentId,
+            pageId: transcriptions.pageId,
+            pageNumber: documentPages.pageNumber,
+            documentId: documents.id,
             documentTitle: documents.title,
             contributorUsername: user.username,
             status: transcriptions.status,
             updatedAt: transcriptions.updatedAt,
          })
          .from(transcriptions)
-         .innerJoin(documents, eq(documents.id, transcriptions.documentId))
+         .innerJoin(documentPages, eq(documentPages.id, transcriptions.pageId))
+         .innerJoin(documents, eq(documents.id, documentPages.documentId))
          .innerJoin(user, eq(user.id, transcriptions.userId))
          .where(eq(transcriptions.status, 'submitted'));
 
@@ -215,23 +211,16 @@ export const transcriptionsRouter = router({
 
          const transcription = await db.query.transcriptions.findFirst({
             where: eq(transcriptions.id, input.transcriptionId),
-            with: { user: true },
+            with: { user: true, page: true },
          });
 
-         if (!transcription) {
-            throw new TRPCError({
-               code: 'NOT_FOUND',
-               message: 'Transcription not found',
-            });
-         }
-
+         if (!transcription) throw new TRPCError({ code: 'NOT_FOUND' });
          if (transcription.userId === ctx.user.id) {
             throw new TRPCError({
                code: 'FORBIDDEN',
                message: 'Cannot approve your own transcription',
             });
          }
-
          if (transcription.status !== 'submitted') {
             throw new TRPCError({
                code: 'BAD_REQUEST',
@@ -247,7 +236,7 @@ export const transcriptionsRouter = router({
          await sendApprovalEmail({
             to: transcription.user.email,
             username: transcription.user.username,
-            documentId: transcription.documentId,
+            documentId: transcription?.page.documentId as string,
          });
 
          return { success: true };
@@ -265,23 +254,16 @@ export const transcriptionsRouter = router({
 
          const transcription = await db.query.transcriptions.findFirst({
             where: eq(transcriptions.id, input.transcriptionId),
-            with: { user: true },
+            with: { user: true, page: true },
          });
 
-         if (!transcription) {
-            throw new TRPCError({
-               code: 'NOT_FOUND',
-               message: 'Transcription not found.',
-            });
-         }
-
+         if (!transcription) throw new TRPCError({ code: 'NOT_FOUND' });
          if (transcription.userId === ctx.user.id) {
             throw new TRPCError({
                code: 'FORBIDDEN',
                message: 'Cannot reject your own transcription.',
             });
          }
-
          if (transcription.status !== 'submitted') {
             throw new TRPCError({
                code: 'BAD_REQUEST',
@@ -301,15 +283,16 @@ export const transcriptionsRouter = router({
          await sendRejectionEmail({
             to: transcription.user.email,
             username: transcription.user.username,
-            documentId: transcription.documentId,
+            documentId: transcription.page.documentId as string,
             reason: input.reason,
          });
 
          return { success: true };
       }),
 
-   getSubmittedByDocument: protectedProcedure
-      .input(z.object({ documentId: z.string() }))
+   // Returns submitted transcription for a page (editor view)
+   getSubmittedByPage: protectedProcedure
+      .input(z.object({ pageId: z.string() }))
       .query(async ({ ctx, input }) => {
          if (!isEditor(ctx.user.globalRole)) {
             throw new TRPCError({
@@ -320,7 +303,7 @@ export const transcriptionsRouter = router({
 
          const transcription = await db.query.transcriptions.findFirst({
             where: and(
-               eq(transcriptions.documentId, input.documentId),
+               eq(transcriptions.pageId, input.pageId),
                eq(transcriptions.status, 'submitted'),
             ),
             with: { user: true },
@@ -329,12 +312,13 @@ export const transcriptionsRouter = router({
          return transcription ?? null;
       }),
 
-   getApprovedByDocument: publicProcedure
-      .input(z.object({ documentId: z.string() }))
+   // Returns approved transcription for a page (public)
+   getApprovedByPage: publicProcedure
+      .input(z.object({ pageId: z.string() }))
       .query(async ({ ctx, input }) => {
          const approved = await db.query.transcriptions.findFirst({
             where: and(
-               eq(transcriptions.documentId, input.documentId),
+               eq(transcriptions.pageId, input.pageId),
                eq(transcriptions.status, 'approved'),
             ),
          });

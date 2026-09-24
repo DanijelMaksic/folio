@@ -1,4 +1,4 @@
-import { integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 import { documentStatusEnum } from './enums.js';
 import { user } from './auth.js';
 import { collections } from './collections.js';
@@ -12,8 +12,7 @@ export const documents = pgTable('documents', {
    uploadedBy: text()
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
-   cloudinaryPublicId: text().notNull(),
-   cloudinaryUrl: text().notNull(),
+   r2Key: text(),
    status: documentStatusEnum().notNull().default('ready'),
    collectionId: text().references(() => collections.id, {
       onDelete: 'set null',
