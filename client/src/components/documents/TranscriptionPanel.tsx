@@ -1,16 +1,14 @@
 import { Textarea } from '@/components/ui/textarea';
 import { trpc } from '@/lib/trpc';
-import { Document, Transcription } from '@shared';
+import { Transcription } from '@shared';
 import { useEffect, useState } from 'react';
 
 function TranscriptionPanel({
    transcription,
-   id: docId,
-   doc,
+   id: documentId,
 }: {
    transcription: Transcription;
    id: string;
-   doc: Document;
 }) {
    const [transcriptionContent, setTranscriptionContent] = useState('');
 
@@ -67,7 +65,9 @@ function TranscriptionPanel({
          {!transcription ? (
             <button
                className="text-sm underline"
-               onClick={() => createMutation.mutate({ documentId: docId! })}
+               onClick={() =>
+                  createMutation.mutate({ documentId: documentId! })
+               }
                disabled={createMutation.isPending}
             >
                Start transcribing

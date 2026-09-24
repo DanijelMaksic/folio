@@ -129,8 +129,8 @@ export default function Documents() {
             </p>
          ) : (
             <div className="grid grid-cols-3 gap-4 transition-opacity duration-150">
-               {documents.map((doc: Document) => (
-                  <DocumentCard doc={doc} key={doc.id} />
+               {documents.map((document: Document) => (
+                  <DocumentCard document={document} key={document.id} />
                ))}
             </div>
          )}

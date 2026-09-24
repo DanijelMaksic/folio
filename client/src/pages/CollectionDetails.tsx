@@ -40,10 +40,9 @@ function CollectionDetails() {
          id: id!,
       });
 
-   const { data: savedDocuments, isLoading: isLoadingDocs } =
-      trpc.documents.getByCollection.useQuery({
-         collectionId: id!,
-      });
+   const { data: savedDocuments } = trpc.documents.getByCollection.useQuery({
+      collectionId: id!,
+   });
 
    const { data: searchResults } = trpc.documents.search.useQuery(
       {
@@ -133,8 +132,8 @@ function CollectionDetails() {
             </p>
          ) : (
             <div className="grid grid-cols-3 gap-4 transition-opacity duration-150">
-               {displayedDocuments.map((doc: Document) => (
-                  <DocumentCard doc={doc} key={doc.id} />
+               {displayedDocuments.map((document: Document) => (
+                  <DocumentCard document={document} key={document.id} />
                ))}
             </div>
          )}

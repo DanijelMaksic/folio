@@ -8,8 +8,9 @@ import {
    useTransformEffect,
 } from 'react-zoom-pan-pinch';
 
-const Controls = () => {
+const Controls = ({ documentId }: { documentId: string }) => {
    const { zoomIn, zoomOut, resetTransform } = useControls();
+   const { resetViewerState } = useViewerStore();
 
    return (
       <div className="tools absolute left-[43%] top-4 z-10 bg-white/80 flex items-center justify-center gap-6 py-1 px-3 rounded-md shadow-md">
@@ -19,7 +20,13 @@ const Controls = () => {
          <button type="button" onClick={() => zoomOut()}>
             -
          </button>
-         <button type="button" onClick={() => resetTransform()}>
+         <button
+            type="button"
+            onClick={() => {
+               resetViewerState(documentId);
+               resetTransform();
+            }}
+         >
             x
          </button>
       </div>
@@ -42,7 +49,7 @@ const TransformTracker = ({ documentId }: { documentId: string }) => {
 
 function DocumentViewer({ document }: { document: Document }) {
    const { viewers } = useViewerStore();
-   const savedState = viewers[document.id];
+   const savedState = viewers[document?.id];
    const [isHovered, setIsHovered] = useState(false);
 
    if (!document) return null;
@@ -72,7 +79,7 @@ function DocumentViewer({ document }: { document: Document }) {
                smoothStep: 0.002,
             }}
          >
-            {isHovered && <Controls />}
+            {isHovered && <Controls documentId={document.id} />}
 
             <TransformTracker documentId={document.id} />
             <TransformComponent

@@ -1,9 +1,9 @@
 import { Document } from '@shared';
 import { Link } from 'react-router-dom';
 
-export function DocumentCard({ doc }: { doc: Document }) {
+export function DocumentCard({ document }: { document: Document }) {
    const { id, title, cloudinaryUrl, uploaderName, hasApprovedTranscription } =
-      doc;
+      document;
 
    return (
       <Link

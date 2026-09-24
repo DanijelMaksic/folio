@@ -19,7 +19,7 @@ function TranscribeTab() {
       },
    );
 
-   const { data: doc, isLoading } = trpc.documents.getById.useQuery({
+   const { data: document } = trpc.documents.getById.useQuery({
       id: id!,
    });
 
@@ -29,15 +29,9 @@ function TranscribeTab() {
 
    return (
       <div className="grid grid-cols-2 gap-4">
-         <DocumentViewer doc={doc} />
+         <DocumentViewer document={document} />
 
-         {id && (
-            <TranscriptionPanel
-               transcription={transcription}
-               id={id}
-               doc={doc}
-            />
-         )}
+         {id && <TranscriptionPanel transcription={transcription} id={id} />}
       </div>
    );
 }
