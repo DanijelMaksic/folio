@@ -41,7 +41,6 @@ export const documentSchema = z.object({
    title: z.string(),
    description: z.string().nullable(),
    uploadedBy: z.string(),
-   r2Key: z.string().nullable(),
    status: z.enum(['processing', 'ready', 'failed']),
    createdAt: z.date(),
    updatedAt: z.date(),

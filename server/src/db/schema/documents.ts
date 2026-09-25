@@ -12,7 +12,6 @@ export const documents = pgTable('documents', {
    uploadedBy: text()
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
-   r2Key: text(),
    status: documentStatusEnum().notNull().default('ready'),
    collectionId: text().references(() => collections.id, {
       onDelete: 'set null',

@@ -34,7 +34,7 @@ export const documentsRouter = router({
          }
 
          if (input.fileType === 'pdf') {
-            // Create document with processing status, r2Key placeholder
+            // Create document with processing status
             // BullMQ job will handle splitting and page creation
             const [doc] = await db
                .insert(documents)
@@ -42,15 +42,11 @@ export const documentsRouter = router({
                   title: input.title,
                   description: input.description,
                   uploadedBy: ctx.user.id,
-                  r2Key: `documents/${crypto.randomUUID()}.pdf`,
                   status: 'processing',
                })
                .returning();
 
-            // TODO: upload to R2 and enqueue BullMQ job in Sprint 6
-            // await uploadToR2(doc.r2Key, input.fileBase64);
-            // await pdfQueue.add('process-pdf', { documentId: doc.id, r2Key: doc.r2Key });
-
+            // TODO: upload and enqueue BullMQ job in Sprint 6
             return doc;
          }
 
@@ -97,7 +93,6 @@ export const documentsRouter = router({
                   description: documents.description,
                   uploadedBy: documents.uploadedBy,
                   collectionId: documents.collectionId,
-                  r2Key: documents.r2Key,
                   status: documents.status,
                   createdAt: documents.createdAt,
                   updatedAt: documents.updatedAt,
@@ -140,7 +135,6 @@ export const documentsRouter = router({
                description: documents.description,
                uploadedBy: documents.uploadedBy,
                collectionId: documents.collectionId,
-               r2Key: documents.r2Key,
                status: documents.status,
                createdAt: documents.createdAt,
                updatedAt: documents.updatedAt,
@@ -175,7 +169,6 @@ export const documentsRouter = router({
                description: documents.description,
                uploadedBy: documents.uploadedBy,
                collectionId: documents.collectionId,
-               r2Key: documents.r2Key,
                status: documents.status,
                createdAt: documents.createdAt,
                updatedAt: documents.updatedAt,
@@ -250,7 +243,6 @@ export const documentsRouter = router({
                uploadedBy: documents.uploadedBy,
                uploaderName: user.name,
                collectionId: documents.collectionId,
-               r2Key: documents.r2Key,
                status: documents.status,
                createdAt: documents.createdAt,
                updatedAt: documents.updatedAt,
