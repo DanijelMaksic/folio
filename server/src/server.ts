@@ -1,4 +1,5 @@
 import { app } from '@/app.js';
+import '@/workers/pdf-worker.js';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 

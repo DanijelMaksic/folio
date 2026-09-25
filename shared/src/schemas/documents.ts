@@ -27,6 +27,13 @@ export const searchDocumentsSchema = z.object({
    collectionId: z.string().nullable().optional(),
 });
 
+export const updateDocumentSchema = z.object({
+   id: z.string(),
+   title: z.string().min(1).max(225).optional(),
+   description: z.string().max(1000).optional(),
+   collectionId: z.string().nullable().optional(),
+});
+
 export const documentPageSchema = z.object({
    id: z.string(),
    documentId: z.string(),
@@ -51,12 +58,8 @@ export const documentSchema = z.object({
    coverImageUrl: z.string().nullable().optional(),
 });
 
-export const updateDocumentSchema = uploadDocumentSchema
-   .omit({ fileBase64: true, fileType: true })
-   .partial()
-   .extend({ id: z.string(), collectionId: z.string().nullable().optional() });
-
 export type UploadedDocumentInput = z.infer<typeof uploadDocumentSchema>;
+export type UpdateDocumentInput = z.infer<typeof updateDocumentSchema>;
 export type ListDocumentsInput = z.infer<typeof listDocumentsSchema>;
 export type Document = z.infer<typeof documentSchema>;
 export type DocumentPage = z.infer<typeof documentPageSchema>;

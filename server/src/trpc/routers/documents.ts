@@ -14,6 +14,7 @@ import {
 import { isContributor } from '@folio/shared';
 import { db } from '@/db/index.js';
 import { count } from 'drizzle-orm';
+import { pdfQueue } from '@/lib/queue.js';
 
 const coverImageSubquery = (documentId: string) => sql<string | null>`(
   SELECT image_url FROM document_pages
@@ -34,19 +35,21 @@ export const documentsRouter = router({
          }
 
          if (input.fileType === 'pdf') {
-            // Create document with processing status
-            // BullMQ job will handle splitting and page creation
             const [doc] = await db
                .insert(documents)
                .values({
                   title: input.title,
-                  description: input.description,
+                  description: input.description ?? null,
                   uploadedBy: ctx.user.id,
                   status: 'processing',
                })
                .returning();
 
-            // TODO: upload and enqueue BullMQ job in Sprint 6
+            await pdfQueue.add('process-pdf', {
+               documentId: doc.id,
+               fileBase64: input.fileBase64,
+            });
+
             return doc;
          }
 
@@ -60,7 +63,7 @@ export const documentsRouter = router({
             .insert(documents)
             .values({
                title: input.title,
-               description: input.description,
+               description: input.description ?? null,
                uploadedBy: ctx.user.id,
                status: 'ready',
             })
