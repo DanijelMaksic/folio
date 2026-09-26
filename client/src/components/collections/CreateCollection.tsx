@@ -5,9 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { TRPCClientError } from '@trpc/client';
+import { TRPCClientErrorLike } from '@trpc/client';
 import type { AppRouter } from '@server/trpc/router';
-import { Collection } from '@shared';
 
 export default function CreateCollection() {
    const navigate = useNavigate();
@@ -16,9 +15,8 @@ export default function CreateCollection() {
    const [error, setError] = useState('');
 
    const createCollection = trpc.collections.create.useMutation({
-      onSuccess: (collection: Collection) =>
-         navigate(`/collections/${collection.id}`),
-      onError: (err: TRPCClientError<AppRouter>) => setError(err.message),
+      onSuccess: (collection) => navigate(`/collections/${collection.id}`),
+      onError: (err: TRPCClientErrorLike<AppRouter>) => setError(err.message),
    });
 
    const handleSubmit = async () => {
@@ -52,7 +50,10 @@ export default function CreateCollection() {
 
          {error && <p className="text-sm text-destructive">{error}</p>}
 
-         <Button onClick={handleSubmit} disabled={createCollection.isPending || !title}>
+         <Button
+            onClick={handleSubmit}
+            disabled={createCollection.isPending || !title}
+         >
             {createCollection.isPending ? 'Creating...' : 'Create'}
          </Button>
       </div>

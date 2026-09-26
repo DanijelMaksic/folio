@@ -8,8 +8,8 @@ export const transcriptionSchema = z.object({
    content: z.string(),
    status: z.enum(['draft', 'submitted', 'approved', 'rejected']),
    rejectionReason: z.string().nullable(),
-   createdAt: z.date(),
-   updatedAt: z.date(),
+   createdAt: z.string(),
+   updatedAt: z.string(),
 });
 
 export const updateTranscriptionSchema = z.object({
@@ -25,7 +25,7 @@ export const transcriptionRevisionSchema = z.object({
    id: z.string(),
    transcriptionId: z.string(),
    content: z.string(),
-   savedAt: z.date(),
+   savedAt: z.string(),
 });
 
 export const approveSchema = z.object({
@@ -48,7 +48,7 @@ export const queueItemSchema = z.object({
    documentTitle: z.string(),
    contributorUsername: z.string(),
    status: z.enum(['submitted']),
-   updatedAt: z.date(),
+   updatedAt: z.string(),
 });
 
 export const DocumentIdSchema = z.string();

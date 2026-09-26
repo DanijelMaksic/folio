@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { protectedProcedure, publicProcedure, router } from '@/trpc/trpc.js';
-import { documents, documentPages } from '@/db/schema/index.js';
+import { documents, pages } from '@/db/schema/index.js';
 import { user } from '@/db/schema/index.js';
 import { and, desc, eq, ilike, sql } from 'drizzle-orm';
 import cloudinary from '@/lib/cloudinary.js';
@@ -69,7 +69,7 @@ export const documentsRouter = router({
             })
             .returning();
 
-         await db.insert(documentPages).values({
+         await db.insert(pages).values({
             documentId: doc.id,
             pageNumber: 1,
             imageUrl: uploaded.secure_url,

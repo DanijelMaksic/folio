@@ -83,7 +83,7 @@ export default function Documents() {
          search: search || undefined,
       },
       {
-         placeholderData: (prev: Document) => prev,
+         placeholderData: (prev) => prev,
          staleTime: 1000,
       },
    );

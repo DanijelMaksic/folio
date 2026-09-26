@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 interface DeleteModalProps {
    heading: string;
    error?: string;
-   isPending: string;
+   isPending: boolean;
    onDelete: () => void;
    onClose: () => void;
 }

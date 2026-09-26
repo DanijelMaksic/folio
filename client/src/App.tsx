@@ -4,7 +4,7 @@ import Register from './pages/Register';
 import Login from './pages/Login';
 import VerifyOtp from '@/pages/VerifyOtp';
 import Documents from '@/pages/Documents';
-import DocumentDetails from '@/pages/DocumentDetails';
+import DocumentPages from '@/pages/DocumentPages';
 import UploadDocument from '@/pages/UploadDocument';
 import ReviewQueue from '@/pages/ReviewQueue';
 import Layout from '@/components/shared/Layout';
@@ -14,6 +14,7 @@ import PageNotFound from '@/pages/PageNotFound';
 import Collections from '@/components/collections/Collections';
 import CollectionDetails from '@/pages/CollectionDetails';
 import CreateCollection from '@/components/collections/CreateCollection';
+import PageDetails from '@/pages/PageDetails';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
    const { data: session, isPending } = useSession();
@@ -31,10 +32,8 @@ export default function App() {
                <Route path="/register" element={<Register />} />
                <Route path="/login" element={<Login />} />
                <Route path="/verify-otp" element={<VerifyOtp />} />
+
                <Route path="/documents" element={<Documents />} />
-               <Route path="/documents/:id" element={<DocumentDetails />} />
-               <Route path="/collections" element={<Collections />} />
-               <Route path="/collections/:id" element={<CollectionDetails />} />
                <Route
                   path="/documents/upload"
                   element={
@@ -43,6 +42,13 @@ export default function App() {
                      </ProtectedRoute>
                   }
                />
+               <Route path="/documents/:id" element={<DocumentPages />} />
+               <Route
+                  path="/documents/:id/pages/:pageNumber"
+                  element={<PageDetails />}
+               />
+
+               <Route path="/collections" element={<Collections />} />
                <Route
                   path="/collections/create"
                   element={
@@ -51,6 +57,8 @@ export default function App() {
                      </ProtectedRoute>
                   }
                />
+               <Route path="/collections/:id" element={<CollectionDetails />} />
+
                <Route
                   path="/review"
                   element={

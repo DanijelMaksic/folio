@@ -40,7 +40,7 @@ export const documentPageSchema = z.object({
    pageNumber: z.number(),
    imageUrl: z.string(),
    cloudinaryPublicId: z.string(),
-   createdAt: z.date(),
+   createdAt: z.string(),
 });
 
 export const documentSchema = z.object({
@@ -49,9 +49,8 @@ export const documentSchema = z.object({
    description: z.string().nullable(),
    uploadedBy: z.string(),
    status: z.enum(['processing', 'ready', 'failed']),
-   createdAt: z.date(),
-   updatedAt: z.date(),
-   hasApprovedTranscription: z.boolean(),
+   createdAt: z.string(),
+   updatedAt: z.string(),
    uploaderName: z.string().nullable().optional(),
    collectionId: z.string().nullable().optional(),
    pageCount: z.number().optional(),

@@ -1,11 +1,10 @@
 import { Button } from '@/components/ui/button';
-import { Collection } from '@shared';
 
 interface CollectionPickerModalProps {
    isLoadingCollections: boolean;
    addToColPending: boolean;
    selectedId: string | null;
-   collections: Collection[];
+   collections?: { id: string; title: string }[];
    error?: string;
    onClose: () => void;
    onSelect: (id: string | null) => void;
@@ -31,7 +30,7 @@ function CollectionPickerModal({
                {isLoadingCollections ? (
                   <p>Loading...</p>
                ) : (
-                  collections?.map((collection: Collection) => (
+                  collections?.map((collection) => (
                      <button
                         key={collection.id}
                         onClick={() => {

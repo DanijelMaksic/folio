@@ -1,5 +1,5 @@
 import { relations } from 'drizzle-orm';
-import { documentPages } from '@/db/schema/document-pages.js';
+import { pages } from '@/db/schema/pages.js';
 import {
    transcriptionRevisions,
    transcriptions,
@@ -26,26 +26,23 @@ export const documentRelations = relations(documents, ({ one, many }) => ({
       fields: [documents.uploadedBy],
       references: [user.id],
    }),
-   pages: many(documentPages),
+   documentPages: many(pages),
 }));
 
-export const documentPageRelations = relations(
-   documentPages,
-   ({ one, many }) => ({
-      document: one(documents, {
-         fields: [documentPages.documentId],
-         references: [documents.id],
-      }),
-      transcriptions: many(transcriptions),
+export const documentPageRelations = relations(pages, ({ one, many }) => ({
+   document: one(documents, {
+      fields: [pages.documentId],
+      references: [documents.id],
    }),
-);
+   transcriptions: many(transcriptions),
+}));
 
 export const transcriptionRelations = relations(
    transcriptions,
    ({ one, many }) => ({
-      page: one(documentPages, {
+      page: one(pages, {
          fields: [transcriptions.pageId],
-         references: [documentPages.id],
+         references: [pages.id],
       }),
       user: one(user, {
          fields: [transcriptions.userId],

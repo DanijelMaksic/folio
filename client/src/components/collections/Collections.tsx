@@ -56,13 +56,13 @@ export default function Collections() {
          search: search || undefined,
       },
       {
-         placeholderData: (prev: Collection) => prev,
+         placeholderData: (prev) => prev,
          staleTime: 1000,
       },
    );
 
    const collections = data?.collections ?? [];
-   const totalPages = data?.pages ?? 1;
+   const totalPages = data?.totalPages ?? 1;
 
    return (
       <div className="max-w-4xl mx-auto p-6">
@@ -97,7 +97,7 @@ export default function Collections() {
             </p>
          ) : (
             <div className="grid grid-cols-3 gap-4 transition-opacity duration-150">
-               {collections.map((collection: Collection) => (
+               {collections.map((collection) => (
                   <CollectionCard collection={collection} key={collection.id} />
                ))}
             </div>

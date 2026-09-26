@@ -4,10 +4,10 @@ import { db } from '@/db/index.js';
 import { documents, documentPages } from '@/db/schema/index.js';
 import { eq } from 'drizzle-orm';
 import cloudinary from '@/lib/cloudinary.js';
-import sharp from 'sharp';
 
 // pdfjs-dist needs a canvas implementation in Node
 import { getDocument, type PDFDocumentProxy } from 'pdfjs-dist';
+import { createCanvas } from 'canvas';
 
 export interface PdfJobData {
    documentId: string;
@@ -21,43 +21,16 @@ const renderPageToBuffer = async (
    const page = await pdf.getPage(pageNumber);
    const viewport = page.getViewport({ scale: 2.0 });
 
-   const { width, height } = viewport;
-
-   // Render to raw RGBA pixel data using pdfjs-dist's NodeCanvasFactory
-   // We use a minimal offscreen canvas implementation via sharp
-   const canvasData = new Uint8ClampedArray(width * height * 4);
+   const canvas = createCanvas(viewport.width, viewport.height);
+   const context = canvas.getContext('2d');
 
    await page.render({
-      canvasContext: {
-         // Minimal canvas context that pdfjs needs
-         canvas: { width, height },
-         drawImage: () => {},
-         fillRect: () => {},
-         getImageData: () => ({ data: canvasData }),
-         putImageData: () => {},
-         save: () => {},
-         restore: () => {},
-         transform: () => {},
-         scale: () => {},
-         translate: () => {},
-         clearRect: () => {},
-         beginPath: () => {},
-         moveTo: () => {},
-         lineTo: () => {},
-         stroke: () => {},
-         fill: () => {},
-         clip: () => {},
-         setTransform: () => {},
-         resetTransform: () => {},
-      } as unknown as CanvasRenderingContext2D,
+      canvasContext: context as unknown as CanvasRenderingContext2D,
       viewport,
+      canvas: canvas as unknown as HTMLCanvasElement,
    }).promise;
 
-   return sharp(Buffer.from(canvasData), {
-      raw: { width, height, channels: 4 },
-   })
-      .jpeg({ quality: 90 })
-      .toBuffer();
+   return canvas.toBuffer('image/jpeg', { quality: 0.9 });
 };
 
 const processPdf = async (job: Job<PdfJobData>) => {

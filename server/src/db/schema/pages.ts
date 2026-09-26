@@ -1,7 +1,7 @@
 import { documents } from '@/db/schema/documents.js';
 import { integer, pgTable, text, timestamp, unique } from 'drizzle-orm/pg-core';
 
-export const documentPages = pgTable(
+export const pages = pgTable(
    'document_pages',
    {
       id: text()
@@ -10,6 +10,8 @@ export const documentPages = pgTable(
       documentId: text().references(() => documents.id, {
          onDelete: 'cascade',
       }),
+      title: text().notNull(),
+      description: text(),
       pageNumber: integer().notNull(),
       imageUrl: text().notNull(),
       cloudinaryPublicId: text().notNull(),

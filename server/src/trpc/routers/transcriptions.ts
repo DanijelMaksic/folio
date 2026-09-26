@@ -3,7 +3,7 @@ import {
    transcriptionRevisions,
    transcriptions,
 } from '@/db/schema/transcriptions.js';
-import { documentPages } from '@/db/schema/document-pages.js';
+import { pages } from '@/db/schema/pages.js';
 import { protectedProcedure, publicProcedure, router } from '@/trpc/trpc.js';
 import {
    approveSchema,
@@ -183,7 +183,7 @@ export const transcriptionsRouter = router({
          .select({
             id: transcriptions.id,
             pageId: transcriptions.pageId,
-            pageNumber: documentPages.pageNumber,
+            pageNumber: pages.pageNumber,
             documentId: documents.id,
             documentTitle: documents.title,
             contributorUsername: user.username,
@@ -191,8 +191,8 @@ export const transcriptionsRouter = router({
             updatedAt: transcriptions.updatedAt,
          })
          .from(transcriptions)
-         .innerJoin(documentPages, eq(documentPages.id, transcriptions.pageId))
-         .innerJoin(documents, eq(documents.id, documentPages.documentId))
+         .innerJoin(pages, eq(pages.id, transcriptions.pageId))
+         .innerJoin(documents, eq(documents.id, pages.documentId))
          .innerJoin(user, eq(user.id, transcriptions.userId))
          .where(eq(transcriptions.status, 'submitted'));
 

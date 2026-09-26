@@ -78,12 +78,15 @@ export const verifyOtpSchema = z.object({
 
 export const userSchema = z.object({
    id: z.string(),
+   name: z.string(),
    username: z.string(),
    email: z.string().email(),
+   emailVerified: z.boolean(),
+   image: z.string().nullable(),
    globalRole: z.enum(GLOBAL_ROLES),
-   twoFactorEnabled: z.boolean(),
-   createdAt: z.date(),
-   updatedAt: z.date(),
+   twoFactorEnabled: z.boolean().nullable(),
+   createdAt: z.string(),
+   updatedAt: z.string(),
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;

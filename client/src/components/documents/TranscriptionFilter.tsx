@@ -36,7 +36,7 @@ function TranscriptionFilter({
             <DropdownMenuContent>
                <DropdownMenuGroup>
                   <DropdownMenuItem
-                     onClick={() => onSetStatus('all documents')}
+                     onClick={() => onSetStatus('all-documents')}
                   >
                      All Documents
                   </DropdownMenuItem>

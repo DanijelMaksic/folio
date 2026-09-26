@@ -1,5 +1,5 @@
 import { useViewerStore } from '@/store/useViewerStore';
-import { Document } from '@shared';
+import type { Page } from '@shared';
 import { useState } from 'react';
 import {
    TransformWrapper,
@@ -8,7 +8,7 @@ import {
    useTransformEffect,
 } from 'react-zoom-pan-pinch';
 
-const Controls = ({ documentId }: { documentId: string }) => {
+const Controls = ({ pageId }: { pageId: string }) => {
    const { zoomIn, zoomOut, resetTransform } = useControls();
    const { resetViewerState } = useViewerStore();
 
@@ -23,7 +23,7 @@ const Controls = ({ documentId }: { documentId: string }) => {
          <button
             type="button"
             onClick={() => {
-               resetViewerState(documentId);
+               resetViewerState(pageId);
                resetTransform();
             }}
          >
@@ -33,11 +33,11 @@ const Controls = ({ documentId }: { documentId: string }) => {
    );
 };
 
-const TransformTracker = ({ documentId }: { documentId: string }) => {
+const TransformTracker = ({ pageId }: { pageId: string }) => {
    const { setViewerState } = useViewerStore();
 
    useTransformEffect(({ state }) => {
-      setViewerState(documentId, {
+      setViewerState(pageId, {
          scale: state.scale,
          positionX: state.positionX,
          positionY: state.positionY,
@@ -47,12 +47,12 @@ const TransformTracker = ({ documentId }: { documentId: string }) => {
    return null;
 };
 
-function DocumentViewer({ document }: { document: Document }) {
+function DocumentViewer({ page }: { page: Page | undefined }) {
    const { viewers } = useViewerStore();
-   const savedState = viewers[document?.id];
+   const savedState = viewers[page?.id ?? ''];
    const [isHovered, setIsHovered] = useState(false);
 
-   if (!document) return null;
+   if (!document || !page) return null;
 
    return (
       <div
@@ -79,9 +79,9 @@ function DocumentViewer({ document }: { document: Document }) {
                smoothStep: 0.002,
             }}
          >
-            {isHovered && <Controls documentId={document.id} />}
+            {isHovered && <Controls pageId={page.id} />}
 
-            <TransformTracker documentId={document.id} />
+            <TransformTracker pageId={page.id} />
             <TransformComponent
                wrapperStyle={{
                   width: '100%',
@@ -98,8 +98,8 @@ function DocumentViewer({ document }: { document: Document }) {
                }}
             >
                <img
-                  src={document.cloudinaryUrl}
-                  alt={document.title}
+                  src={page.imageUrl}
+                  alt={page.title}
                   className="w-fit max-h-[70vh] shadow-sm"
                />
             </TransformComponent>

@@ -2,8 +2,8 @@ import { DocumentCard } from '@/components/documents/DocumentCard';
 import { useSession } from '@/lib/auth-client';
 import { trpc } from '@/lib/trpc';
 import { AppRouter } from '@server/trpc/router';
-import { Document, isContributor, isEditor } from '@shared';
-import { TRPCClientError } from '@trpc/client';
+import { isContributor, isEditor } from '@shared';
+import { TRPCClientErrorLike } from '@trpc/client';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import SearchBar from '@/components/shared/SearchBar';
@@ -51,7 +51,7 @@ function CollectionDetails() {
       },
       {
          enabled: debouncedSearch.length > 0,
-         placeholderData: (prev: Document) => prev,
+         placeholderData: (prev) => prev,
          staleTime: 1000,
       },
    );
@@ -63,7 +63,7 @@ function CollectionDetails() {
          utils.collections.getById.invalidate({ id: id! });
          setIsEditOpen(false);
       },
-      onError: (err: TRPCClientError<AppRouter>) => {
+      onError: (err: TRPCClientErrorLike<AppRouter>) => {
          setEditError(err.message);
       },
    });
@@ -72,7 +72,7 @@ function CollectionDetails() {
       onSuccess: () => {
          navigate('/collections', { replace: true });
       },
-      onError: (err: TRPCClientError<AppRouter>) => {
+      onError: (err: TRPCClientErrorLike<AppRouter>) => {
          setDeleteError(err.message);
       },
    });
@@ -92,7 +92,7 @@ function CollectionDetails() {
    };
 
    const handleDelete = async () => {
-      deleteCollection.mutate({ id });
+      deleteCollection.mutate({ id: id as string });
    };
 
    const isSearchActive = debouncedSearch.length > 0;
@@ -132,7 +132,7 @@ function CollectionDetails() {
             </p>
          ) : (
             <div className="grid grid-cols-3 gap-4 transition-opacity duration-150">
-               {displayedDocuments.map((document: Document) => (
+               {displayedDocuments.map((document) => (
                   <DocumentCard document={document} key={document.id} />
                ))}
             </div>

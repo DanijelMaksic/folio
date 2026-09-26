@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { TRPCClientError } from '@trpc/client';
+import { TRPCClientErrorLike } from '@trpc/client';
 import type { AppRouter } from '@server/trpc/router';
 import { Document } from '@shared';
 
@@ -17,8 +17,8 @@ export default function UploadDocument() {
    const [error, setError] = useState('');
 
    const upload = trpc.documents.upload.useMutation({
-      onSuccess: (doc: Document) => navigate(`/documents/${doc.id}`),
-      onError: (err: TRPCClientError<AppRouter>) => setError(err.message),
+      onSuccess: (doc) => navigate(`/documents/${doc.id}`),
+      onError: (err: TRPCClientErrorLike<AppRouter>) => setError(err.message),
    });
 
    const handleSubmit = async () => {
@@ -27,11 +27,14 @@ export default function UploadDocument() {
       const reader = new FileReader();
       reader.onload = () => {
          const base64 = reader.result as string;
+
+         const fileType = file.type === 'application/pdf' ? 'pdf' : 'image';
+
          upload.mutate({
             title,
             description,
             fileBase64: base64,
-            fileType: file.type,
+            fileType: fileType,
          });
       };
       reader.readAsDataURL(file);

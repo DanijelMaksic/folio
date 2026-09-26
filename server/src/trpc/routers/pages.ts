@@ -1,8 +1,6 @@
 import { db } from '@/db/index.js';
-import { documentPages } from '@/db/schema/document-pages.js';
-import { transcriptions } from '@/db/schema/transcriptions.js';
-import { protectedProcedure, publicProcedure, router } from '@/trpc/trpc.js';
-import { isEditor } from '@folio/shared';
+import { pages } from '@/db/schema/pages.js';
+import { publicProcedure, router } from '@/trpc/trpc.js';
 import { TRPCError } from '@trpc/server';
 import { and, asc, eq, sql } from 'drizzle-orm';
 import z from 'zod';
@@ -12,22 +10,24 @@ export const pagesRouter = router({
    getByDocument: publicProcedure
       .input(z.object({ documentId: z.string() }))
       .query(async ({ ctx, input }) => {
-         const pages = await db
+         const documentPages = await db
             .select({
-               id: documentPages.id,
-               pageNumber: documentPages.pageNumber,
-               imageUrl: documentPages.imageUrl,
-               createdAt: documentPages.createdAt,
+               id: pages.id,
+               pageNumber: pages.pageNumber,
+               imageUrl: pages.imageUrl,
+               createdAt: pages.createdAt,
                // Overall page status — approved if any transcription is approved
                approvedTranscriptionCount: sql<number>`(
                SELECT COUNT(*) FROM transcriptions
-               WHERE page_id = ${documentPages.id}
+               WHERE page_id = ${pages.id}
                AND status = 'approved'
             )`,
             })
-            .from(documentPages)
-            .where(eq(documentPages.documentId, input.documentId))
-            .orderBy(asc(documentPages.pageNumber));
+            .from(pages)
+            .where(eq(pages.documentId, input.documentId))
+            .orderBy(asc(pages.pageNumber));
+
+         return documentPages;
       }),
 
    // Returns a single page by id
@@ -36,8 +36,8 @@ export const pagesRouter = router({
       .query(async ({ ctx, input }) => {
          const [page] = await db
             .select()
-            .from(documentPages)
-            .where(eq(documentPages.id, input.pageId))
+            .from(pages)
+            .where(eq(pages.id, input.pageId))
             .limit(1);
 
          if (!page) throw new TRPCError({ code: 'NOT_FOUND' });
@@ -56,11 +56,11 @@ export const pagesRouter = router({
       .query(async ({ ctx, input }) => {
          const [page] = await db
             .select()
-            .from(documentPages)
+            .from(pages)
             .where(
                and(
-                  eq(documentPages.documentId, input.documentId),
-                  eq(documentPages.pageNumber, input.pageNumber),
+                  eq(pages.documentId, input.documentId),
+                  eq(pages.pageNumber, input.pageNumber),
                ),
             )
             .limit(1);

@@ -10,8 +10,8 @@ function RevisionHistoryTab() {
 
    const canTranscribe = isContributor(user?.globalRole);
 
-   const { data: transcription } = trpc.transcriptions.getByDocument.useQuery(
-      { documentId: id! },
+   const { data: transcription } = trpc.transcriptions.getByPage.useQuery(
+      { pageId: id! },
       {
          enabled: canTranscribe,
       },

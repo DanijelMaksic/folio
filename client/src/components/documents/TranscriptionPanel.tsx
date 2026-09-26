@@ -5,10 +5,10 @@ import { useEffect, useState } from 'react';
 
 function TranscriptionPanel({
    transcription,
-   id: documentId,
+   pageId,
 }: {
-   transcription: Transcription;
-   id: string;
+   transcription?: Transcription;
+   pageId: string;
 }) {
    const [transcriptionContent, setTranscriptionContent] = useState('');
 
@@ -19,13 +19,13 @@ function TranscriptionPanel({
    const utils = trpc.useUtils();
 
    const createMutation = trpc.transcriptions.create.useMutation({
-      onSuccess: () => utils.transcriptions.getByDocument.invalidate(),
+      onSuccess: () => utils.transcriptions.getByPage.invalidate(),
    });
 
    const updateMutation = trpc.transcriptions.update.useMutation();
 
    const submitMutation = trpc.transcriptions.submit.useMutation({
-      onSuccess: () => utils.transcriptions.getByDocument.invalidate(),
+      onSuccess: () => utils.transcriptions.getByPage.invalidate(),
    });
 
    // Sync textarea when transcription loads
@@ -65,9 +65,7 @@ function TranscriptionPanel({
          {!transcription ? (
             <button
                className="text-sm underline"
-               onClick={() =>
-                  createMutation.mutate({ documentId: documentId! })
-               }
+               onClick={() => createMutation.mutate({ pageId: pageId! })}
                disabled={createMutation.isPending}
             >
                Start transcribing

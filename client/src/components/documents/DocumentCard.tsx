@@ -2,8 +2,7 @@ import { Document } from '@shared';
 import { Link } from 'react-router-dom';
 
 export function DocumentCard({ document }: { document: Document }) {
-   const { id, title, cloudinaryUrl, uploaderName, hasApprovedTranscription } =
-      document;
+   const { id, title, uploaderName, coverImageUrl } = document;
 
    return (
       <Link
@@ -13,7 +12,7 @@ export function DocumentCard({ document }: { document: Document }) {
          <span className="absolute -inset-px m-0 bg-linear-to-t from-gray-800 group-hover:from-gray-900 z-10 pointer-events-none rounded-xl md:rounded-2xl transition duration-300 group-hover:saturate-120" />
 
          <img
-            src={cloudinaryUrl}
+            src={coverImageUrl}
             alt="Document image"
             className="absolute inset-0 h-full w-full object-cover rounded-xl md:rounded-2xl"
          />
@@ -23,7 +22,7 @@ export function DocumentCard({ document }: { document: Document }) {
          <div className="z-20 space-y-0.5">
             {!uploaderName ? (
                <span className="space-x-2 text-sm text-gray-300/70">
-                  {hasApprovedTranscription ? 'Transcribed' : 'Not transcribed'}
+                  {/* {hasApprovedTranscription ? 'Transcribed' : 'Not transcribed'} */}
                </span>
             ) : (
                <div className="space-x-2 text-sm text-gray-300/70">

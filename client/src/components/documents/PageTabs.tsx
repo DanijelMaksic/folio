@@ -4,16 +4,16 @@ import RevisionHistoryTab from '@/components/documents/RevisionHistoryTab';
 import OverviewTab from '@/components/documents/OverviewTab';
 import { trpc } from '@/lib/trpc';
 
-function DocumentTabs({
+function PageTabs({
    canTranscribe,
-   documentId,
+   pageId,
 }: {
    canTranscribe: boolean;
-   documentId: string;
+   pageId: string;
 }) {
    const { data: approvedTranscription } =
-      trpc.transcriptions.getApprovedByDocument.useQuery({
-         documentId,
+      trpc.transcriptions.getApprovedByPage.useQuery({
+         pageId,
       });
 
    const hiddenStyle = `${!canTranscribe && 'hidden'}`;
@@ -48,4 +48,4 @@ function DocumentTabs({
    );
 }
 
-export default DocumentTabs;
+export default PageTabs;

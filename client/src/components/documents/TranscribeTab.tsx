@@ -12,15 +12,15 @@ function TranscribeTab() {
 
    const canTranscribe = isContributor(user?.globalRole);
 
-   const { data: transcription } = trpc.transcriptions.getByDocument.useQuery(
-      { documentId: id! },
+   const { data: transcription } = trpc.transcriptions.getByPage.useQuery(
+      { pageId: id! },
       {
          enabled: canTranscribe,
       },
    );
 
-   const { data: document } = trpc.documents.getById.useQuery({
-      id: id!,
+   const { data: page } = trpc.pages.getById.useQuery({
+      pageId: id!,
    });
 
    if (isPending) return null;
@@ -29,9 +29,11 @@ function TranscribeTab() {
 
    return (
       <div className="grid grid-cols-2 gap-4">
-         <DocumentViewer document={document} />
+         <DocumentViewer page={page} />
 
-         {id && <TranscriptionPanel transcription={transcription} id={id} />}
+         {id && (
+            <TranscriptionPanel transcription={transcription} pageId={id} />
+         )}
       </div>
    );
 }
