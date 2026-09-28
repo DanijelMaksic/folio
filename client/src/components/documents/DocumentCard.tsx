@@ -12,7 +12,7 @@ export function DocumentCard({ document }: { document: Document }) {
          <span className="absolute -inset-px m-0 bg-linear-to-t from-gray-800 group-hover:from-gray-900 z-10 pointer-events-none rounded-xl md:rounded-2xl transition duration-300 group-hover:saturate-120" />
 
          <img
-            src={coverImageUrl}
+            src={coverImageUrl ?? undefined}
             alt="Document image"
             className="absolute inset-0 h-full w-full object-cover rounded-xl md:rounded-2xl"
          />
@@ -23,16 +23,11 @@ export function DocumentCard({ document }: { document: Document }) {
             {!uploaderName ? (
                <span className="space-x-2 text-sm text-gray-300/70">
                   {/* {hasApprovedTranscription ? 'Transcribed' : 'Not transcribed'} */}
+                  s
                </span>
             ) : (
                <div className="space-x-2 text-sm text-gray-300/70">
                   <span>{uploaderName}</span>
-                  <span>•</span>
-                  <span>
-                     {hasApprovedTranscription
-                        ? 'Transcribed'
-                        : 'Not Transcribed'}
-                  </span>
                </div>
             )}
 

@@ -6,12 +6,13 @@ import { isContributor } from '@shared';
 import { useParams } from 'react-router-dom';
 
 function OverviewTab() {
-   const { id } = useParams<{ id: string }>();
+   const { id, pageNumber } = useParams<{ id: string; pageNumber: string }>();
    const { data: session } = useSession();
    const user = session?.user;
 
-   const { data: page } = trpc.pages.getById.useQuery({
-      pageId: id!,
+   const { data: page } = trpc.pages.getByPageNumber.useQuery({
+      documentId: id!,
+      pageNumber: Number(pageNumber),
    });
 
    const placeholderType = !user
@@ -21,7 +22,10 @@ function OverviewTab() {
         : 'viewer';
 
    const { data: approvedTranscription } =
-      trpc.transcriptions.getApprovedByPage.useQuery({ pageId: id! });
+      trpc.transcriptions.getApprovedByPage.useQuery(
+         { pageId: page?.id! },
+         { enabled: !!page?.id },
+      );
 
    return (
       <div className="grid grid-cols-2 gap-4">

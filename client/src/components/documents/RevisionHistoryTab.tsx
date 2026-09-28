@@ -1,6 +1,6 @@
 import { useSession } from '@/lib/auth-client';
 import { trpc } from '@/lib/trpc';
-import { isContributor, TranscriptionRevision } from '@shared';
+import { isContributor } from '@shared';
 import { Navigate, useParams } from 'react-router-dom';
 
 function RevisionHistoryTab() {
@@ -34,7 +34,7 @@ function RevisionHistoryTab() {
                   No revisions yet.
                </li>
             )}
-            {revisions?.map((rev: TranscriptionRevision) => (
+            {revisions?.map((rev) => (
                <li
                   key={rev.id}
                   className="text-xs border rounded p-2 space-y-1"

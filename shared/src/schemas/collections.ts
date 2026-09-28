@@ -21,15 +21,6 @@ export const listMyCollectionsSchema = listCollectionsSchema.extend({
    userId: z.string(),
 });
 
-export const collectionSchema = z.object({
-   id: z.string(),
-   title: z.string(),
-   description: z.string().nullable(),
-   createdBy: z.string(),
-   creatorName: z.string(),
-   coverImageUrl: z.string().nullable().optional(),
-});
-
 export const updateCollectionSchema = createCollectionSchema
    .partial()
    .extend({ id: z.string(), collectionId: z.string().nullable().optional() });
@@ -37,4 +28,3 @@ export const updateCollectionSchema = createCollectionSchema
 export type CreateCollectionInput = z.infer<typeof createCollectionSchema>;
 export type ListCollectionInput = z.infer<typeof listCollectionsSchema>;
 export type ListMyCollectionInput = z.infer<typeof listMyCollectionsSchema>;
-export type Collection = z.infer<typeof collectionSchema>;

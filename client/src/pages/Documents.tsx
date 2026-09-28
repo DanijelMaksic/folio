@@ -1,6 +1,6 @@
 import { trpc } from '@/lib/trpc';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Document, isContributor } from '@shared';
+import { isContributor } from '@shared';
 import { Button } from '@/components/ui/button';
 import { useSession } from '@/lib/auth-client';
 import { DocumentCard } from '@/components/documents/DocumentCard.js';
@@ -129,7 +129,7 @@ export default function Documents() {
             </p>
          ) : (
             <div className="grid grid-cols-3 gap-4 transition-opacity duration-150">
-               {documents.map((document: Document) => (
+               {documents.map((document) => (
                   <DocumentCard document={document} key={document.id} />
                ))}
             </div>

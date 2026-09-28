@@ -1,13 +1,14 @@
 import { Worker, Job } from 'bullmq';
 import { connection } from '@/lib/queue.js';
 import { db } from '@/db/index.js';
-import { documents, documentPages } from '@/db/schema/index.js';
 import { eq } from 'drizzle-orm';
 import cloudinary from '@/lib/cloudinary.js';
 
 // pdfjs-dist needs a canvas implementation in Node
 import { getDocument, type PDFDocumentProxy } from 'pdfjs-dist';
-import { createCanvas } from 'canvas';
+const { createCanvas } = await import('canvas');
+import { documents } from '@/db/schema/documents.js';
+import { pages } from '@/db/schema/pages.js';
 
 export interface PdfJobData {
    documentId: string;
@@ -63,8 +64,9 @@ const processPdf = async (job: Job<PdfJobData>) => {
                .end(imageBuffer);
          });
 
-         await db.insert(documentPages).values({
+         await db.insert(pages).values({
             documentId,
+            title: `Page ${i}`,
             pageNumber: i,
             imageUrl: uploaded.secure_url,
             cloudinaryPublicId: uploaded.public_id,

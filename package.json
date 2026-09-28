@@ -28,5 +28,11 @@
    "overrides": {
       "esbuild": "^0.25.0",
       "shell-quote": "^1.8.5"
+   },
+   "allowScripts": {
+      "canvas@3.2.3": true,
+      "esbuild@0.25.12": true,
+      "esbuild@0.28.1": true,
+      "msgpackr-extract@3.0.4": true
    }
 }

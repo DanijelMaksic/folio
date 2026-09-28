@@ -1,8 +1,7 @@
 import { pgTable, text, timestamp, index, unique } from 'drizzle-orm/pg-core';
 import { transcriptionStatusEnum } from './enums.js';
 import { user } from './auth.js';
-import { documents } from './documents.js';
-import { documentPages } from '@/db/schema/document-pages.js';
+import { pages } from '@/db/schema/pages.js';
 
 export const transcriptions = pgTable(
    'transcriptions',
@@ -12,7 +11,7 @@ export const transcriptions = pgTable(
          .$defaultFn(() => crypto.randomUUID()),
       pageId: text()
          .notNull()
-         .references(() => documentPages.id, { onDelete: 'cascade' }),
+         .references(() => pages.id, { onDelete: 'cascade' }),
       userId: text()
          .notNull()
          .references(() => user.id, { onDelete: 'cascade' }),

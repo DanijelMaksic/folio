@@ -72,6 +72,7 @@ export const documentsRouter = router({
          await db.insert(pages).values({
             documentId: doc.id,
             pageNumber: 1,
+            title: doc.title,
             imageUrl: uploaded.secure_url,
             cloudinaryPublicId: uploaded.public_id,
          });

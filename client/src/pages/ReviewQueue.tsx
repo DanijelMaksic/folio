@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { trpc } from '../lib/trpc';
 import { useSession } from '../lib/auth-client';
-import { isEditor, QueueItem } from '@folio/shared';
+import { isEditor } from '@folio/shared';
 import {
    Card,
    CardContent,
@@ -39,7 +39,7 @@ export default function ReviewQueue() {
       <div className="p-6 max-w-4xl mx-auto">
          <h1 className="text-2xl font-semibold mb-6">Review Queue</h1>
          <div className="flex flex-col gap-4">
-            {queue.map((item: QueueItem) => (
+            {queue.map((item) => (
                <Card key={item.id}>
                   <CardHeader>
                      <CardTitle className="text-lg">

@@ -36,8 +36,10 @@ export const updateDocumentSchema = z.object({
 
 export const documentPageSchema = z.object({
    id: z.string(),
-   documentId: z.string(),
+   documentId: z.string().nullable(),
    pageNumber: z.number(),
+   title: z.string(),
+   description: z.string().nullable(),
    imageUrl: z.string(),
    cloudinaryPublicId: z.string(),
    createdAt: z.string(),

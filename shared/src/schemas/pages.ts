@@ -12,3 +12,5 @@ export const pageSchema = z.object({
 });
 
 export type Page = z.infer<typeof pageSchema>;
+
+// TODO: edit page input schema
