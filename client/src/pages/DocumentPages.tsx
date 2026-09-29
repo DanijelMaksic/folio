@@ -34,14 +34,20 @@ function DocumentPages() {
    const utils = trpc.useUtils();
 
    const { data: document, isLoading: isLoadingDocument } =
-      trpc.documents.getById.useQuery({ id: id! });
+      trpc.documents.getById.useQuery(
+         { id: id! },
+         {
+            refetchInterval: (query) =>
+               query.state.data?.status === 'processing' ? 2000 : false,
+         },
+      );
 
    const { data: pages, isLoading: isLoadingPages } =
       trpc.pages.getByDocument.useQuery(
          { documentId: id! },
          {
             // Poll every 3 seconds while processing
-            refetchInterval: document?.status === 'processing' ? 3000 : false,
+            refetchInterval: document?.status === 'processing' ? 2000 : false,
          },
       );
 

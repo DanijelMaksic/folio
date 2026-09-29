@@ -31,19 +31,19 @@ export const pagesRouter = router({
       }),
 
    // Returns a single page by id
-   getById: publicProcedure
-      .input(z.object({ pageId: z.string() }))
-      .query(async ({ ctx, input }) => {
-         const [page] = await db
-            .select()
-            .from(pages)
-            .where(eq(pages.id, input.pageId))
-            .limit(1);
+   // getById: publicProcedure
+   //    .input(z.object({ pageId: z.string() }))
+   //    .query(async ({ ctx, input }) => {
+   //       const [page] = await db
+   //          .select()
+   //          .from(pages)
+   //          .where(eq(pages.id, input.pageId))
+   //          .limit(1);
 
-         if (!page) throw new TRPCError({ code: 'NOT_FOUND' });
+   //       if (!page) throw new TRPCError({ code: 'NOT_FOUND' });
 
-         return page;
-      }),
+   //       return page;
+   //    }),
 
    // Returns a single page by document id and page number — used for URL-based navigation
    getByPageNumber: publicProcedure

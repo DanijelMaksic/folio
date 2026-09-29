@@ -5,7 +5,10 @@ import { eq } from 'drizzle-orm';
 import cloudinary from '@/lib/cloudinary.js';
 
 // pdfjs-dist needs a canvas implementation in Node
-import { getDocument, type PDFDocumentProxy } from 'pdfjs-dist';
+import {
+   getDocument,
+   type PDFDocumentProxy,
+} from 'pdfjs-dist/legacy/build/pdf.mjs';
 const { createCanvas } = await import('canvas');
 import { documents } from '@/db/schema/documents.js';
 import { pages } from '@/db/schema/pages.js';
@@ -25,13 +28,23 @@ const renderPageToBuffer = async (
    const canvas = createCanvas(viewport.width, viewport.height);
    const context = canvas.getContext('2d');
 
+   // pdfjs-dist needs a globalThis.document-like object to resolve fonts
+   // Set a minimal global before rendering
+   (globalThis as any).document = {
+      createElement: (tag: string) => {
+         if (tag === 'canvas') return createCanvas(1, 1);
+         return {};
+      },
+      documentElement: { style: {} },
+   };
+
    await page.render({
       canvasContext: context as unknown as CanvasRenderingContext2D,
       viewport,
       canvas: canvas as unknown as HTMLCanvasElement,
    }).promise;
 
-   return canvas.toBuffer('image/jpeg', { quality: 0.9 });
+   return canvas.toBuffer('image/png');
 };
 
 const processPdf = async (job: Job<PdfJobData>) => {
@@ -48,6 +61,7 @@ const processPdf = async (job: Job<PdfJobData>) => {
 
       for (let i = 1; i <= totalPages; i++) {
          const imageBuffer = await renderPageToBuffer(pdf, i);
+         console.log(`Page ${i} buffer size:`, imageBuffer.length, 'bytes');
 
          const uploaded = await new Promise<{
             secure_url: string;

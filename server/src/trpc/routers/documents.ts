@@ -16,13 +16,6 @@ import { db } from '@/db/index.js';
 import { count } from 'drizzle-orm';
 import { pdfQueue } from '@/lib/queue.js';
 
-const coverImageSubquery = (documentId: string) => sql<string | null>`(
-  SELECT image_url FROM document_pages
-  WHERE document_id = ${documentId}
-  AND page_number = 1
-  LIMIT 1
-)`;
-
 export const documentsRouter = router({
    upload: protectedProcedure
       .input(uploadDocumentSchema)
@@ -53,31 +46,37 @@ export const documentsRouter = router({
             return doc;
          }
 
-         // Single image — upload to Cloudinary and create page immediately
-         const uploaded = await cloudinary.uploader.upload(input.fileBase64, {
-            folder: 'folio/documents',
-            resource_type: 'image',
-         });
+         if (input.fileType === 'image') {
+            const [doc] = await db
+               .insert(documents)
+               .values({
+                  title: input.title,
+                  description: input.description ?? null,
+                  uploadedBy: ctx.user.id,
+                  status: 'ready',
+               })
+               .returning();
 
-         const [doc] = await db
-            .insert(documents)
-            .values({
-               title: input.title,
-               description: input.description ?? null,
-               uploadedBy: ctx.user.id,
-               status: 'ready',
-            })
-            .returning();
+            for (let i = 0; i < input.files.length; i++) {
+               const uploaded = await cloudinary.uploader.upload(
+                  input.files[i],
+                  {
+                     folder: 'folio/documents',
+                     resource_type: 'image',
+                  },
+               );
 
-         await db.insert(pages).values({
-            documentId: doc.id,
-            pageNumber: 1,
-            title: doc.title,
-            imageUrl: uploaded.secure_url,
-            cloudinaryPublicId: uploaded.public_id,
-         });
+               await db.insert(pages).values({
+                  documentId: doc.id,
+                  pageNumber: i + 1,
+                  title: `Page ${i + 1}`,
+                  imageUrl: uploaded.secure_url,
+                  cloudinaryPublicId: uploaded.public_id,
+               });
+            }
 
-         return doc;
+            return doc;
+         }
       }),
 
    list: publicProcedure
@@ -144,15 +143,15 @@ export const documentsRouter = router({
                updatedAt: documents.updatedAt,
                uploaderName: user.name,
                coverImageUrl: sql<string | null>`(
-            SELECT image_url FROM document_pages
-            WHERE document_id = ${documents.id}
-            AND page_number = 1
-            LIMIT 1
-          )`,
+                 SELECT image_url FROM document_pages
+                 WHERE document_id = ${documents.id}
+                 AND page_number = 1
+                 LIMIT 1
+               )`,
                pageCount: sql<number>`(
-            SELECT COUNT(*) FROM document_pages
-            WHERE document_id = ${documents.id}
-          )`,
+                 SELECT COUNT(*) FROM document_pages
+                 WHERE document_id = ${documents.id}
+               )`,
             })
             .from(documents)
             .innerJoin(user, eq(user.id, documents.uploadedBy))
@@ -177,15 +176,15 @@ export const documentsRouter = router({
                createdAt: documents.createdAt,
                updatedAt: documents.updatedAt,
                coverImageUrl: sql<string | null>`(
-            SELECT image_url FROM document_pages
-            WHERE document_id = ${documents.id}
-            AND page_number = 1
-            LIMIT 1
-          )`,
+                 SELECT image_url FROM document_pages
+                 WHERE document_id = "documents"."id"
+                 AND page_number = 1
+                 LIMIT 1
+               )`,
                pageCount: sql<number>`(
-            SELECT COUNT(*) FROM document_pages
-            WHERE document_id = ${documents.id}
-          )`,
+                 SELECT COUNT(*) FROM document_pages
+                 WHERE document_id = ${documents.id}
+               )`,
             })
             .from(documents)
             .where(eq(documents.collectionId, input.collectionId));
