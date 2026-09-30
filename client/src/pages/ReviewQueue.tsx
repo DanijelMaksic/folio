@@ -2,17 +2,12 @@ import { useNavigate } from 'react-router-dom';
 import { trpc } from '../lib/trpc';
 import { useSession } from '../lib/auth-client';
 import { isEditor } from '@folio/shared';
-import {
-   Card,
-   CardContent,
-   CardHeader,
-   CardTitle,
-} from '../components/ui/card';
-import { Button } from '../components/ui/button';
+import QueueItem from '@/pages/QueueItem';
 
 export default function ReviewQueue() {
    const navigate = useNavigate();
    const { data: session } = useSession();
+
    const { data: queue, isLoading } = trpc.transcriptions.listQueue.useQuery();
 
    if (!isEditor(session?.user?.globalRole)) {
@@ -40,38 +35,7 @@ export default function ReviewQueue() {
          <h1 className="text-2xl font-semibold mb-6">Review Queue</h1>
          <div className="flex flex-col gap-4">
             {queue.map((item) => (
-               <Card key={item.id}>
-                  <CardHeader>
-                     <CardTitle className="text-lg">
-                        {item.documentTitle}
-                     </CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex items-center justify-between">
-                     <div className="text-sm text-muted-foreground">
-                        <p>
-                           Contributor:{' '}
-                           <span className="font-medium text-foreground">
-                              {item.contributorUsername}
-                           </span>
-                        </p>
-                        <p>
-                           Submitted:{' '}
-                           <span className="font-medium text-foreground">
-                              {item.updatedAt
-                                 ? new Date(item.updatedAt).toLocaleDateString()
-                                 : '—'}
-                           </span>
-                        </p>
-                     </div>
-                     <Button
-                        onClick={() =>
-                           navigate(`/documents/${item.documentId}`)
-                        }
-                     >
-                        Review
-                     </Button>
-                  </CardContent>
-               </Card>
+               <QueueItem key={item.id} item={item} />
             ))}
          </div>
       </div>

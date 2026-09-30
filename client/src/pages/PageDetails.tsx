@@ -65,7 +65,7 @@ function PageDetails() {
    const { data: submittedTranscription } =
       trpc.transcriptions.getSubmittedByPage.useQuery(
          {
-            pageId: id!,
+            pageId: page?.id!,
          },
          {
             enabled: isEditor(user?.globalRole),
@@ -116,7 +116,7 @@ function PageDetails() {
             submittedTranscription.userId !== session?.user?.id && (
                <ReviewPanel
                   submittedTranscription={submittedTranscription}
-                  pageId={id}
+                  pageId={page.id}
                />
             )}
 

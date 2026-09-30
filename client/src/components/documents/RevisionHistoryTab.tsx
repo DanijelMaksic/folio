@@ -4,14 +4,19 @@ import { isContributor } from '@shared';
 import { Navigate, useParams } from 'react-router-dom';
 
 function RevisionHistoryTab() {
-   const { id } = useParams<{ id: string }>();
+   const { id, pageNumber } = useParams<{ id: string; pageNumber: string }>();
    const { data: session, isPending } = useSession();
    const user = session?.user;
 
    const canTranscribe = isContributor(user?.globalRole);
 
+   const { data: page } = trpc.pages.getByPageNumber.useQuery({
+      documentId: id!,
+      pageNumber: Number(pageNumber),
+   });
+
    const { data: transcription } = trpc.transcriptions.getByPage.useQuery(
-      { pageId: id! },
+      { pageId: page?.id! },
       {
          enabled: canTranscribe,
       },

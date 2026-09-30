@@ -183,6 +183,7 @@ export const transcriptionsRouter = router({
          .select({
             id: transcriptions.id,
             pageId: transcriptions.pageId,
+            userId: transcriptions.userId,
             pageNumber: pages.pageNumber,
             documentId: documents.id,
             documentTitle: documents.title,

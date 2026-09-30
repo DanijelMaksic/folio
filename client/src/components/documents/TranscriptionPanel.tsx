@@ -8,7 +8,7 @@ function TranscriptionPanel({
    pageId,
 }: {
    transcription?: Transcription;
-   pageId: string;
+   pageId?: string;
 }) {
    const [transcriptionContent, setTranscriptionContent] = useState('');
 

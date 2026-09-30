@@ -29,7 +29,9 @@ function TranscriptionFilter({
                      data-testid="actions-dropdown-btn"
                      className=" capitalize w-31"
                   >
-                     {status === 'not-transcribed' ? 'not transcribed' : status}
+                     {status === 'all-documents' && 'all documents'}
+                     {status === 'transcribed' && 'transcribed'}
+                     {status === 'not-transcribed' && 'not transcribed'}
                   </Button>
                }
             />

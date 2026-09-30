@@ -62,7 +62,8 @@ function ReviewPanel({
             data-testid="review-status"
             className="text-sm text-muted-foreground"
          >
-            Status: {submittedTranscription.status}
+            <span>Status: </span>
+            <span className="capitalize">{submittedTranscription.status}</span>
          </div>
          <Button onClick={handleApprove} disabled={approveMutation.isPending}>
             Approve

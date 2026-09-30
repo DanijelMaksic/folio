@@ -33,7 +33,10 @@ function TranscribeTab() {
          <DocumentViewer page={page} />
 
          {id && (
-            <TranscriptionPanel transcription={transcription} pageId={id} />
+            <TranscriptionPanel
+               transcription={transcription}
+               pageId={page?.id}
+            />
          )}
       </div>
    );

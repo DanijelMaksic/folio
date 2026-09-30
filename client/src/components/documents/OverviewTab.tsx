@@ -36,9 +36,15 @@ function OverviewTab() {
                <div className="flex gap-6 justify-between items-center">
                   <h2 className="text-lg font-medium">Transcription</h2>
 
-                  <p className="text-sm text-muted-foreground space-y-1 capitalize italic">
-                     Status: {approvedTranscription.status}
-                  </p>
+                  {approvedTranscription?.status &&
+                     user?.id === approvedTranscription.userId && (
+                        <p className="text-sm text-muted-foreground space-y-1 capitalize italic">
+                           Status:{' '}
+                           <span data-testid="transcription-status">
+                              {approvedTranscription?.status}
+                           </span>
+                        </p>
+                     )}
                </div>
                <p>{approvedTranscription.content}</p>
             </div>
