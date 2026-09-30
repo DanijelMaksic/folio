@@ -28,6 +28,8 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 // TODO: Switch to ctx.user.id in trpc procedures
 
+// TODO: Switch from doc to document (in routers escpecially)
+
 export default function App() {
    return (
       <BrowserRouter>

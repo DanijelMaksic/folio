@@ -1,6 +1,8 @@
 import { db } from '@/db/index.js';
+import { documents } from '@/db/schema/documents.js';
 import { pages } from '@/db/schema/pages.js';
-import { publicProcedure, router } from '@/trpc/trpc.js';
+import { protectedProcedure, publicProcedure, router } from '@/trpc/trpc.js';
+import { isContributor, updatePageSchema } from '@folio/shared';
 import { TRPCError } from '@trpc/server';
 import { and, asc, eq, sql } from 'drizzle-orm';
 import z from 'zod';
@@ -15,6 +17,7 @@ export const pagesRouter = router({
                id: pages.id,
                pageNumber: pages.pageNumber,
                imageUrl: pages.imageUrl,
+               title: pages.title,
                createdAt: pages.createdAt,
                // Overall page status — approved if any transcription is approved
                approvedTranscriptionCount: sql<number>`(
@@ -68,5 +71,48 @@ export const pagesRouter = router({
          if (!page) throw new TRPCError({ code: 'NOT_FOUND' });
 
          return page;
+      }),
+
+   update: protectedProcedure
+      .input(updatePageSchema)
+      .mutation(async ({ ctx, input }) => {
+         if (!isContributor(ctx.user.globalRole)) {
+            throw new TRPCError({
+               code: 'FORBIDDEN',
+               message: 'Only contributors and above can edit pages',
+            });
+         }
+
+         const { id, ...fields } = input;
+
+         const [updated] = await db
+            .update(pages)
+            .set(fields)
+            .where(eq(pages.id, id))
+            .returning();
+
+         if (!updated) throw new TRPCError({ code: 'NOT_FOUND' });
+
+         return updated;
+      }),
+
+   delete: protectedProcedure
+      .input(z.object({ id: z.string() }))
+      .mutation(async ({ ctx, input }) => {
+         if (!isContributor(ctx.user.globalRole)) {
+            throw new TRPCError({
+               code: 'FORBIDDEN',
+               message: 'Only contributors and above can delete pages',
+            });
+         }
+
+         const [deleted] = await db
+            .delete(pages)
+            .where(eq(pages.id, input.id))
+            .returning();
+
+         if (!deleted) throw new TRPCError({ code: 'NOT_FOUND' });
+
+         return deleted;
       }),
 });

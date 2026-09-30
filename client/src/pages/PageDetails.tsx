@@ -20,7 +20,10 @@ function PageDetails() {
    const [editDescription, setEditDescription] = useState('');
    const { resetViewerState } = useViewerStore();
 
-   const { id, pageNumber } = useParams<{ id: string; pageNumber: string }>();
+   const { id: documentId, pageNumber } = useParams<{
+      id: string;
+      pageNumber: string;
+   }>();
    const { data: session } = useSession();
    const user = session?.user;
    const navigate = useNavigate();
@@ -30,19 +33,22 @@ function PageDetails() {
    const utils = trpc.useUtils();
 
    const { data: document } = trpc.documents.getById.useQuery({
-      id: id!,
+      id: documentId!,
    });
 
    const { data: page, isLoading } = trpc.pages.getByPageNumber.useQuery({
-      documentId: id!,
+      documentId: documentId!,
       pageNumber: Number(pageNumber),
    });
 
-   const isMyDocument = document?.uploadedBy === user?.id;
+   const isMyPage = document?.uploadedBy === user?.id;
 
-   const editDocument = trpc.documents.update.useMutation({
+   const editPage = trpc.pages.update.useMutation({
       onSuccess: () => {
-         utils.documents.getById.invalidate({ id: id! });
+         utils.pages.getByPageNumber.invalidate({
+            documentId: documentId!,
+            pageNumber: Number(pageNumber),
+         });
          setIsEditOpen(false);
       },
       onError: (err: TRPCClientErrorLike<AppRouter>) => {
@@ -50,32 +56,32 @@ function PageDetails() {
       },
    });
 
-   const deleteDocument = trpc.documents.delete.useMutation({
+   const deletePage = trpc.pages.delete.useMutation({
       onSuccess: () => {
-         navigate('/documents', { replace: true });
+         navigate(`/documents/${documentId}`, { replace: true });
       },
       onError: (err: TRPCClientErrorLike<AppRouter>) => {
-         resetViewerState(document?.id!);
+         resetViewerState(page?.id!);
          setDeleteError(err.message);
       },
    });
 
    const handleEditOpen = () => {
-      setEditTitle(document?.title ?? '');
-      setEditDescription(document?.description ?? '');
+      setEditTitle(page?.title ?? '');
+      setEditDescription(page?.description ?? '');
       setIsEditOpen(true);
    };
 
    const handleEditSubmit = () => {
-      editDocument.mutate({
-         id: id!,
+      editPage.mutate({
+         id: page?.id!,
          title: editTitle,
          description: editDescription,
       });
    };
 
    const handleDelete = async () => {
-      deleteDocument.mutate({ id: id as string });
+      deletePage.mutate({ id: page?.id as string });
    };
 
    if (isLoading) return <p>Loading...</p>;
@@ -88,23 +94,25 @@ function PageDetails() {
             <h1 className="text-2xl font-semibold">{page.title}</h1>
 
             <ActionsMenu
-               show={canTranscribe && (isMyDocument || editor)}
+               show={canTranscribe && (isMyPage || editor)}
                onEdit={handleEditOpen}
                onDelete={() => setIsDeleteOpen(true)}
             />
          </div>
 
-         {id && <PageTabs canTranscribe={canTranscribe} pageId={id} />}
+         {page.id && (
+            <PageTabs canTranscribe={canTranscribe} pageId={page.id} />
+         )}
 
          <Outlet />
 
          {isEditOpen && (
             <EditModal
-               heading="Edit Document"
+               heading="Edit Page"
                error={editError}
                title={editTitle}
                description={editDescription}
-               isPending={editDocument.isPending}
+               isPending={editPage.isPending}
                onTitleChange={setEditTitle}
                onDescriptionChange={setEditDescription}
                onEdit={handleEditSubmit}
@@ -119,7 +127,7 @@ function PageDetails() {
             <DeleteModal
                heading="Delete Document"
                error={deleteError}
-               isPending={deleteDocument.isPending}
+               isPending={deletePage.isPending}
                onDelete={handleDelete}
                onClose={() => {
                   setIsDeleteOpen(false);

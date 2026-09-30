@@ -184,7 +184,7 @@ function DocumentPages() {
                               className="w-full object-cover aspect-[3/4]"
                            />
                            <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs px-2 py-1 flex items-center justify-between">
-                              <span>Page {page.pageNumber}</span>
+                              <span>{page.title}</span>
                               {page.approvedTranscriptionCount > 0 && (
                                  <span className="bg-green-500 text-white text-xs px-1.5 py-0.5 rounded">
                                     ✓

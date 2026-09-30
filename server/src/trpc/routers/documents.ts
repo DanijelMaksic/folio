@@ -131,7 +131,7 @@ export const documentsRouter = router({
    getById: publicProcedure
       .input(z.object({ id: z.string() }))
       .query(async ({ ctx, input }) => {
-         const [doc] = await db
+         const [document] = await db
             .select({
                id: documents.id,
                title: documents.title,
@@ -157,9 +157,9 @@ export const documentsRouter = router({
             .innerJoin(user, eq(user.id, documents.uploadedBy))
             .where(eq(documents.id, input.id));
 
-         if (!doc) throw new TRPCError({ code: 'NOT_FOUND' });
+         if (!document) throw new TRPCError({ code: 'NOT_FOUND' });
 
-         return doc;
+         return document;
       }),
 
    getByCollection: publicProcedure
