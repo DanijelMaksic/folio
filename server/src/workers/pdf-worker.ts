@@ -3,66 +3,24 @@ import { connection } from '@/lib/queue.js';
 import { db } from '@/db/index.js';
 import { eq } from 'drizzle-orm';
 import cloudinary from '@/lib/cloudinary.js';
-
-// pdfjs-dist needs a canvas implementation in Node
-import {
-   getDocument,
-   type PDFDocumentProxy,
-} from 'pdfjs-dist/legacy/build/pdf.mjs';
-const { createCanvas } = await import('canvas');
 import { documents } from '@/db/schema/documents.js';
 import { pages } from '@/db/schema/pages.js';
+import { pdf } from 'pdf-to-img';
 
 export interface PdfJobData {
    documentId: string;
    fileBase64: string;
 }
 
-const renderPageToBuffer = async (
-   pdf: PDFDocumentProxy,
-   pageNumber: number,
-): Promise<Buffer> => {
-   const page = await pdf.getPage(pageNumber);
-   const viewport = page.getViewport({ scale: 2.0 });
-
-   const canvas = createCanvas(viewport.width, viewport.height);
-   const context = canvas.getContext('2d');
-
-   // pdfjs-dist needs a globalThis.document-like object to resolve fonts
-   // Set a minimal global before rendering
-   (globalThis as any).document = {
-      createElement: (tag: string) => {
-         if (tag === 'canvas') return createCanvas(1, 1);
-         return {};
-      },
-      documentElement: { style: {} },
-   };
-
-   await page.render({
-      canvasContext: context as unknown as CanvasRenderingContext2D,
-      viewport,
-      canvas: canvas as unknown as HTMLCanvasElement,
-   }).promise;
-
-   return canvas.toBuffer('image/png');
-};
-
 const processPdf = async (job: Job<PdfJobData>) => {
    const { documentId, fileBase64 } = job.data;
 
    try {
-      // Strip data URI prefix if present
-      const base64Data = fileBase64.replace(/^data:.+;base64,/, '');
-      const pdfBuffer = Buffer.from(base64Data, 'base64');
+      const doc = await pdf(fileBase64, { scale: 2 });
+      const totalPages = doc.length;
+      let i = 1;
 
-      const pdf = await getDocument({ data: new Uint8Array(pdfBuffer) })
-         .promise;
-      const totalPages = pdf.numPages;
-
-      for (let i = 1; i <= totalPages; i++) {
-         const imageBuffer = await renderPageToBuffer(pdf, i);
-         console.log(`Page ${i} buffer size:`, imageBuffer.length, 'bytes');
-
+      for await (const pageImage of doc) {
          const uploaded = await new Promise<{
             secure_url: string;
             public_id: string;
@@ -75,7 +33,7 @@ const processPdf = async (job: Job<PdfJobData>) => {
                      resolve(result);
                   },
                )
-               .end(imageBuffer);
+               .end(pageImage);
          });
 
          await db.insert(pages).values({
@@ -86,8 +44,8 @@ const processPdf = async (job: Job<PdfJobData>) => {
             cloudinaryPublicId: uploaded.public_id,
          });
 
-         // Report progress back to BullMQ
          await job.updateProgress(Math.round((i / totalPages) * 100));
+         i++;
       }
 
       await db
@@ -100,7 +58,7 @@ const processPdf = async (job: Job<PdfJobData>) => {
          .set({ status: 'failed', updatedAt: new Date() })
          .where(eq(documents.id, documentId));
 
-      throw error; // Re-throw so BullMQ marks the job as failed
+      throw error;
    }
 };
 
