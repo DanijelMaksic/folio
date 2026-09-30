@@ -2,7 +2,7 @@ import { useSearchParams } from 'react-router-dom';
 import AppPagination from '@/components/shared/AppPagination';
 import { trpc } from '@/lib/trpc';
 import { useNavigate } from 'react-router-dom';
-import { Collection, isContributor } from '@shared';
+import { isContributor } from '@shared';
 import { Button } from '@/components/ui/button';
 import { useSession } from '@/lib/auth-client';
 import { CollectionCard } from '@/components/collections/CollectionCard';
@@ -103,11 +103,13 @@ export default function Collections() {
             </div>
          )}
 
-         <AppPagination
-            currentPage={page}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-         />
+         {!collections.length ? null : (
+            <AppPagination
+               currentPage={page}
+               totalPages={totalPages}
+               onPageChange={handlePageChange}
+            />
+         )}
       </div>
    );
 }

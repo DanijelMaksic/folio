@@ -2,14 +2,12 @@ import { Outlet, useNavigate, useParams } from 'react-router-dom';
 import { trpc } from '../lib/trpc';
 import { useSession } from '../lib/auth-client';
 import { isContributor, isEditor } from '@shared';
-import ReviewPanel from '@/components/documents/ReviewPanel';
 import { useState } from 'react';
 import type { TRPCClientErrorLike } from '@trpc/client';
 import { AppRouter } from '@server/trpc/router';
 import DeleteModal from '@/components/shared/DeleteModal';
 import EditModal from '@/components/shared/EditModal';
 import ActionsMenu from '@/components/shared/ActionsMenu';
-import CollectionPickerModal from '@/components/documents/CollectionPickerModal';
 import { useViewerStore } from '@/store/useViewerStore';
 import PageTabs from '@/components/documents/PageTabs';
 
@@ -62,16 +60,6 @@ function PageDetails() {
       },
    });
 
-   const { data: submittedTranscription } =
-      trpc.transcriptions.getSubmittedByPage.useQuery(
-         {
-            pageId: page?.id!,
-         },
-         {
-            enabled: isEditor(user?.globalRole),
-         },
-      );
-
    const handleEditOpen = () => {
       setEditTitle(document?.title ?? '');
       setEditDescription(document?.description ?? '');
@@ -109,16 +97,6 @@ function PageDetails() {
          {id && <PageTabs canTranscribe={canTranscribe} pageId={id} />}
 
          <Outlet />
-
-         {isEditor(session?.user?.globalRole) &&
-            id &&
-            submittedTranscription &&
-            submittedTranscription.userId !== session?.user?.id && (
-               <ReviewPanel
-                  submittedTranscription={submittedTranscription}
-                  pageId={page.id}
-               />
-            )}
 
          {isEditOpen && (
             <EditModal

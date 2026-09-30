@@ -53,7 +53,7 @@ function DocumentPages() {
 
    const { data: collections, isLoading: isLoadingCollections } =
       trpc.collections.getCurrentUserCollections.useQuery(
-         { page: 1, limit: 9, userId: user?.id ?? '' },
+         { page: 1, limit: 9 },
          { enabled: !!user?.id },
       );
 
@@ -123,6 +123,7 @@ function DocumentPages() {
    };
 
    if (isLoadingDocument) return <p>Loading...</p>;
+
    if (!document) return <p>Document not found</p>;
 
    return (

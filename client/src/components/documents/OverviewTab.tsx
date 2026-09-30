@@ -1,4 +1,4 @@
-import DocumentViewer from '@/components/documents/DocumentViewer';
+import PageViewer from '@/components/documents/PageViewer';
 import TranscriptionPlaceholder from '@/components/documents/TranscriptionPlaceholder';
 import { useSession } from '@/lib/auth-client';
 import { trpc } from '@/lib/trpc';
@@ -29,7 +29,7 @@ function OverviewTab() {
 
    return (
       <div className="grid grid-cols-2 gap-4">
-         <DocumentViewer page={page} />
+         <PageViewer page={page} />
 
          {approvedTranscription ? (
             <div className="space-y-3 border rounded-md p-4">

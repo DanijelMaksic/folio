@@ -12,7 +12,7 @@ export default function ReviewQueue() {
 
    if (!isEditor(session?.user?.globalRole)) {
       navigate('/');
-      return null;
+      return <div>403 Forbidden</div>;
    }
 
    if (isLoading) {

@@ -195,7 +195,8 @@ export const transcriptionsRouter = router({
          .innerJoin(pages, eq(pages.id, transcriptions.pageId))
          .innerJoin(documents, eq(documents.id, pages.documentId))
          .innerJoin(user, eq(user.id, transcriptions.userId))
-         .where(eq(transcriptions.status, 'submitted'));
+         .where(eq(transcriptions.status, 'submitted'))
+         .orderBy(desc(transcriptions.updatedAt));
 
       return queue;
    }),
@@ -292,8 +293,8 @@ export const transcriptionsRouter = router({
       }),
 
    // Returns submitted transcription for a page (editor view)
-   getSubmittedByPage: protectedProcedure
-      .input(z.object({ pageId: z.string() }))
+   getSubmittedByPageAndUser: protectedProcedure
+      .input(z.object({ pageId: z.string(), userId: z.string() }))
       .query(async ({ ctx, input }) => {
          if (!isEditor(ctx.user.globalRole)) {
             throw new TRPCError({
@@ -304,6 +305,7 @@ export const transcriptionsRouter = router({
 
          const transcription = await db.query.transcriptions.findFirst({
             where: and(
+               eq(transcriptions.userId, input.userId),
                eq(transcriptions.pageId, input.pageId),
                eq(transcriptions.status, 'submitted'),
             ),

@@ -3,33 +3,25 @@ import { Textarea } from '@/components/ui/textarea';
 import { trpc } from '@/lib/trpc';
 import { SubmittedTranscription } from '@shared';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function ReviewPanel({
    submittedTranscription,
-   pageId,
 }: {
    submittedTranscription: SubmittedTranscription;
-   pageId: string;
 }) {
    const [rejectionReason, setRejectionReason] = useState('');
-
-   const utils = trpc.useUtils();
+   const navigate = useNavigate();
 
    const approveMutation = trpc.transcriptions.approve.useMutation({
       onSuccess: () => {
-         utils.transcriptions.getByPage.invalidate({ pageId });
-         utils.transcriptions.getSubmittedByPage.invalidate({
-            pageId,
-         });
+         navigate('/review');
       },
    });
 
    const rejectMutation = trpc.transcriptions.reject.useMutation({
       onSuccess: () => {
-         utils.transcriptions.getByPage.invalidate({ pageId });
-         utils.transcriptions.getSubmittedByPage.invalidate({
-            pageId,
-         });
+         navigate('/review');
       },
    });
 
@@ -47,24 +39,13 @@ function ReviewPanel({
    }
 
    return (
-      <div className="mt-6 border rounded-lg p-4 space-y-4">
+      <div className="border rounded-lg p-4 space-y-4">
          <h2 className="font-semibold">Review Transcription</h2>
-         <p className="text-sm text-muted-foreground">
-            Submitted by{' '}
-            <span className="font-medium text-foreground">
-               {submittedTranscription.user.username}
-            </span>
-         </p>
+
          <div className="rounded bg-muted p-3 text-sm whitespace-pre-wrap">
             {submittedTranscription.content}
          </div>
-         <div
-            data-testid="review-status"
-            className="text-sm text-muted-foreground"
-         >
-            <span>Status: </span>
-            <span className="capitalize">{submittedTranscription.status}</span>
-         </div>
+
          <Button onClick={handleApprove} disabled={approveMutation.isPending}>
             Approve
          </Button>

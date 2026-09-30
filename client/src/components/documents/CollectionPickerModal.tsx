@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 interface CollectionPickerModalProps {
    isLoadingCollections: boolean;
@@ -21,43 +22,56 @@ function CollectionPickerModal({
    onClose,
    onSave,
 }: CollectionPickerModalProps) {
+   const noCollections = collections?.length === 0;
+
    return (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
          <div className="bg-background rounded-xl p-6 w-full max-w-md space-y-4">
             <h2 className="text-lg font-semibold">Add to collection</h2>
 
-            <div className="grid grid-cols-3 gap-3">
-               {isLoadingCollections ? (
-                  <p>Loading...</p>
-               ) : (
-                  collections?.map((collection) => (
-                     <button
-                        key={collection.id}
-                        onClick={() => {
-                           onSelect(
-                              selectedId === collection.id
-                                 ? null
-                                 : collection.id,
-                           );
-                        }}
-                        className={`border border-gray-300 rounded-md p-4 ${collection.id === selectedId && 'bg-gray-300'}`}
-                     >
-                        {collection.title}
-                     </button>
-                  ))
-               )}
-            </div>
+            {noCollections ? (
+               <div>
+                  <p>You don't have any collections.</p>
+                  <Link to="/collections/create" className="underline">
+                     Create one to get started.
+                  </Link>
+               </div>
+            ) : (
+               <div className="grid grid-cols-3 gap-3">
+                  {isLoadingCollections ? (
+                     <p>Loading...</p>
+                  ) : (
+                     collections?.map((collection) => (
+                        <button
+                           key={collection.id}
+                           onClick={() => {
+                              onSelect(
+                                 selectedId === collection.id
+                                    ? null
+                                    : collection.id,
+                              );
+                           }}
+                           className={`border border-gray-300 rounded-md p-4 ${collection.id === selectedId && 'bg-gray-300'}`}
+                        >
+                           {collection.title}
+                        </button>
+                     ))
+                  )}
+               </div>
+            )}
 
             {error && <p className="text-sm text-destructive">{error}</p>}
 
             <div className="flex justify-end gap-2">
                <Button variant="outline" onClick={onClose}>
-                  Cancel
+                  {noCollections ? 'Close' : 'Cancel'}
                </Button>
 
-               <Button onClick={onSave} disabled={addToColPending}>
-                  {addToColPending ? 'Saving...' : 'Save'}
-               </Button>
+               {noCollections ? null : (
+                  <Button onClick={onSave} disabled={addToColPending}>
+                     {addToColPending ? 'Saving...' : 'Save'}
+                  </Button>
+               )}
             </div>
          </div>
       </div>

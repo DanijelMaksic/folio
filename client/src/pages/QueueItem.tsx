@@ -57,7 +57,7 @@ function QueueItem({ item }: { item: QueueItemProps }) {
             <Button
                onClick={() =>
                   navigate(
-                     `/documents/${item.documentId}/pages/${item.pageNumber}`,
+                     `/review/${item.documentId}/pages/${item.pageNumber}?userId=${item.userId}`,
                   )
                }
                disabled={session?.user.id === item.userId}

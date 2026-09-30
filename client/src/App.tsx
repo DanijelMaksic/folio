@@ -15,6 +15,7 @@ import Collections from '@/components/collections/Collections';
 import CollectionDetails from '@/pages/CollectionDetails';
 import CreateCollection from '@/components/collections/CreateCollection';
 import PageDetails from '@/pages/PageDetails';
+import ReviewPage from '@/pages/ReviewPage';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
    const { data: session, isPending } = useSession();
@@ -22,6 +23,10 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
    if (!session) return <Navigate to="/login" replace />;
    return <>{children}</>;
 }
+
+// TODO: When transcribing, if user hits sumbit before save, revisions tab shows nothing and transcription is not submitted
+
+// TODO: Switch to ctx.user.id in trpc procedures
 
 export default function App() {
    return (
@@ -67,6 +72,16 @@ export default function App() {
                      </ProtectedRoute>
                   }
                />
+
+               <Route
+                  path="/review/:id/pages/:pageNumber"
+                  element={
+                     <ProtectedRoute>
+                        <ReviewPage />
+                     </ProtectedRoute>
+                  }
+               />
+
                <Route
                   path="/account"
                   element={

@@ -47,7 +47,7 @@ const TransformTracker = ({ pageId }: { pageId: string }) => {
    return null;
 };
 
-function DocumentViewer({ page }: { page: Page | undefined }) {
+function PageViewer({ page }: { page: Page | undefined }) {
    const { viewers } = useViewerStore();
    const savedState = viewers[page?.id ?? ''];
    const [isHovered, setIsHovered] = useState(false);
@@ -108,4 +108,4 @@ function DocumentViewer({ page }: { page: Page | undefined }) {
    );
 }
 
-export default DocumentViewer;
+export default PageViewer;

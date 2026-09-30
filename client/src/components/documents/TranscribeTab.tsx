@@ -1,4 +1,4 @@
-import DocumentViewer from '@/components/documents/DocumentViewer';
+import PageViewer from '@/components/documents/PageViewer';
 import TranscriptionPanel from '@/components/documents/TranscriptionPanel';
 import { useSession } from '@/lib/auth-client';
 import { trpc } from '@/lib/trpc';
@@ -30,7 +30,7 @@ function TranscribeTab() {
 
    return (
       <div className="grid grid-cols-2 gap-4">
-         <DocumentViewer page={page} />
+         <PageViewer page={page} />
 
          {id && (
             <TranscriptionPanel

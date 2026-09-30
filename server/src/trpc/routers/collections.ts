@@ -6,7 +6,6 @@ import {
    createCollectionSchema,
    isContributor,
    listCollectionsSchema,
-   listMyCollectionsSchema,
    updateCollectionSchema,
 } from '@folio/shared';
 import { TRPCError } from '@trpc/server';
@@ -96,16 +95,15 @@ export const collectionsRouter = router({
          return collection;
       }),
 
-   // Fetches the current user's collections
    getCurrentUserCollections: protectedProcedure
-      .input(listMyCollectionsSchema)
+      .input(listCollectionsSchema)
       .query(async ({ ctx, input }) => {
          const offset = (input.page - 1) * input.limit;
 
          const result = await db
             .select()
             .from(collections)
-            .where(eq(collections.createdBy, input.userId))
+            .where(eq(collections.createdBy, ctx.user.id))
             .limit(input.limit)
             .offset(offset)
             .orderBy(desc(collections.createdAt));

@@ -135,11 +135,13 @@ export default function Documents() {
             </div>
          )}
 
-         <AppPagination
-            currentPage={page}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-         />
+         {!documents.length ? null : (
+            <AppPagination
+               currentPage={page}
+               totalPages={totalPages}
+               onPageChange={handlePageChange}
+            />
+         )}
       </div>
    );
 }
