@@ -34,7 +34,7 @@ export default function UploadDocument() {
    const fileInputRef = useRef<HTMLInputElement>(null);
 
    const upload = trpc.documents.upload.useMutation({
-      onSuccess: (doc) => navigate(`/documents/${doc.id}`),
+      onSuccess: (document) => navigate(`/documents/${document?.id}`),
       onError: (err: TRPCClientErrorLike<AppRouter>) => setError(err.message),
    });
 
@@ -88,11 +88,13 @@ export default function UploadDocument() {
    };
 
    const handleSubmit = async () => {
-      if (selectedFiles.length === 0 || !title) return;
+      if (!title) return;
       setError('');
 
       try {
-         if (fileType === 'pdf') {
+         if (selectedFiles.length === 0) {
+            upload.mutate({ title, description });
+         } else if (fileType === 'pdf') {
             const fileBase64 = await toBase64(selectedFiles[0].file);
             upload.mutate({ fileType: 'pdf', title, description, fileBase64 });
          } else {
@@ -213,10 +215,7 @@ export default function UploadDocument() {
 
          {error && <p className="text-sm text-destructive">{error}</p>}
 
-         <Button
-            onClick={handleSubmit}
-            disabled={upload.isPending || selectedFiles.length === 0 || !title}
-         >
+         <Button onClick={handleSubmit} disabled={upload.isPending || !title}>
             {upload.isPending ? 'Uploading...' : 'Upload'}
          </Button>
       </div>

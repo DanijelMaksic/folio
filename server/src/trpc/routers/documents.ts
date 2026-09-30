@@ -27,8 +27,8 @@ export const documentsRouter = router({
             });
          }
 
-         if (input.fileType === 'pdf') {
-            const [doc] = await db
+         if (input.fileType === 'pdf' && input.fileBase64) {
+            const [document] = await db
                .insert(documents)
                .values({
                   title: input.title,
@@ -39,15 +39,15 @@ export const documentsRouter = router({
                .returning();
 
             await pdfQueue.add('process-pdf', {
-               documentId: doc.id,
+               documentId: document.id,
                fileBase64: input.fileBase64,
             });
 
-            return doc;
+            return document;
          }
 
-         if (input.fileType === 'image') {
-            const [doc] = await db
+         if (input.fileType === 'image' && input.files?.length) {
+            const [document] = await db
                .insert(documents)
                .values({
                   title: input.title,
@@ -67,7 +67,7 @@ export const documentsRouter = router({
                );
 
                await db.insert(pages).values({
-                  documentId: doc.id,
+                  documentId: document.id,
                   pageNumber: i + 1,
                   title: `Page ${i + 1}`,
                   imageUrl: uploaded.secure_url,
@@ -75,8 +75,20 @@ export const documentsRouter = router({
                });
             }
 
-            return doc;
+            return document;
          }
+
+         const [document] = await db
+            .insert(documents)
+            .values({
+               title: input.title,
+               description: input.description ?? null,
+               uploadedBy: ctx.user.id,
+               status: 'ready',
+            })
+            .returning();
+
+         return document;
       }),
 
    list: publicProcedure

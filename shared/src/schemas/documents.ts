@@ -1,31 +1,18 @@
 import { z } from 'zod';
 
-export const uploadDocumentSchema = z.discriminatedUnion('fileType', [
-   z.object({
-      fileType: z.literal('pdf'),
-      title: z
-         .string()
-         .min(1, 'Title is required')
-         .max(225, 'Title cannot be longer than 255 characters'),
-      description: z
-         .string()
-         .max(1000, 'Description cannot be longer than 1000 characters')
-         .optional(),
-      fileBase64: z.string(),
-   }),
-   z.object({
-      fileType: z.literal('image'),
-      title: z
-         .string()
-         .min(1, 'Title is required')
-         .max(225, 'Title cannot be longer than 255 characters'),
-      description: z
-         .string()
-         .max(1000, 'Description cannot be longer than 1000 characters')
-         .optional(),
-      files: z.array(z.string()).min(1, 'At least one image is required'),
-   }),
-]);
+export const uploadDocumentSchema = z.object({
+   title: z
+      .string()
+      .min(1, 'Title is required')
+      .max(225, 'Title cannot be longer than 255 characters'),
+   description: z
+      .string()
+      .max(1000, 'Description cannot be longer than 1000 characters')
+      .optional(),
+   fileType: z.enum(['image', 'pdf']).optional(),
+   fileBase64: z.string().optional(),
+   files: z.array(z.string()).optional(),
+});
 
 export const listDocumentsSchema = z.object({
    page: z.number().int().min(1).default(1),
