@@ -85,7 +85,7 @@ function ReplaceImageModal({
    return (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
          <div className="bg-background rounded-lg p-6 w-full max-w-md space-y-4 border">
-            <h2 className="text-lg font-semibold">Replace Page Image</h2>
+            <h2 className="text-lg font-semibold">Change Page Image</h2>
 
             <div className="space-y-2">
                <Label>New Image</Label>
@@ -158,7 +158,7 @@ function ReplaceImageModal({
                   onClick={handleSubmit}
                   disabled={replaceImage.isPending || !selectedFile}
                >
-                  {replaceImage.isPending ? 'Uploading...' : 'Replace Image'}
+                  {replaceImage.isPending ? 'Uploading...' : 'Change Image'}
                </Button>
             </div>
          </div>

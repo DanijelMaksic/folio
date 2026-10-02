@@ -154,13 +154,15 @@ function DocumentPages() {
                   </Button>
                )}
 
-               <ActionsMenu
-                  show={canTranscribe && (isMyDocument || editor)}
-                  onEdit={handleEditOpen}
-                  onDelete={() => setIsDeleteOpen(true)}
-                  onSaveToCollection={handleCollectionOpen}
-                  inCollection={inCollection}
-               />
+               {(isMyDocument || editor) && document.status === 'ready' && (
+                  <ActionsMenu
+                     show={canTranscribe && (isMyDocument || editor)}
+                     onEdit={handleEditOpen}
+                     onDelete={() => setIsDeleteOpen(true)}
+                     onSaveToCollection={handleCollectionOpen}
+                     inCollection={inCollection}
+                  />
+               )}
             </div>
          </div>
 

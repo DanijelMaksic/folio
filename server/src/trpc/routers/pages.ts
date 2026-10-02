@@ -11,7 +11,7 @@ import {
    updatePageSchema,
 } from '@folio/shared';
 import { TRPCError } from '@trpc/server';
-import { and, asc, eq, sql } from 'drizzle-orm';
+import { and, asc, eq, gt, sql } from 'drizzle-orm';
 import z from 'zod';
 
 export const pagesRouter = router({
@@ -104,8 +104,27 @@ export const pagesRouter = router({
       }),
 
    delete: protectedProcedure
-      .input(z.object({ id: z.string() }))
+      .input(z.object({ pageId: z.string() }))
       .mutation(async ({ ctx, input }) => {
+         const [page] = await db
+            .select({
+               id: pages.id,
+               pageNumber: pages.pageNumber,
+               documentId: pages.documentId,
+               cloudinaryPublicId: pages.cloudinaryPublicId,
+               uploadedBy: documents.uploadedBy,
+            })
+            .from(pages)
+            .innerJoin(documents, eq(documents.id, pages.documentId))
+            .where(eq(pages.id, input.pageId));
+
+         if (!page) {
+            throw new TRPCError({
+               code: 'NOT_FOUND',
+               message: 'Page not found',
+            });
+         }
+
          if (!isContributor(ctx.user.globalRole)) {
             throw new TRPCError({
                code: 'FORBIDDEN',
@@ -113,12 +132,42 @@ export const pagesRouter = router({
             });
          }
 
+         const isMyDocument = page.uploadedBy === ctx.user.id;
+         if (!isMyDocument && !isEditor(ctx.user.globalRole)) {
+            throw new TRPCError({
+               code: 'FORBIDDEN',
+               message: 'You do not have permission to delete this page',
+            });
+         }
+
+         await cloudinary.uploader.destroy(page.cloudinaryPublicId);
+
          const [deleted] = await db
             .delete(pages)
-            .where(eq(pages.id, input.id))
+            .where(eq(pages.id, input.pageId))
             .returning();
 
          if (!deleted) throw new TRPCError({ code: 'NOT_FOUND' });
+
+         // Renumber remaining pages after the deleted one
+         await db
+            .update(pages)
+            .set({
+               pageNumber: sql`${pages.pageNumber} - 1`,
+               title: sql`
+                  CASE
+                     WHEN ${pages.title} = 'Page ' || ${pages.pageNumber}::text
+                     THEN 'Page ' || (${pages.pageNumber} - 1)::text
+                     ELSE ${pages.title}
+                  END
+               `,
+            })
+            .where(
+               and(
+                  eq(pages.documentId, page.documentId!),
+                  gt(pages.pageNumber, page.pageNumber),
+               ),
+            );
 
          return deleted;
       }),

@@ -11,7 +11,7 @@ import ActionsMenu from '@/components/shared/ActionsMenu';
 import { useViewerStore } from '@/store/useViewerStore';
 import PageTabs from '@/components/documents/PageTabs';
 import { Button } from '@/components/ui/button';
-import ReplaceImageModal from '@/components/documents/ReplaceImagesModal';
+import ReplaceImageModal from '@/components/documents/ReplaceImageModal';
 
 function PageDetails() {
    const [isEditOpen, setIsEditOpen] = useState(false);
@@ -86,7 +86,7 @@ function PageDetails() {
    };
 
    const handleDelete = async () => {
-      deletePage.mutate({ id: page?.id as string });
+      deletePage.mutate({ pageId: page?.id as string });
    };
 
    if (isLoading) return <p>Loading...</p>;
@@ -105,7 +105,7 @@ function PageDetails() {
                      size="sm"
                      onClick={() => setIsReplaceImageOpen(true)}
                   >
-                     Replace Image
+                     Change Image
                   </Button>
                )}
 

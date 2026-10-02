@@ -21,5 +21,15 @@ export const updateCollectionSchema = createCollectionSchema
    .partial()
    .extend({ id: z.string(), collectionId: z.string().nullable().optional() });
 
+export const collectionSchema = z.object({
+   id: z.string(),
+   title: z.string(),
+   description: z.string().nullable().optional(),
+   createdBy: z.string(),
+   creatorName: z.string(),
+   coverImageUrl: z.string().nullable().optional(),
+});
+
 export type CreateCollectionInput = z.infer<typeof createCollectionSchema>;
 export type ListCollectionInput = z.infer<typeof listCollectionsSchema>;
+export type Collection = z.infer<typeof collectionSchema>;
