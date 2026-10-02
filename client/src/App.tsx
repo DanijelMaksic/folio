@@ -34,6 +34,8 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 // TODO: On first visit to /documents and /collections, no data was found
 
+// TODO: Choose between SQL-like db.select() and ORM-like db.query()
+
 export default function App() {
    return (
       <BrowserRouter>

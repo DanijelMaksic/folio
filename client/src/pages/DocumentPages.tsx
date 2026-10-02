@@ -10,9 +10,9 @@ import EditModal from '@/components/shared/EditModal';
 import ActionsMenu from '@/components/shared/ActionsMenu';
 import CollectionPickerModal from '@/components/documents/CollectionPickerModal';
 import { useViewerStore } from '@/store/useViewerStore';
-import { Files, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import AddPagesModal from '@/components/shared/AddPagesModal';
+import AddPagesModal from '@/components/documents/AddPagesModal';
 
 function DocumentPages() {
    const [isEditOpen, setIsEditOpen] = useState(false);

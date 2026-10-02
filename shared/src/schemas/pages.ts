@@ -25,5 +25,16 @@ export const updatePageSchema = z.object({
    imageUrl: z.string().optional(),
 });
 
+export const addPagesSchema = z.object({
+   documentId: z.string(),
+   files: z.array(z.string()).min(1, 'At least one image is required'),
+});
+
+export const replaceImageSchema = z.object({
+   pageId: z.string(),
+   fileBase64: z.string(),
+});
+
 export type Page = z.infer<typeof pageSchema>;
 export type UpdatePageInput = z.infer<typeof updatePageSchema>;
+export type ReplaceImageInput = z.infer<typeof replaceImageSchema>;

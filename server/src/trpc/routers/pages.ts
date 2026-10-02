@@ -3,7 +3,13 @@ import { documents } from '@/db/schema/documents.js';
 import { pages } from '@/db/schema/pages.js';
 import cloudinary from '@/lib/cloudinary.js';
 import { protectedProcedure, publicProcedure, router } from '@/trpc/trpc.js';
-import { isContributor, updatePageSchema } from '@folio/shared';
+import {
+   addPagesSchema,
+   isContributor,
+   isEditor,
+   replaceImageSchema,
+   updatePageSchema,
+} from '@folio/shared';
 import { TRPCError } from '@trpc/server';
 import { and, asc, eq, sql } from 'drizzle-orm';
 import z from 'zod';
@@ -118,12 +124,7 @@ export const pagesRouter = router({
       }),
 
    addPages: protectedProcedure
-      .input(
-         z.object({
-            documentId: z.string(),
-            files: z.array(z.string()).min(1, 'At least one image is required'),
-         }),
-      )
+      .input(addPagesSchema)
       .mutation(async ({ ctx, input }) => {
          const document = await db.query.documents.findFirst({
             where: eq(documents.id, input.documentId),
@@ -166,5 +167,60 @@ export const pagesRouter = router({
          }
 
          return { added: input.files.length };
+      }),
+
+   replaceImage: protectedProcedure
+      .input(replaceImageSchema)
+      .mutation(async ({ ctx, input }) => {
+         const [page] = await db
+            .select({
+               id: pages.id,
+               cloudinaryPublicId: pages.cloudinaryPublicId,
+               uploadedBy: documents.uploadedBy,
+            })
+            .from(pages)
+            .innerJoin(documents, eq(documents.id, pages.documentId))
+            .where(eq(pages.id, input.pageId));
+
+         if (!page) {
+            throw new TRPCError({
+               code: 'NOT_FOUND',
+               message: 'Page not found',
+            });
+         }
+
+         if (!isContributor(ctx.user.globalRole)) {
+            throw new TRPCError({
+               code: 'FORBIDDEN',
+               message: 'Only contributors and above can replace images',
+            });
+         }
+
+         const isMyDocument = page.uploadedBy === ctx.user.id;
+
+         if (!isMyDocument && !isEditor(ctx.user.globalRole)) {
+            throw new TRPCError({
+               code: 'FORBIDDEN',
+               message: 'You do not have permission to replace this image',
+            });
+         }
+
+         await cloudinary.uploader.destroy(page.cloudinaryPublicId);
+
+         const uploaded = await cloudinary.uploader.upload(input.fileBase64, {
+            folder: 'folio/documents',
+            resource_type: 'image',
+         });
+
+         const [updated] = await db
+            .update(pages)
+            .set({
+               imageUrl: uploaded.secure_url,
+               cloudinaryPublicId: uploaded.public_id,
+            })
+            .where(eq(pages.id, input.pageId))
+            .returning();
+
+         return updated;
       }),
 });

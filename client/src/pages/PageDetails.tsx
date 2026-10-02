@@ -10,12 +10,17 @@ import EditModal from '@/components/shared/EditModal';
 import ActionsMenu from '@/components/shared/ActionsMenu';
 import { useViewerStore } from '@/store/useViewerStore';
 import PageTabs from '@/components/documents/PageTabs';
+import { Button } from '@/components/ui/button';
+import ReplaceImageModal from '@/components/documents/ReplaceImagesModal';
 
 function PageDetails() {
-   const [editError, setEditError] = useState('');
-   const [deleteError, setDeleteError] = useState('');
    const [isEditOpen, setIsEditOpen] = useState(false);
    const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+   const [isReplaceImageOpen, setIsReplaceImageOpen] = useState(false);
+
+   const [editError, setEditError] = useState('');
+   const [deleteError, setDeleteError] = useState('');
+
    const [editTitle, setEditTitle] = useState('');
    const [editDescription, setEditDescription] = useState('');
    const { resetViewerState } = useViewerStore();
@@ -93,11 +98,23 @@ function PageDetails() {
          <div className="flex items-center justify-between gap-3">
             <h1 className="text-2xl font-semibold">{page.title}</h1>
 
-            <ActionsMenu
-               show={canTranscribe && (isMyPage || editor)}
-               onEdit={handleEditOpen}
-               onDelete={() => setIsDeleteOpen(true)}
-            />
+            <div className="flex items-center justify-center gap-3">
+               {(isMyPage || editor) && (
+                  <Button
+                     variant="outline"
+                     size="sm"
+                     onClick={() => setIsReplaceImageOpen(true)}
+                  >
+                     Replace Image
+                  </Button>
+               )}
+
+               <ActionsMenu
+                  show={canTranscribe && (isMyPage || editor)}
+                  onEdit={handleEditOpen}
+                  onDelete={() => setIsDeleteOpen(true)}
+               />
+            </div>
          </div>
 
          {page.id && (
@@ -133,6 +150,15 @@ function PageDetails() {
                   setIsDeleteOpen(false);
                   setDeleteError('');
                }}
+            />
+         )}
+
+         {isReplaceImageOpen && page && (
+            <ReplaceImageModal
+               pageId={page.id}
+               documentId={documentId!}
+               pageNumber={Number(pageNumber)}
+               onClose={() => setIsReplaceImageOpen(false)}
             />
          )}
       </div>
