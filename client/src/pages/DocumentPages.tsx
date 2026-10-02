@@ -10,15 +10,20 @@ import EditModal from '@/components/shared/EditModal';
 import ActionsMenu from '@/components/shared/ActionsMenu';
 import CollectionPickerModal from '@/components/documents/CollectionPickerModal';
 import { useViewerStore } from '@/store/useViewerStore';
-import { Loader2 } from 'lucide-react';
+import { Files, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import AddPagesModal from '@/components/shared/AddPagesModal';
 
 function DocumentPages() {
+   const [isEditOpen, setIsEditOpen] = useState(false);
+   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+   const [isAddPagesOpen, setIsAddPagesOpen] = useState(false);
+   const [isCollectionOpen, setIsCollectionOpen] = useState(false);
+
    const [editError, setEditError] = useState('');
    const [deleteError, setDeleteError] = useState('');
    const [collectionError, setCollectionError] = useState('');
-   const [isEditOpen, setIsEditOpen] = useState(false);
-   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-   const [isCollectionOpen, setIsCollectionOpen] = useState(false);
+
    const [editTitle, setEditTitle] = useState('');
    const [editDescription, setEditDescription] = useState('');
    const [selectedCollectionId, setSelectedCollectionId] = useState<
@@ -111,15 +116,15 @@ function DocumentPages() {
       });
    };
 
+   const handleDelete = () => {
+      deleteDocument.mutate({ id: id! });
+   };
+
    const handleAddToCollection = () => {
       addToCollection.mutate({
          id: id!,
          collectionId: selectedCollectionId,
       });
-   };
-
-   const handleDelete = () => {
-      deleteDocument.mutate({ id: id! });
    };
 
    if (isLoadingDocument) return <p>Loading...</p>;
@@ -138,13 +143,25 @@ function DocumentPages() {
                )}
             </div>
 
-            <ActionsMenu
-               show={canTranscribe && (isMyDocument || editor)}
-               onEdit={handleEditOpen}
-               onDelete={() => setIsDeleteOpen(true)}
-               onSaveToCollection={handleCollectionOpen}
-               inCollection={inCollection}
-            />
+            <div className="flex items-center justify-center gap-3">
+               {(isMyDocument || editor) && document.status === 'ready' && (
+                  <Button
+                     variant="outline"
+                     size="sm"
+                     onClick={() => setIsAddPagesOpen(true)}
+                  >
+                     Add Pages
+                  </Button>
+               )}
+
+               <ActionsMenu
+                  show={canTranscribe && (isMyDocument || editor)}
+                  onEdit={handleEditOpen}
+                  onDelete={() => setIsDeleteOpen(true)}
+                  onSaveToCollection={handleCollectionOpen}
+                  inCollection={inCollection}
+               />
+            </div>
          </div>
 
          {document.status === 'processing' && (
@@ -212,6 +229,16 @@ function DocumentPages() {
                   setIsEditOpen(false);
                   setEditError('');
                }}
+            />
+         )}
+
+         {isAddPagesOpen && (
+            <AddPagesModal
+               documentId={id!}
+               onSuccess={() =>
+                  utils.pages.getByDocument.invalidate({ documentId: id! })
+               }
+               onClose={() => setIsAddPagesOpen(false)}
             />
          )}
 

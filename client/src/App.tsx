@@ -30,6 +30,10 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 // TODO: Switch from doc to document (in routers escpecially)
 
+// TODO: Status: indexed fromThePage
+
+// TODO: On first visit to /documents and /collections, no data was found
+
 export default function App() {
    return (
       <BrowserRouter>

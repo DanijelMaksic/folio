@@ -1,6 +1,7 @@
 import { db } from '@/db/index.js';
 import { documents } from '@/db/schema/documents.js';
 import { pages } from '@/db/schema/pages.js';
+import cloudinary from '@/lib/cloudinary.js';
 import { protectedProcedure, publicProcedure, router } from '@/trpc/trpc.js';
 import { isContributor, updatePageSchema } from '@folio/shared';
 import { TRPCError } from '@trpc/server';
@@ -114,5 +115,56 @@ export const pagesRouter = router({
          if (!deleted) throw new TRPCError({ code: 'NOT_FOUND' });
 
          return deleted;
+      }),
+
+   addPages: protectedProcedure
+      .input(
+         z.object({
+            documentId: z.string(),
+            files: z.array(z.string()).min(1, 'At least one image is required'),
+         }),
+      )
+      .mutation(async ({ ctx, input }) => {
+         const document = await db.query.documents.findFirst({
+            where: eq(documents.id, input.documentId),
+         });
+
+         if (!document) {
+            throw new TRPCError({
+               code: 'NOT_FOUND',
+               message: 'Document not found',
+            });
+         }
+
+         if (!isContributor(ctx.user.globalRole)) {
+            throw new TRPCError({
+               code: 'FORBIDDEN',
+               message: 'Only contributors and above can delete documents',
+            });
+         }
+
+         const [result] = await db
+            .select({ maxPage: sql<number>`Max(${pages.pageNumber})` })
+            .from(pages)
+            .where(eq(pages.documentId, input.documentId));
+
+         const startingPageNumber = (result?.maxPage ?? 0) + 1;
+
+         for (let i = 0; i < input.files.length; i++) {
+            const uploaded = await cloudinary.uploader.upload(input.files[i], {
+               folder: 'folio/documents',
+               resource_type: 'image',
+            });
+
+            await db.insert(pages).values({
+               documentId: input.documentId,
+               pageNumber: startingPageNumber + i,
+               title: `Page ${startingPageNumber + i}`,
+               imageUrl: uploaded.secure_url,
+               cloudinaryPublicId: uploaded.public_id,
+            });
+         }
+
+         return { added: input.files.length };
       }),
 });
