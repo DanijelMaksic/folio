@@ -96,7 +96,9 @@ function PageDetails() {
    return (
       <div className="max-w-full mx-auto py-6 px-12 space-y-3">
          <div className="flex items-center justify-between gap-3">
-            <h1 className="text-2xl font-semibold">{page.title}</h1>
+            <h1 className="text-2xl font-semibold" data-testid="page-title">
+               {page.title}
+            </h1>
 
             <div className="flex items-center justify-center gap-3">
                {(isMyPage || editor) && (
