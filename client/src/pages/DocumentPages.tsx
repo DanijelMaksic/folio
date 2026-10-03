@@ -2,7 +2,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { trpc } from '../lib/trpc';
 import { useSession } from '../lib/auth-client';
 import { isContributor, isEditor } from '@shared';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { TRPCClientErrorLike } from '@trpc/client';
 import { AppRouter } from '@server/trpc/router';
 import DeleteModal from '@/components/shared/DeleteModal';
@@ -15,6 +15,8 @@ import { Button } from '@/components/ui/button';
 import AddPagesModal from '@/components/documents/AddPagesModal';
 import TranscriptionFilter from '@/components/documents/TranscriptionFilter';
 import PageCard from '@/components/documents/PageCard';
+import SearchBar from '@/components/shared/SearchBar';
+import AppPagination from '@/components/shared/AppPagination';
 
 export type StatusType = 'all-pages' | 'transcribed' | 'not-transcribed';
 
@@ -53,6 +55,37 @@ function DocumentPages() {
    const status: StatusType =
       rawStatus && VALID_STATUSES.includes(rawStatus) ? rawStatus : 'all-pages';
 
+   const page = Math.max(Number(searchParams.get('page')) || 1, 1);
+   const search = searchParams.get('search') ?? '';
+   const [inputValue, setInputValue] = useState(search);
+
+   const handlePageChange = (newPage: number) => {
+      setSearchParams((prev) => {
+         const next = new URLSearchParams(prev);
+         next.set('page', String(newPage));
+         return next;
+      });
+   };
+
+   useEffect(() => {
+      const t = setTimeout(() => {
+         setSearchParams(
+            (prev) => {
+               const next = new URLSearchParams(prev);
+               if (inputValue) {
+                  next.set('search', inputValue);
+               } else {
+                  next.delete('search');
+               }
+               next.set('page', '1');
+               return next;
+            },
+            { replace: true },
+         );
+      }, 300);
+      return () => clearTimeout(t);
+   }, [inputValue]);
+
    const { data: document, isLoading: isLoadingDocument } =
       trpc.documents.getById.useQuery(
          { id: documentId! },
@@ -62,14 +95,23 @@ function DocumentPages() {
          },
       );
 
-   const { data: pages, isLoading: isLoadingPages } =
+   const { data: pagesData, isLoading: isLoadingPages } =
       trpc.pages.getByDocument.useQuery(
-         { documentId: documentId! },
          {
-            // Poll every 3 seconds while processing
+            documentId: documentId!,
+            page,
+            limit: 20,
+            search: search || undefined,
+         },
+         {
             refetchInterval: document?.status === 'processing' ? 2000 : false,
+            placeholderData: (prev) => prev,
+            staleTime: 1000,
          },
       );
+
+   const pages = pagesData?.pages ?? [];
+   const totalPages = pagesData?.totalPages ?? 1;
 
    const { data: collections, isLoading: isLoadingCollections } =
       trpc.collections.getCurrentUserCollections.useQuery(
@@ -162,6 +204,8 @@ function DocumentPages() {
       return true; // 'all-pages'
    });
 
+   const hasActiveFilter = status !== 'all-pages' || !!search;
+
    if (isLoadingDocument) return <p>Loading...</p>;
 
    if (!document) return <p>Document not found</p>;
@@ -179,7 +223,15 @@ function DocumentPages() {
             </div>
 
             <div className="flex items-center justify-center gap-3">
-               {!pages?.length ? null : (
+               {(!!pages?.length || hasActiveFilter) && (
+                  <SearchBar
+                     placeholder="Search pages..."
+                     value={inputValue}
+                     onChange={setInputValue}
+                  />
+               )}
+
+               {(!!pages?.length || hasActiveFilter) && (
                   <TranscriptionFilter
                      onSetStatus={handleSetStatus}
                      status={status}
@@ -300,6 +352,14 @@ function DocumentPages() {
                   setIsCollectionOpen(false);
                   setCollectionError('');
                }}
+            />
+         )}
+
+         {!!pages.length && (
+            <AppPagination
+               currentPage={page}
+               totalPages={totalPages}
+               onPageChange={handlePageChange}
             />
          )}
       </div>

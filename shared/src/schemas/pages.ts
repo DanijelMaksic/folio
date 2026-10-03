@@ -36,6 +36,20 @@ export const replaceImageSchema = z.object({
    fileBase64: z.string(),
 });
 
+export const getByDocumentSchema = z.object({
+   documentId: z.string(),
+   page: z.number().min(1).default(1),
+   limit: z.number().min(1).max(100).default(20),
+   search: z.string().optional(),
+});
+
+export const getByPageNumberSchema = z.object({
+   documentId: z.string(),
+   pageNumber: z.number().int().min(1),
+});
+
 export type Page = z.infer<typeof pageSchema>;
 export type UpdatePageInput = z.infer<typeof updatePageSchema>;
 export type ReplaceImageInput = z.infer<typeof replaceImageSchema>;
+export type GetByDocumentInput = z.infer<typeof getByDocumentSchema>;
+export type GetByPageNumbeInput = z.infer<typeof getByPageNumberSchema>;

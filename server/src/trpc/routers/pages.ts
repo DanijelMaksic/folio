@@ -6,42 +6,61 @@ import cloudinary from '@/lib/cloudinary.js';
 import { protectedProcedure, publicProcedure, router } from '@/trpc/trpc.js';
 import {
    addPagesSchema,
+   getByDocumentSchema,
+   getByPageNumberSchema,
    isContributor,
    isEditor,
    replaceImageSchema,
    updatePageSchema,
 } from '@folio/shared';
 import { TRPCError } from '@trpc/server';
-import { and, asc, eq, gt, sql } from 'drizzle-orm';
+import { and, asc, count, eq, gt, ilike, sql } from 'drizzle-orm';
 import z from 'zod';
 
 export const pagesRouter = router({
    // Returns all pages for a document with per-page transcription status for the current user
    getByDocument: publicProcedure
-      .input(z.object({ documentId: z.string() }))
+      .input(getByDocumentSchema)
       .query(async ({ ctx, input }) => {
-         const documentPages = await db
-            .select({
-               id: pages.id,
-               pageNumber: pages.pageNumber,
-               imageUrl: pages.imageUrl,
-               title: pages.title,
-               createdAt: pages.createdAt,
-               approvedTranscriptionCount: sql<number>`COUNT(CASE WHEN ${transcriptions.status} = 'approved' THEN 1 END)::int`,
-            })
-            .from(pages)
-            .leftJoin(transcriptions, eq(transcriptions.pageId, pages.id))
-            .where(eq(pages.documentId, input.documentId))
-            .groupBy(
-               pages.id,
-               pages.pageNumber,
-               pages.imageUrl,
-               pages.title,
-               pages.createdAt,
-            )
-            .orderBy(asc(pages.pageNumber));
+         const offset = (input.page - 1) * input.limit;
 
-         return documentPages;
+         const where = and(
+            eq(pages.documentId, input.documentId),
+            input.search ? ilike(pages.title, `%${input.search}%`) : undefined,
+         );
+
+         const [results, [{ total }]] = await Promise.all([
+            db
+               .select({
+                  id: pages.id,
+                  pageNumber: pages.pageNumber,
+                  imageUrl: pages.imageUrl,
+                  title: pages.title,
+                  createdAt: pages.createdAt,
+                  approvedTranscriptionCount: sql<number>`COUNT(CASE WHEN ${transcriptions.status} = 'approved' THEN 1 END)::int`,
+               })
+               .from(pages)
+               .leftJoin(transcriptions, eq(transcriptions.pageId, pages.id))
+               .where(where)
+               .groupBy(
+                  pages.id,
+                  pages.pageNumber,
+                  pages.imageUrl,
+                  pages.title,
+                  pages.createdAt,
+               )
+               .orderBy(asc(pages.pageNumber))
+               .limit(input.limit)
+               .offset(offset),
+
+            db.select({ total: count() }).from(pages).where(where),
+         ]);
+
+         return {
+            pages: results,
+            totalCount: Number(total),
+            totalPages: Math.ceil(Number(total) / input.limit),
+         };
       }),
 
    // Returns a single page by id
@@ -61,12 +80,7 @@ export const pagesRouter = router({
 
    // Returns a single page by document id and page number — used for URL-based navigation
    getByPageNumber: publicProcedure
-      .input(
-         z.object({
-            documentId: z.string(),
-            pageNumber: z.number().int().min(1),
-         }),
-      )
+      .input(getByPageNumberSchema)
       .query(async ({ ctx, input }) => {
          const [page] = await db
             .select()
