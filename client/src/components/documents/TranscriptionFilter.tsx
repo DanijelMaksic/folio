@@ -38,7 +38,7 @@ function TranscriptionFilter({
             <DropdownMenuContent>
                <DropdownMenuGroup>
                   <DropdownMenuItem onClick={() => onSetStatus('all-pages')}>
-                     All Documents
+                     All Pages
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => onSetStatus('transcribed')}>
                      Transcribed

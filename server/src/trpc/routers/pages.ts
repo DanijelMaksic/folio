@@ -1,6 +1,7 @@
 import { db } from '@/db/index.js';
 import { documents } from '@/db/schema/documents.js';
 import { pages } from '@/db/schema/pages.js';
+import { transcriptions } from '@/db/schema/transcriptions.js';
 import cloudinary from '@/lib/cloudinary.js';
 import { protectedProcedure, publicProcedure, router } from '@/trpc/trpc.js';
 import {
@@ -26,15 +27,18 @@ export const pagesRouter = router({
                imageUrl: pages.imageUrl,
                title: pages.title,
                createdAt: pages.createdAt,
-               // Overall page status — approved if any transcription is approved
-               approvedTranscriptionCount: sql<number>`(
-               SELECT COUNT(*) FROM transcriptions
-               WHERE page_id = ${pages.id}
-               AND status = 'approved'
-            )`,
+               approvedTranscriptionCount: sql<number>`COUNT(CASE WHEN ${transcriptions.status} = 'approved' THEN 1 END)::int`,
             })
             .from(pages)
+            .leftJoin(transcriptions, eq(transcriptions.pageId, pages.id))
             .where(eq(pages.documentId, input.documentId))
+            .groupBy(
+               pages.id,
+               pages.pageNumber,
+               pages.imageUrl,
+               pages.title,
+               pages.createdAt,
+            )
             .orderBy(asc(pages.pageNumber));
 
          return documentPages;

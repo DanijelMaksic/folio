@@ -155,6 +155,13 @@ function DocumentPages() {
       });
    };
 
+   const filteredPages = pages?.filter((page) => {
+      if (status === 'transcribed') return page.approvedTranscriptionCount > 0;
+      if (status === 'not-transcribed')
+         return page.approvedTranscriptionCount === 0;
+      return true; // 'all-pages'
+   });
+
    if (isLoadingDocument) return <p>Loading...</p>;
 
    if (!document) return <p>Document not found</p>;
@@ -220,9 +227,13 @@ function DocumentPages() {
                   <p>Loading pages...</p>
                ) : !pages?.length ? (
                   <p className="text-muted-foreground">No pages found.</p>
+               ) : !filteredPages?.length ? (
+                  <p className="text-muted-foreground">
+                     No pages match this filter.
+                  </p>
                ) : (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                     {pages.map((page) => (
+                     {filteredPages.map((page) => (
                         <PageCard
                            page={page}
                            documentId={documentId!}

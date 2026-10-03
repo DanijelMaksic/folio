@@ -26,6 +26,8 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 // TODO: When transcribing, if user hits sumbit before save, revisions tab shows nothing and transcription is not submitted
 
+// TODO: When transcribing, if user types something, then hits save, then types some more, then hits submit, revision history will not show newest version and earlier version is submitted for review
+
 // TODO: Switch to ctx.user.id in trpc procedures
 
 // TODO: Switch from doc to document (in routers escpecially)
