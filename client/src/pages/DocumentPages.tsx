@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { trpc } from '../lib/trpc';
 import { useSession } from '../lib/auth-client';
 import { isContributor, isEditor } from '@shared';
@@ -13,6 +13,16 @@ import { useViewerStore } from '@/store/useViewerStore';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AddPagesModal from '@/components/documents/AddPagesModal';
+import TranscriptionFilter from '@/components/documents/TranscriptionFilter';
+import PageCard from '@/components/documents/PageCard';
+
+export type StatusType = 'all-pages' | 'transcribed' | 'not-transcribed';
+
+const VALID_STATUSES: StatusType[] = [
+   'all-pages',
+   'transcribed',
+   'not-transcribed',
+];
 
 function DocumentPages() {
    const [isEditOpen, setIsEditOpen] = useState(false);
@@ -30,17 +40,22 @@ function DocumentPages() {
       string | null
    >(null);
    const { resetViewerState } = useViewerStore();
+   const [searchParams, setSearchParams] = useSearchParams();
 
-   const { id } = useParams<{ id: string }>();
+   const { id: documentId } = useParams<{ id: string }>();
    const { data: session } = useSession();
    const user = session?.user;
    const navigate = useNavigate();
 
    const utils = trpc.useUtils();
 
+   const rawStatus = searchParams.get('status') as StatusType | null;
+   const status: StatusType =
+      rawStatus && VALID_STATUSES.includes(rawStatus) ? rawStatus : 'all-pages';
+
    const { data: document, isLoading: isLoadingDocument } =
       trpc.documents.getById.useQuery(
-         { id: id! },
+         { id: documentId! },
          {
             refetchInterval: (query) =>
                query.state.data?.status === 'processing' ? 2000 : false,
@@ -49,7 +64,7 @@ function DocumentPages() {
 
    const { data: pages, isLoading: isLoadingPages } =
       trpc.pages.getByDocument.useQuery(
-         { documentId: id! },
+         { documentId: documentId! },
          {
             // Poll every 3 seconds while processing
             refetchInterval: document?.status === 'processing' ? 2000 : false,
@@ -69,7 +84,7 @@ function DocumentPages() {
 
    const editDocument = trpc.documents.update.useMutation({
       onSuccess: () => {
-         utils.documents.getById.invalidate({ id: id! });
+         utils.documents.getById.invalidate({ id: documentId! });
          setIsEditOpen(false);
       },
       onError: (err: TRPCClientErrorLike<AppRouter>) => {
@@ -89,7 +104,7 @@ function DocumentPages() {
 
    const addToCollection = trpc.documents.update.useMutation({
       onSuccess: () => {
-         utils.documents.getById.invalidate({ id: id! });
+         utils.documents.getById.invalidate({ id: documentId! });
          setIsCollectionOpen(false);
       },
       onError: (err: TRPCClientErrorLike<AppRouter>) => {
@@ -110,20 +125,33 @@ function DocumentPages() {
 
    const handleEditSubmit = () => {
       editDocument.mutate({
-         id: id!,
+         id: documentId!,
          title: editTitle,
          description: editDescription,
       });
    };
 
    const handleDelete = () => {
-      deleteDocument.mutate({ id: id! });
+      deleteDocument.mutate({ id: documentId! });
    };
 
    const handleAddToCollection = () => {
       addToCollection.mutate({
-         id: id!,
+         id: documentId!,
          collectionId: selectedCollectionId,
+      });
+   };
+
+   const handleSetStatus = (newStatus: StatusType) => {
+      setSearchParams((prev) => {
+         const next = new URLSearchParams(prev);
+         if (newStatus === 'all-pages') {
+            next.delete('status');
+         } else {
+            next.set('status', newStatus);
+         }
+         next.set('page', '1');
+         return next;
       });
    };
 
@@ -144,6 +172,13 @@ function DocumentPages() {
             </div>
 
             <div className="flex items-center justify-center gap-3">
+               {!pages?.length ? null : (
+                  <TranscriptionFilter
+                     onSetStatus={handleSetStatus}
+                     status={status}
+                  />
+               )}
+
                {(isMyDocument || editor) && document.status === 'ready' && (
                   <Button
                      variant="outline"
@@ -188,29 +223,11 @@ function DocumentPages() {
                ) : (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                      {pages.map((page) => (
-                        <button
+                        <PageCard
+                           page={page}
+                           documentId={documentId!}
                            key={page.id}
-                           onClick={() =>
-                              navigate(
-                                 `/documents/${id}/pages/${page.pageNumber}`,
-                              )
-                           }
-                           className="group relative rounded-lg overflow-hidden border hover:border-primary transition-colors"
-                        >
-                           <img
-                              src={page.imageUrl}
-                              alt={`Page ${page.pageNumber}`}
-                              className="w-full object-cover aspect-[3/4]"
-                           />
-                           <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs px-2 py-1 flex items-center justify-between">
-                              <span>{page.title}</span>
-                              {page.approvedTranscriptionCount > 0 && (
-                                 <span className="bg-green-500 text-white text-xs px-1.5 py-0.5 rounded">
-                                    ✓
-                                 </span>
-                              )}
-                           </div>
-                        </button>
+                        />
                      ))}
                   </div>
                )}
@@ -236,9 +253,11 @@ function DocumentPages() {
 
          {isAddPagesOpen && (
             <AddPagesModal
-               documentId={id!}
+               documentId={documentId!}
                onSuccess={() =>
-                  utils.pages.getByDocument.invalidate({ documentId: id! })
+                  utils.pages.getByDocument.invalidate({
+                     documentId: documentId!,
+                  })
                }
                onClose={() => setIsAddPagesOpen(false)}
             />

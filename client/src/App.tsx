@@ -36,6 +36,14 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 // TODO: Choose between SQL-like db.select() and ORM-like db.query()
 
+// TODO: Add number of pages on document card
+
+// TODO: Add pagination to documentPages
+
+// TODO: Remove filtering from history stack
+
+// TODO: Replace id (from URL) with documentId
+
 export default function App() {
    return (
       <BrowserRouter>

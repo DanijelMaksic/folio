@@ -2,13 +2,14 @@ import { z } from 'zod';
 
 export const pageSchema = z.object({
    id: z.string(),
-   documentId: z.string().nullable(),
+   documentId: z.string().nullable().optional(),
    title: z.string(),
-   description: z.string().nullable(),
+   description: z.string().nullable().optional(),
    pageNumber: z.number(),
    imageUrl: z.string(),
-   cloudinaryPublicId: z.string(),
+   cloudinaryPublicId: z.string().optional(),
    createdAt: z.string(),
+   approvedTranscriptionCount: z.number(),
 });
 
 export const updatePageSchema = z.object({

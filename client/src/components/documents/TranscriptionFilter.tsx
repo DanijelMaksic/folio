@@ -6,7 +6,7 @@ import {
    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { StatusType } from '@/pages/Documents';
+import { StatusType } from '@/pages/DocumentPages';
 
 interface TranscriptionFilterProps {
    onSetStatus: (status: StatusType) => void;
@@ -29,7 +29,7 @@ function TranscriptionFilter({
                      data-testid="actions-dropdown-btn"
                      className=" capitalize w-31"
                   >
-                     {status === 'all-documents' && 'all documents'}
+                     {status === 'all-pages' && 'all pages'}
                      {status === 'transcribed' && 'transcribed'}
                      {status === 'not-transcribed' && 'not transcribed'}
                   </Button>
@@ -37,9 +37,7 @@ function TranscriptionFilter({
             />
             <DropdownMenuContent>
                <DropdownMenuGroup>
-                  <DropdownMenuItem
-                     onClick={() => onSetStatus('all-documents')}
-                  >
+                  <DropdownMenuItem onClick={() => onSetStatus('all-pages')}>
                      All Documents
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => onSetStatus('transcribed')}>

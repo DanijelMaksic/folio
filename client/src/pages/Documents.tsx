@@ -7,16 +7,7 @@ import { DocumentCard } from '@/components/documents/DocumentCard.js';
 import { Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import SearchBar from '@/components/shared/SearchBar';
-import TranscriptionFilter from '@/components/documents/TranscriptionFilter';
 import AppPagination from '@/components/shared/AppPagination';
-
-export type StatusType = 'all-documents' | 'transcribed' | 'not-transcribed';
-
-const VALID_STATUSES: StatusType[] = [
-   'all-documents',
-   'transcribed',
-   'not-transcribed',
-];
 
 export default function Documents() {
    const navigate = useNavigate();
@@ -29,29 +20,10 @@ export default function Documents() {
    const search = searchParams.get('search') ?? '';
    const [inputValue, setInputValue] = useState(search);
 
-   const rawStatus = searchParams.get('status') as StatusType | null;
-   const status: StatusType =
-      rawStatus && VALID_STATUSES.includes(rawStatus)
-         ? rawStatus
-         : 'all-documents';
-
    const handlePageChange = (newPage: number) => {
       setSearchParams((prev) => {
          const next = new URLSearchParams(prev);
          next.set('page', String(newPage));
-         return next;
-      });
-   };
-
-   const handleSetStatus = (newStatus: StatusType) => {
-      setSearchParams((prev) => {
-         const next = new URLSearchParams(prev);
-         if (newStatus === 'all-documents') {
-            next.delete('status');
-         } else {
-            next.set('status', newStatus);
-         }
-         next.set('page', '1');
          return next;
       });
    };
@@ -79,7 +51,6 @@ export default function Documents() {
       {
          page,
          limit: 20,
-         status,
          search: search || undefined,
       },
       {
@@ -93,18 +64,13 @@ export default function Documents() {
 
    return (
       <div className="max-w-4xl mx-auto p-6">
-         <div className="grid grid-cols-[2fr_3fr_1fr_0.1fr] gap-5 mb-6">
+         <div className="grid grid-cols-[2fr_4.5fr_0.1fr] gap-5 mb-6">
             <h1 className="text-2xl font-semibold">Documents</h1>
 
             <SearchBar
                placeholder="Search documents..."
                value={inputValue}
                onChange={setInputValue}
-            />
-
-            <TranscriptionFilter
-               onSetStatus={handleSetStatus}
-               status={status}
             />
 
             {canTranscribe ? (
