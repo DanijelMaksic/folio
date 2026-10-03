@@ -7,7 +7,8 @@ export async function uploadTestDocument(page: Page, title: string) {
    await page.getByLabel('Title').fill(title);
    await page.getByLabel('Description').fill('Uploaded by Playwright');
 
-   await page.getByLabel('File').setInputFiles({
+   // Target the hidden file input directly
+   await page.locator('input[type="file"]').setInputFiles({
       name: 'test.png',
       mimeType: 'image/png',
       buffer: Buffer.from(
@@ -15,6 +16,9 @@ export async function uploadTestDocument(page: Page, title: string) {
          'base64',
       ),
    });
+
+   // Wait for the attachment to appear before submitting
+   await expect(page.getByText('test.png')).toBeVisible();
 
    await page.getByRole('button', { name: 'Upload' }).click();
    await page.waitForURL(/\/documents\/.+/);

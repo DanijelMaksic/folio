@@ -5,14 +5,21 @@ import {
 } from '@/__tests__/helpers/trpc-helper.js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { mockInsert, mockSelect, mockUpdate, mockDelete, mockUpload } =
-   vi.hoisted(() => ({
-      mockInsert: vi.fn(),
-      mockSelect: vi.fn(),
-      mockUpdate: vi.fn(),
-      mockDelete: vi.fn(),
-      mockUpload: vi.fn(),
-   }));
+const {
+   mockInsert,
+   mockSelect,
+   mockUpdate,
+   mockDelete,
+   mockUpload,
+   mockPdfQueue,
+} = vi.hoisted(() => ({
+   mockInsert: vi.fn(),
+   mockSelect: vi.fn(),
+   mockUpdate: vi.fn(),
+   mockDelete: vi.fn(),
+   mockUpload: vi.fn(),
+   mockPdfQueue: vi.fn(),
+}));
 
 vi.mock('@/db/index.js', () => ({
    db: {
@@ -35,6 +42,12 @@ vi.mock('@/lib/cloudinary.js', () => ({
    },
 }));
 
+vi.mock('@/lib/queue.js', () => ({
+   pdfQueue: {
+      add: mockPdfQueue,
+   },
+}));
+
 const contributorUser = mockUser({ globalRole: 'contributor' });
 const editorUser = mockUser({ globalRole: 'editor' });
 const viewerUser = mockUser({ globalRole: 'viewer' });
@@ -45,11 +58,9 @@ const mockDoc = {
    description: 'A test document',
    uploadedBy: contributorUser.id,
    collectionId: null,
-   cloudinaryPublicId: 'folio/abc123',
-   cloudinaryUrl: 'https://res.cloudinary.com/mock/image/upload/folio/abc123',
    status: 'ready',
-   createdAt: new Date(),
-   uploadedAt: new Date(),
+   createdAt: new Date().toISOString(),
+   updatedAt: new Date().toISOString(),
 };
 
 beforeEach(() => {
@@ -59,12 +70,7 @@ beforeEach(() => {
 // ── upload ───────────────────────
 
 describe('documents.upload', () => {
-   it('uploads a document and returns it', async () => {
-      mockUpload.mockResolvedValueOnce({
-         public_id: 'folio/abc123',
-         secure_url: mockDoc.cloudinaryUrl,
-      });
-
+   it('creates a document with no pages when no file provided', async () => {
       mockInsert.mockReturnValueOnce({
          values: vi.fn(() => ({
             returning: vi.fn().mockResolvedValueOnce([mockDoc]),
@@ -75,66 +81,110 @@ describe('documents.upload', () => {
       const result = await caller.documents.upload({
          title: 'Test Document',
          description: 'A test document',
-         fileBase64: 'data:image/png;base64,abc123',
       });
 
       expect(result).toMatchObject({ title: 'Test Document' });
+      expect(mockUpload).not.toHaveBeenCalled();
+      expect(mockPdfQueue).not.toHaveBeenCalled();
+   });
+
+   it('enqueues a PDF job when fileType is pdf', async () => {
+      mockPdfQueue.mockResolvedValueOnce({});
+
+      mockInsert.mockReturnValueOnce({
+         values: vi.fn(() => ({
+            returning: vi
+               .fn()
+               .mockResolvedValueOnce([{ ...mockDoc, status: 'processing' }]),
+         })),
+      });
+
+      const caller = createAuthenticatedCaller(contributorUser);
+      const result = await caller.documents.upload({
+         title: 'Test Document',
+         fileType: 'pdf',
+         fileBase64: 'data:application/pdf;base64,abc123',
+      });
+
+      expect(result).toMatchObject({ status: 'processing' });
+      expect(mockPdfQueue).toHaveBeenCalledWith('process-pdf', {
+         documentId: mockDoc.id,
+         fileBase64: 'data:application/pdf;base64,abc123',
+      });
+      expect(mockUpload).not.toHaveBeenCalled();
+   });
+
+   it('uploads images and inserts pages when fileType is image', async () => {
+      mockUpload.mockResolvedValue({
+         public_id: 'folio/abc123',
+         secure_url:
+            'https://res.cloudinary.com/mock/image/upload/folio/abc123',
+      });
+
+      // First insert: document
+      mockInsert.mockReturnValueOnce({
+         values: vi.fn(() => ({
+            returning: vi.fn().mockResolvedValueOnce([mockDoc]),
+         })),
+      });
+
+      // Second insert: page
+      mockInsert.mockReturnValueOnce({
+         values: vi.fn(() => Promise.resolve()),
+      });
+
+      const caller = createAuthenticatedCaller(contributorUser);
+      const result = await caller.documents.upload({
+         title: 'Test Document',
+         fileType: 'image',
+         files: ['data:image/png;base64,abc123'],
+      });
+
+      expect(result).toMatchObject({ title: 'Test Document', status: 'ready' });
       expect(mockUpload).toHaveBeenCalledWith('data:image/png;base64,abc123', {
          folder: 'folio/documents',
-         resource_type: 'auto',
+         resource_type: 'image',
       });
    });
 
    it('throws FORBIDDEN if user is a viewer', async () => {
       const caller = createAuthenticatedCaller(viewerUser);
-
       await expect(
-         caller.documents.upload({
-            title: 'Test',
-            description: '',
-            fileBase64: 'data:image/png;base64,abc123',
-         }),
+         caller.documents.upload({ title: 'Test' }),
       ).rejects.toMatchObject({ code: 'FORBIDDEN' });
    });
 
    it('throws UNAUTHORIZED if not signed in', async () => {
       const caller = createUnauthenticatedCaller();
-
       await expect(
-         caller.documents.upload({
-            title: 'Test',
-            description: '',
-            fileBase64: 'data:image/png;base64,abc123',
-         }),
+         caller.documents.upload({ title: 'Test' }),
       ).rejects.toMatchObject({ code: 'UNAUTHORIZED' });
    });
 });
 
 // ── list ───────────────────────
+
 describe('documents.list', () => {
-   it('returns a list of documents', async () => {
+   it('returns a paginated list of documents', async () => {
       const mockResults = [
          {
             id: mockDoc.id,
             title: mockDoc.title,
             status: mockDoc.status,
-            cloudinaryUrl: mockDoc.cloudinaryUrl,
             uploaderName: 'testUser',
             createdAt: mockDoc.createdAt,
-            hasApprovedTranscription: false,
+            coverImageUrl: null,
+            pageCount: 0,
          },
       ];
 
-      // First select: paginated results
       mockSelect.mockReturnValueOnce({
          from: vi.fn(() => ({
             innerJoin: vi.fn(() => ({
-               leftJoin: vi.fn(() => ({
-                  where: vi.fn(() => ({
-                     limit: vi.fn(() => ({
-                        offset: vi.fn(() => ({
-                           orderBy: vi.fn().mockResolvedValueOnce(mockResults),
-                        })),
+               where: vi.fn(() => ({
+                  limit: vi.fn(() => ({
+                     offset: vi.fn(() => ({
+                        orderBy: vi.fn().mockResolvedValueOnce(mockResults),
                      })),
                   })),
                })),
@@ -142,12 +192,9 @@ describe('documents.list', () => {
          })),
       });
 
-      // Second select: count query
       mockSelect.mockReturnValueOnce({
          from: vi.fn(() => ({
-            leftJoin: vi.fn(() => ({
-               where: vi.fn().mockResolvedValueOnce([{ total: 1 }]),
-            })),
+            where: vi.fn().mockResolvedValueOnce([{ total: 1 }]),
          })),
       });
 
@@ -159,6 +206,66 @@ describe('documents.list', () => {
       expect(result.totalCount).toBe(1);
       expect(result.totalPages).toBe(1);
    });
+
+   it('returns empty list when no documents exist', async () => {
+      mockSelect.mockReturnValueOnce({
+         from: vi.fn(() => ({
+            innerJoin: vi.fn(() => ({
+               where: vi.fn(() => ({
+                  limit: vi.fn(() => ({
+                     offset: vi.fn(() => ({
+                        orderBy: vi.fn().mockResolvedValueOnce([]),
+                     })),
+                  })),
+               })),
+            })),
+         })),
+      });
+
+      mockSelect.mockReturnValueOnce({
+         from: vi.fn(() => ({
+            where: vi.fn().mockResolvedValueOnce([{ total: 0 }]),
+         })),
+      });
+
+      const caller = createUnauthenticatedCaller();
+      const result = await caller.documents.list({ page: 1, limit: 20 });
+
+      expect(result.documents).toHaveLength(0);
+      expect(result.totalCount).toBe(0);
+      expect(result.totalPages).toBe(0);
+   });
+
+   it('filters by search term', async () => {
+      mockSelect.mockReturnValueOnce({
+         from: vi.fn(() => ({
+            innerJoin: vi.fn(() => ({
+               where: vi.fn(() => ({
+                  limit: vi.fn(() => ({
+                     offset: vi.fn(() => ({
+                        orderBy: vi.fn().mockResolvedValueOnce([mockDoc]),
+                     })),
+                  })),
+               })),
+            })),
+         })),
+      });
+
+      mockSelect.mockReturnValueOnce({
+         from: vi.fn(() => ({
+            where: vi.fn().mockResolvedValueOnce([{ total: 1 }]),
+         })),
+      });
+
+      const caller = createUnauthenticatedCaller();
+      const result = await caller.documents.list({
+         page: 1,
+         limit: 20,
+         search: 'Test',
+      });
+
+      expect(result.documents).toHaveLength(1);
+   });
 });
 
 // ── getById ───────────────────────
@@ -167,7 +274,9 @@ describe('documents.getById', () => {
    it('returns a document by id', async () => {
       mockSelect.mockReturnValueOnce({
          from: vi.fn(() => ({
-            where: vi.fn().mockResolvedValueOnce([mockDoc]),
+            innerJoin: vi.fn(() => ({
+               where: vi.fn().mockResolvedValueOnce([mockDoc]),
+            })),
          })),
       });
 
@@ -180,7 +289,9 @@ describe('documents.getById', () => {
    it('throws NOT_FOUND if document does not exist', async () => {
       mockSelect.mockReturnValueOnce({
          from: vi.fn(() => ({
-            where: vi.fn().mockResolvedValueOnce([]),
+            innerJoin: vi.fn(() => ({
+               where: vi.fn().mockResolvedValueOnce([]),
+            })),
          })),
       });
 
@@ -305,7 +416,6 @@ describe('documents.delete', () => {
       });
 
       const caller = createAuthenticatedCaller(contributorUser);
-
       await expect(
          caller.documents.delete({ id: 'nonexistent' }),
       ).rejects.toMatchObject({ code: 'NOT_FOUND' });
@@ -321,7 +431,7 @@ describe('documents.delete', () => {
    it('throws UNAUTHORIZED if not signed in', async () => {
       const caller = createUnauthenticatedCaller();
       await expect(
-         caller.documents.update({ id: 'doc-1' }),
+         caller.documents.delete({ id: 'doc-1' }),
       ).rejects.toMatchObject({ code: 'UNAUTHORIZED' });
    });
 });

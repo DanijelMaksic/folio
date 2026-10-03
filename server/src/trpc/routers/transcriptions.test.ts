@@ -45,13 +45,13 @@ const viewerUser = mockUser({ globalRole: 'viewer' });
 
 const mockTranscription = {
    id: 'transcription-1',
-   documentId: 'doc-1',
+   pageId: 'page-1',
    userId: contributorUser.id,
    content: 'Some transcription content',
    status: 'draft',
    rejectionReason: null,
-   createdAt: new Date(),
-   updatedAt: new Date(),
+   createdAt: new Date().toISOString(),
+   updatedAt: new Date().toISOString(),
 };
 
 const mockTranscriptionWithUser = {
@@ -62,16 +62,20 @@ const mockTranscriptionWithUser = {
       email: contributorUser.email,
       username: contributorUser.username,
    },
+   page: {
+      id: 'page-1',
+      documentId: 'doc-1',
+   },
 };
 
 beforeEach(() => {
    vi.clearAllMocks();
 });
 
-// ── getByDocument ───────────────────────
+// ── getByPage ───────────────────────
 
-describe('transcriptions.getByDocument', () => {
-   it('returns the transcription for the current user and document', async () => {
+describe('transcriptions.getByPage', () => {
+   it('returns the transcription for the current user and page', async () => {
       mockSelect.mockReturnValueOnce({
          from: vi.fn(() => ({
             where: vi.fn(() => ({
@@ -81,8 +85,8 @@ describe('transcriptions.getByDocument', () => {
       });
 
       const caller = createAuthenticatedCaller(contributorUser);
-      const result = await caller.transcriptions.getByDocument({
-         documentId: 'doc-1',
+      const result = await caller.transcriptions.getByPage({
+         pageId: 'page-1',
       });
 
       expect(result).toMatchObject({ id: 'transcription-1' });
@@ -98,8 +102,8 @@ describe('transcriptions.getByDocument', () => {
       });
 
       const caller = createAuthenticatedCaller(contributorUser);
-      const result = await caller.transcriptions.getByDocument({
-         documentId: 'doc-1',
+      const result = await caller.transcriptions.getByPage({
+         pageId: 'page-1',
       });
 
       expect(result).toBeNull();
@@ -108,7 +112,7 @@ describe('transcriptions.getByDocument', () => {
    it('throws UNAUTHORIZED if not signed in', async () => {
       const caller = createUnauthenticatedCaller();
       await expect(
-         caller.transcriptions.getByDocument({ documentId: 'doc-1' }),
+         caller.transcriptions.getByPage({ pageId: 'page-1' }),
       ).rejects.toMatchObject({ code: 'UNAUTHORIZED' });
    });
 });
@@ -126,9 +130,7 @@ describe('transcriptions.create', () => {
       });
 
       const caller = createAuthenticatedCaller(contributorUser);
-      const result = await caller.transcriptions.create({
-         documentId: 'doc-1',
-      });
+      const result = await caller.transcriptions.create({ pageId: 'page-1' });
 
       expect(result).toMatchObject({ id: 'transcription-1' });
       expect(mockInsert).not.toHaveBeenCalled();
@@ -150,9 +152,7 @@ describe('transcriptions.create', () => {
       });
 
       const caller = createAuthenticatedCaller(contributorUser);
-      const result = await caller.transcriptions.create({
-         documentId: 'doc-1',
-      });
+      const result = await caller.transcriptions.create({ pageId: 'page-1' });
 
       expect(result).toMatchObject({ id: 'transcription-1' });
       expect(mockInsert).toHaveBeenCalled();
@@ -161,14 +161,14 @@ describe('transcriptions.create', () => {
    it('throws FORBIDDEN if user is a viewer', async () => {
       const caller = createAuthenticatedCaller(viewerUser);
       await expect(
-         caller.transcriptions.create({ documentId: 'doc-1' }),
+         caller.transcriptions.create({ pageId: 'page-1' }),
       ).rejects.toMatchObject({ code: 'FORBIDDEN' });
    });
 
    it('throws UNAUTHORIZED if not signed in', async () => {
       const caller = createUnauthenticatedCaller();
       await expect(
-         caller.transcriptions.create({ documentId: 'doc-1' }),
+         caller.transcriptions.create({ pageId: 'page-1' }),
       ).rejects.toMatchObject({ code: 'UNAUTHORIZED' });
    });
 });
@@ -228,15 +228,14 @@ describe('transcriptions.update', () => {
    });
 
    it('throws FORBIDDEN if transcription belongs to another user', async () => {
-      const otherUserTranscription = {
-         ...mockTranscription,
-         userId: 'other-user-id',
-      };
-
       mockSelect.mockReturnValueOnce({
          from: vi.fn(() => ({
             where: vi.fn(() => ({
-               limit: vi.fn().mockResolvedValueOnce([otherUserTranscription]),
+               limit: vi
+                  .fn()
+                  .mockResolvedValueOnce([
+                     { ...mockTranscription, userId: 'other-user-id' },
+                  ]),
             })),
          })),
       });
@@ -251,15 +250,14 @@ describe('transcriptions.update', () => {
    });
 
    it('throws FORBIDDEN if transcription is already submitted', async () => {
-      const submittedTranscription = {
-         ...mockTranscription,
-         status: 'submitted',
-      };
-
       mockSelect.mockReturnValueOnce({
          from: vi.fn(() => ({
             where: vi.fn(() => ({
-               limit: vi.fn().mockResolvedValueOnce([submittedTranscription]),
+               limit: vi
+                  .fn()
+                  .mockResolvedValueOnce([
+                     { ...mockTranscription, status: 'submitted' },
+                  ]),
             })),
          })),
       });
@@ -403,7 +401,7 @@ describe('transcriptions.getRevisions', () => {
             id: 'rev-1',
             transcriptionId: 'transcription-1',
             content: 'v1',
-            savedAt: new Date(),
+            savedAt: new Date().toISOString(),
          },
       ];
 
@@ -485,11 +483,12 @@ describe('transcriptions.listQueue', () => {
       const queue = [
          {
             id: 'transcription-1',
+            pageId: 'page-1',
             documentId: 'doc-1',
             documentTitle: 'Test Doc',
             contributorUsername: 'testUser',
             status: 'submitted',
-            updatedAt: new Date(),
+            updatedAt: new Date().toISOString(),
          },
       ];
 
@@ -497,7 +496,11 @@ describe('transcriptions.listQueue', () => {
          from: vi.fn(() => ({
             innerJoin: vi.fn(() => ({
                innerJoin: vi.fn(() => ({
-                  where: vi.fn().mockResolvedValueOnce(queue),
+                  innerJoin: vi.fn(() => ({
+                     where: vi.fn(() => ({
+                        orderBy: vi.fn().mockResolvedValueOnce(queue),
+                     })),
+                  })),
                })),
             })),
          })),
@@ -545,11 +548,9 @@ describe('transcriptions.approve', () => {
       });
 
       expect(result).toEqual({ success: true });
-      await vi.waitFor(() => {
-         expect(mockSendApprovalEmail).toHaveBeenCalledWith(
-            expect.objectContaining({ to: contributorUser.email }),
-         );
-      });
+      expect(mockSendApprovalEmail).toHaveBeenCalledWith(
+         expect.objectContaining({ to: contributorUser.email }),
+      );
    });
 
    it('throws NOT_FOUND if transcription does not exist', async () => {
@@ -604,8 +605,7 @@ describe('transcriptions.approve', () => {
 
 describe('transcriptions.reject', () => {
    it('rejects a submitted transcription and sends rejection email', async () => {
-      const submitted = { ...mockTranscriptionWithUser, status: 'submitted' };
-      mockFindFirst.mockResolvedValueOnce(submitted);
+      mockFindFirst.mockResolvedValueOnce(mockTranscriptionWithUser);
 
       mockUpdate.mockReturnValueOnce({
          set: vi.fn(() => ({
@@ -622,14 +622,12 @@ describe('transcriptions.reject', () => {
       });
 
       expect(result).toEqual({ success: true });
-      await vi.waitFor(() => {
-         expect(mockSendRejectionEmail).toHaveBeenCalledWith(
-            expect.objectContaining({
-               to: contributorUser.email,
-               reason: 'Needs more detail',
-            }),
-         );
-      });
+      expect(mockSendRejectionEmail).toHaveBeenCalledWith(
+         expect.objectContaining({
+            to: contributorUser.email,
+            reason: 'Needs more detail',
+         }),
+      );
    });
 
    it('throws NOT_FOUND if transcription does not exist', async () => {
@@ -696,16 +694,16 @@ describe('transcriptions.reject', () => {
    });
 });
 
-// ── getSubmittedByDocument ───────────────────────
+// ── getSubmittedByPageAndUser ───────────────────────
 
-describe('transcriptions.getSubmittedByDocument', () => {
+describe('transcriptions.getSubmittedByPageAndUser', () => {
    it('returns submitted transcription for editors', async () => {
-      const submitted = { ...mockTranscriptionWithUser, status: 'submitted' };
-      mockFindFirst.mockResolvedValueOnce(submitted);
+      mockFindFirst.mockResolvedValueOnce(mockTranscriptionWithUser);
 
       const caller = createAuthenticatedCaller(editorUser);
-      const result = await caller.transcriptions.getSubmittedByDocument({
-         documentId: 'doc-1',
+      const result = await caller.transcriptions.getSubmittedByPageAndUser({
+         pageId: 'page-1',
+         userId: contributorUser.id,
       });
 
       expect(result).toMatchObject({ status: 'submitted' });
@@ -715,8 +713,9 @@ describe('transcriptions.getSubmittedByDocument', () => {
       mockFindFirst.mockResolvedValueOnce(undefined);
 
       const caller = createAuthenticatedCaller(editorUser);
-      const result = await caller.transcriptions.getSubmittedByDocument({
-         documentId: 'doc-1',
+      const result = await caller.transcriptions.getSubmittedByPageAndUser({
+         pageId: 'page-1',
+         userId: contributorUser.id,
       });
 
       expect(result).toBeNull();
@@ -725,28 +724,34 @@ describe('transcriptions.getSubmittedByDocument', () => {
    it('throws FORBIDDEN if user is a contributor', async () => {
       const caller = createAuthenticatedCaller(contributorUser);
       await expect(
-         caller.transcriptions.getSubmittedByDocument({ documentId: 'doc-1' }),
+         caller.transcriptions.getSubmittedByPageAndUser({
+            pageId: 'page-1',
+            userId: contributorUser.id,
+         }),
       ).rejects.toMatchObject({ code: 'FORBIDDEN' });
    });
 
    it('throws UNAUTHORIZED if not signed in', async () => {
       const caller = createUnauthenticatedCaller();
       await expect(
-         caller.transcriptions.getSubmittedByDocument({ documentId: 'doc-1' }),
+         caller.transcriptions.getSubmittedByPageAndUser({
+            pageId: 'page-1',
+            userId: contributorUser.id,
+         }),
       ).rejects.toMatchObject({ code: 'UNAUTHORIZED' });
    });
 });
 
-// ── getApprovedByDocument ───────────────────────
+// ── getApprovedByPage ───────────────────────
 
-describe('transcriptions.getApprovedByDocument', () => {
+describe('transcriptions.getApprovedByPage', () => {
    it('returns approved transcription', async () => {
       const approved = { ...mockTranscription, status: 'approved' };
       mockFindFirst.mockResolvedValueOnce(approved);
 
       const caller = createUnauthenticatedCaller();
-      const result = await caller.transcriptions.getApprovedByDocument({
-         documentId: 'doc-1',
+      const result = await caller.transcriptions.getApprovedByPage({
+         pageId: 'page-1',
       });
 
       expect(result).toMatchObject({ status: 'approved' });
@@ -756,8 +761,8 @@ describe('transcriptions.getApprovedByDocument', () => {
       mockFindFirst.mockResolvedValueOnce(undefined);
 
       const caller = createUnauthenticatedCaller();
-      const result = await caller.transcriptions.getApprovedByDocument({
-         documentId: 'doc-1',
+      const result = await caller.transcriptions.getApprovedByPage({
+         pageId: 'page-1',
       });
 
       expect(result).toBeNull();

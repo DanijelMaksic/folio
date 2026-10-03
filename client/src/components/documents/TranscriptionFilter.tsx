@@ -24,11 +24,7 @@ function TranscriptionFilter({
          <DropdownMenu>
             <DropdownMenuTrigger
                render={
-                  <Button
-                     variant="outline"
-                     data-testid="actions-dropdown-btn"
-                     className=" capitalize w-31"
-                  >
+                  <Button variant="outline" className=" capitalize w-31">
                      {status === 'all-pages' && 'all pages'}
                      {status === 'transcribed' && 'transcribed'}
                      {status === 'not-transcribed' && 'not transcribed'}

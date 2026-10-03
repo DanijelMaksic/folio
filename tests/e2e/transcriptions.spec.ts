@@ -17,6 +17,8 @@ test.describe('Transcription flow', () => {
    }) => {
       await uploadTestDocument(page, title);
 
+      await page.getByTestId('page-card').click();
+
       await page.getByTestId('transcribe-tab-btn').click();
       await page.getByRole('button', { name: 'Start transcribing' }).click();
       await expect(page.getByTestId('transcription-content')).toBeVisible();

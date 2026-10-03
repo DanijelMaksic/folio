@@ -33,8 +33,8 @@ const mockCollection = {
    title: 'Test Collection',
    description: 'A test collection',
    createdBy: contributorUser.id,
-   createdAt: new Date(),
-   updatedAt: new Date(),
+   createdAt: new Date().toISOString(),
+   updatedAt: new Date().toISOString(),
 };
 
 beforeEach(() => {
@@ -188,7 +188,6 @@ describe('collections.getCurrentUserCollections', () => {
       const result = await caller.collections.getCurrentUserCollections({
          page: 1,
          limit: 20,
-         userId: contributorUser.id,
       });
 
       expect(result).toHaveLength(1);
@@ -201,7 +200,6 @@ describe('collections.getCurrentUserCollections', () => {
          caller.collections.getCurrentUserCollections({
             page: 1,
             limit: 20,
-            userId: contributorUser.id,
          }),
       ).rejects.toMatchObject({ code: 'UNAUTHORIZED' });
    });

@@ -7,6 +7,7 @@ function PageCard({ page, documentId }: { page: Page; documentId: string }) {
    return (
       <button
          key={page.id}
+         data-testid="page-card"
          onClick={() =>
             navigate(`/documents/${documentId}/pages/${page.pageNumber}`)
          }
