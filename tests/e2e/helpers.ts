@@ -57,11 +57,17 @@ export async function testAddDocToCol(
    await page.getByRole('button', { name: colTitle }).click();
    await page.getByRole('button', { name: 'Save' }).click();
 
+   // Wait for modal to close before navigating
+   await expect(page.getByText('Add to collection')).not.toBeVisible({
+      timeout: 15_000,
+   });
+
    await page.goto('/collections');
-   await page
+   const card = page
       .getByTestId('collection-card')
-      .filter({ hasText: colTitle })
-      .click();
+      .filter({ hasText: colTitle });
+   await card.waitFor({ state: 'visible', timeout: 15_000 });
+   await card.click();
    await page.waitForURL(/\/collections\/.+/, { timeout: 15_000 });
    await expect(page.getByText(docTitle)).toBeVisible({ timeout: 15_000 });
 }
