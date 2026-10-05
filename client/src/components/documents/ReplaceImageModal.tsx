@@ -157,6 +157,7 @@ function ReplaceImageModal({
                <Button
                   onClick={handleSubmit}
                   disabled={replaceImage.isPending || !selectedFile}
+                  data-testid="change-img-btn"
                >
                   {replaceImage.isPending ? 'Uploading...' : 'Change Image'}
                </Button>

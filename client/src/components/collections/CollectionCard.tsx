@@ -7,6 +7,7 @@ export function CollectionCard({ collection }: { collection: Collection }) {
    return (
       <Link
          to={`/collections/${id}`}
+         data-testid="collection-card"
          className="relative flex flex-col justify-between h-30 rounded-xl p-6 group cursor-pointer hover:translate-y-[-6px] transition duration-300 hover:shadow-2xl"
       >
          <span className="absolute -inset-px m-0 bg-linear-to-r from-gray-800 group-hover:from-gray-900 z-10 pointer-events-none rounded-xl md:rounded-2xl transition duration-300 group-hover:saturate-120" />

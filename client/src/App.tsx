@@ -24,28 +24,6 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
    return <>{children}</>;
 }
 
-// TODO: When transcribing, if user hits sumbit before save, revisions tab shows nothing and transcription is not submitted
-
-// TODO: When transcribing, if user types something, then hits save, then types some more, then hits submit, revision history will not show newest version and earlier version is submitted for review
-
-// TODO: Switch to ctx.user.id in trpc procedures
-
-// TODO: Switch from doc to document (in routers escpecially)
-
-// TODO: Status: indexed fromThePage
-
-// TODO: On first visit to /documents and /collections, no data was found
-
-// TODO: Choose between SQL-like db.select() and ORM-like db.query()
-
-// TODO: Add number of pages on document card
-
-// TODO: Add pagination to documentPages
-
-// TODO: Remove filtering from history stack
-
-// TODO: Replace id (from URL) with documentId
-
 export default function App() {
    return (
       <BrowserRouter>

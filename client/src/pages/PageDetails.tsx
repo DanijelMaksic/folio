@@ -144,7 +144,7 @@ function PageDetails() {
 
          {isDeleteOpen && (
             <DeleteModal
-               heading="Delete Document"
+               heading="Delete Page"
                error={deleteError}
                isPending={deletePage.isPending}
                onDelete={handleDelete}

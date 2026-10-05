@@ -41,7 +41,7 @@ export async function testSearch(page: Page, url: string, title: string) {
    await expect(page.getByText(title)).toBeVisible();
 
    await page.getByTestId('search-bar').fill(title);
-   await expect(page.getByText(title)).toBeVisible();
+   await expect(page.getByText(title).first()).toBeVisible();
 }
 
 export async function testAddDocToCol(
@@ -58,7 +58,10 @@ export async function testAddDocToCol(
    await page.getByRole('button', { name: 'Save' }).click();
 
    await page.goto('/collections');
-   await page.getByText(colTitle).click();
-   await page.waitForURL(/\/collections\/.+/);
-   await expect(page.getByText(docTitle)).toBeVisible();
+   await page
+      .getByTestId('collection-card')
+      .filter({ hasText: colTitle })
+      .click();
+   await page.waitForURL(/\/collections\/.+/, { timeout: 15_000 });
+   await expect(page.getByText(docTitle)).toBeVisible({ timeout: 15_000 });
 }

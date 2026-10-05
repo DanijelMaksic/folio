@@ -13,15 +13,18 @@ test.describe('Document CRUD operations', () => {
       page,
       auth,
    }) => {
+      const uniqueTitle = `${title} ${Date.now()}`;
       // page is already logged in via fixture
-      await uploadTestDocument(page, title);
+      await uploadTestDocument(page, uniqueTitle);
 
       await page.goto('/documents');
-      await expect(page.getByText(title)).toBeVisible();
+      await expect(page.getByText(uniqueTitle)).toBeVisible();
 
-      await page.getByText(title).click();
+      await page.getByText(uniqueTitle).click();
       await page.waitForURL(/\/documents\/.+/);
-      await expect(page.getByText(title)).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByText(uniqueTitle)).toBeVisible({
+         timeout: 15_000,
+      });
    });
 
    test('contributor can edit a document', async ({ page, auth }) => {
@@ -65,7 +68,8 @@ test.describe('Documents browsing flow', () => {
       page,
       auth,
    }) => {
-      await uploadTestDocument(page, title);
-      await testSearch(page, '/documents', title);
+      const uniqueTitle = `${title} ${Date.now()}`;
+      await uploadTestDocument(page, uniqueTitle);
+      await testSearch(page, '/documents', uniqueTitle);
    });
 });

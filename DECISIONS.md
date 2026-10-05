@@ -361,8 +361,14 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 **Decisions:**
 
-- Move search state from local state to URL, resulting in less and more readable code
+- Move search state from local state to URL, resulting in more readable code
 
 **Issues resolved:**
 
 **Known issues carried forward:**
+
+## Sprint 7 — Deployment
+
+## Sprint 8 — Account section
+
+## Sprint 9 — App visual design revamp

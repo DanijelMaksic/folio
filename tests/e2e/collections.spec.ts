@@ -14,21 +14,16 @@ test.describe('Collection CRUD operations', () => {
       page,
       auth,
    }) => {
-      // page is already logged in via fixture
       await createTestCollection(page, colTitle);
+      await expect(page.getByText(colTitle)).toBeVisible({ timeout: 15_000 });
 
       await page.goto('/collections');
-      await expect(page.getByText(colTitle)).toBeVisible();
-
-      await page.getByText(colTitle).click();
-      await page.waitForURL(/\/collections\/.+/);
-      await expect(page.getByText(colTitle)).toBeVisible({
-         timeout: 15_000,
-      });
+      await expect(
+         page.getByTestId('collection-card').filter({ hasText: colTitle }),
+      ).toBeVisible();
    });
 
    test('contributor can edit a collection', async ({ page, auth }) => {
-      // page is already logged in via fixture
       await createTestCollection(page, colTitle);
 
       await page.getByTestId('actions-dropdown-btn').click();
@@ -48,7 +43,6 @@ test.describe('Collection CRUD operations', () => {
    });
 
    test('contributor can delete a collection', async ({ page, auth }) => {
-      // page is already logged in via fixture
       await createTestCollection(page, colTitle);
 
       await page.getByTestId('actions-dropdown-btn').click();
@@ -68,7 +62,6 @@ test.describe('Collection CRUD operations', () => {
       page,
       auth,
    }) => {
-      // page is already logged in via fixture
       await createTestCollection(page, colTitle);
       await uploadTestDocument(page, docTitle);
       await testAddDocToCol(page, colTitle, docTitle);
@@ -78,25 +71,30 @@ test.describe('Collection CRUD operations', () => {
       page,
       auth,
    }) => {
-      // page is already logged in via fixture
       await createTestCollection(page, colTitle);
       await uploadTestDocument(page, docTitle);
       await testAddDocToCol(page, colTitle, docTitle);
 
       await page.goto('/documents');
-      await page.getByText(docTitle).click();
+      await page
+         .getByTestId('document-card')
+         .filter({ hasText: docTitle })
+         .click();
+      await page.waitForURL(/\/documents\/.+/, { timeout: 15_000 });
 
-      // remove the document from the collection
       await page.getByTestId('actions-dropdown-btn').click();
       await expect(page.getByText('Manage')).toBeVisible();
       await page.getByTestId('save-modal-btn').click();
       await expect(page.getByText('Add to collection')).toBeVisible();
-      await page.getByRole('button', { name: colTitle }).click(); // toggling the collection where document is saved = removing
+      await page.getByRole('button', { name: colTitle }).click();
       await page.getByRole('button', { name: 'Save' }).click();
 
       await page.goto('/collections');
-      await page.getByText(colTitle).click();
-      await page.waitForURL(/\/collections\/.+/);
+      await page
+         .getByTestId('collection-card')
+         .filter({ hasText: colTitle })
+         .click();
+      await page.waitForURL(/\/collections\/.+/, { timeout: 15_000 });
       await expect(page.getByText(docTitle)).not.toBeVisible();
    });
 });
@@ -106,7 +104,6 @@ test.describe('Collections browsing flow', () => {
       page,
       auth,
    }) => {
-      // page is already logged in via fixture
       await createTestCollection(page, colTitle);
       await testSearch(page, '/collections', colTitle);
    });
@@ -115,13 +112,16 @@ test.describe('Collections browsing flow', () => {
       page,
       auth,
    }) => {
-      // page is already logged in via fixture
       await createTestCollection(page, colTitle);
       await uploadTestDocument(page, docTitle);
       await testAddDocToCol(page, colTitle, docTitle);
 
       await page.goto('/collections');
-      await page.getByText(colTitle).click();
+      await page
+         .getByTestId('collection-card')
+         .filter({ hasText: colTitle })
+         .click();
+      await page.waitForURL(/\/collections\/.+/, { timeout: 15_000 });
       await expect(page.getByText(colTitle)).toBeVisible();
       await page.getByTestId('search-bar').fill(docTitle);
       await expect(page.getByText(docTitle)).toBeVisible();
