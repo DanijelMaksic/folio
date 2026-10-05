@@ -351,24 +351,84 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Review queue has no navigation link — deferred to Sprint 6
 
-## Sprint 6 — PDF pipeline
+## Sprint 6 — PDF Pipeline & Pages
 
-**Goal:**
+**Goal:** A logged-in contributor can upload a PDF document, which is automatically split into individual pages. Pages can be browsed, searched, filtered, and managed independently.
 
 **Completed:**
 
-- Moved search from local state to URL; removed the separate search procedure as the search is now part of the list query
+- PDF upload pipeline: BullMQ + IORedis queue, pdf-to-img worker splits PDF into PNG buffers, each page is uploaded to Cloudinary and inserted into `document_pages` table with `Page ${i}` default title; original PDF is never stored
+
+- Document hierarchy introduced: Document is now a container; each page has its own image, title, and transcription slot
+
+- Routes refactored: `/documents/:id` now shows a page grid (`DocumentPages.tsx`); `/documents/:id/pages/:pageNumber` shows a single page viewer (`PageDetails.tsx`); review route moved to `/review/:id/:pageNumber?userId=<id>`
+
+- `document_pages` table added to Drizzle schema with `pageNumber`, `imageUrl`, `cloudinaryPublicId`, unique constraint on `(documentId, pageNumber)`; pages exported as `pages` (not `documentPages`) to avoid tRPC router key collision
+
+- `pages` tRPC router added with `getByDocument`, `getById`, `getByPageNumber`, `update`, `delete`, `addPages`, and `replaceImage` procedures
+
+- `getByDocument` returns paginated results with `approvedTranscriptionCount` per page via `COUNT(CASE WHEN status = 'approved' THEN 1 END)::int` and a `leftJoin` on transcriptions — correlated subquery approach returned 0 due to Drizzle interpolation issues
+
+- Page deletion renumbers remaining pages using raw SQL `CASE` to preserve custom titles while updating default `Page N` titles
+
+- `AddPagesModal` and `ReplaceImageModal` added; file input uses shadcn `Attachment` component with a hidden `<input type="file">` triggered programmatically
+
+- Search, pagination, and transcription status filter added to `DocumentPages`; search and pagination state stored in URL params; filter is client-side using `approvedTranscriptionCount`
+
+- `uploadDocumentSchema` refactored from discriminated union to flat `z.object()` with optional `fileType`, `fileBase64`, and `files` fields — document creation with no files now supported
+
+- Transcription procedures migrated from `documentId` to `pageId` — each page has its own transcription slot
+
+- Review queue updated: `listQueue` joins pages and documents to get `documentId` and page number; `ReviewPage` reads `userId` from query params; `getSubmittedByPageAndUser` takes both `pageId` and `userId`
+
+- BullMQ worker startup deferred with `setTimeout` in `server.ts` to prevent cold-boot blocking — on first PC boot Redis takes a few seconds to initialize, causing the first tRPC queries to hang until the is connected
+
+- Vitest unit tests rewritten for `documents`, `collections`, `transcriptions`, and `pages` routers to match updated procedure signatures and query chain shapes (for mocking)
+
+- Playwright e2e tests updated: file input targeting switched from `getByLabel('File')` to `page.locator('input[type="file"]')` due to hidden input behind shadcn Attachment; navigation fixed to use `getByTestId` + `filter({ hasText })` instead of `getByText` to avoid strict mode violations from duplicate text matches; `data-testid` added to `DocumentCard` and `CollectionCard`
 
 **Decisions:**
 
-- Move search state from local state to URL, resulting in more readable code
+- `pdf-to-img` chosen over `pdfjs-dist` + `canvas` — canvas bindings produce blank images in Node.js due to rendering limitations; `pdf-to-img` works headlessly without native dependencies
+
+- Pages stored as individual Cloudinary images rather than keeping the original PDF — enables per-page image replacement, lazy loading, and Cloudinary transformations; original PDF has no further use after processing
+
+- `approvedTranscriptionCount` computed via `leftJoin` + `COUNT(CASE WHEN ...)::int` rather than a correlated subquery — Drizzle's `sql` template tag interpolates column references correctly in a join context but not reliably inside a correlated subquery; `::int` cast required because PostgreSQL `COUNT` returns bigint which Drizzle passes back as a string
+
+- Client-side filtering for transcription status rather than server-side — `approvedTranscriptionCount` is already returned per page in `getByDocument`; adding a server-side status filter would require a separate count query or a `HAVING` clause, adding complexity for no real benefit at this scale
+
+- Search and pagination state moved to URL params for `DocumentPages` — consistent with the existing pattern on `/documents` and `/collections`, enables browser back/forward and shareable URLs
+
+- `transcriptionRevisions` append-only with `savedAt` only — revisions are never modified, so `updatedAt` is unnecessary; matches the pattern established in Sprint 3
+
+- BullMQ worker deferred with `setTimeout(3000)` rather than awaiting at server startup — ensures the HTTP server accepts requests immediately on cold boot; PDF jobs submitted during the window sit in the queue and are picked up once the worker connects, so no jobs are lost
+
+- `getByTestId` + `filter({ hasText })` pattern adopted across all Playwright tests — `getByText` causes strict mode violations when multiple cards share the same title (different users' documents/collections); filtering by testid scopes the locator to the card element and avoids ambiguity
 
 **Issues resolved:**
 
+- `approvedTranscriptionCount` returned `'0'` as a string — PostgreSQL `COUNT` returns bigint; fixed with `::int` cast in the raw SQL
+
+- `approvedTranscriptionCount` returned `0` even with approved transcriptions — correlated subquery not resolving `pages.id` correctly inside `sql` template; fixed by switching to `leftJoin` + `COUNT(CASE WHEN ...)`
+
+- PDF worker blocking cold boot — BullMQ tried to connect to Redis before it finished initializing on first PC boot; fixed by deferring worker import with `setTimeout`
+
+- Playwright strict mode violations from duplicate text — multiple cards with the same title caused `getByText` to resolve to multiple elements; fixed with `getByTestId('...').filter({ hasText: title })`
+
+- Hidden file input not reachable by `getByLabel('File')` — shadcn Attachment uses a hidden `<input>` triggered by a button; fixed by targeting `input[type="file"]` directly, which Playwright can interact with regardless of visibility
+
 **Known issues carried forward:**
 
-## Sprint 7 — Deployment
+- Resend free tier: only delivers to Resend account owner email in dev. Real domain verification on Resend website deferred to Sprint 7
 
-## Sprint 8 — Account section
+- Email verification flow untested for non-owner emails as a result
 
-## Sprint 9 — App visual design revamp
+- Docker warns about some vulnerabilities related to Golang packages — likely a false-flag warning, will revisit later
+
+- esbuild moderate vulnerability via drizzle-kit's dependency on `@esbuild-kit` — dev-only, unexploitable in production; monitor for a drizzle-kit update
+
+## Sprint 7 — Dashboard and Profile Settings
+
+## Sprint 8 — App Visual Design Revamp
+
+## Sprint 9 — Deployment

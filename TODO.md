@@ -19,3 +19,5 @@
 - Replace id (from URL params) with documentId
 
 - Add searching by description, not just title
+
+- Add a link that leads editor+ to /review page
