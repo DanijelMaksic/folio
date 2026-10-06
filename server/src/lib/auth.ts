@@ -4,6 +4,10 @@ import { betterAuth } from 'better-auth/minimal';
 import { sendVerificationEmail, sendOtpEmail } from './email.js';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { twoFactor } from 'better-auth/plugins';
+import { APIError } from 'better-auth/api';
+import { count, eq } from 'drizzle-orm';
+import { user as userTable } from '@/db/schema/index.js';
+import { deleteUserContent } from '@/lib/delete-user-content.js';
 
 export const auth = betterAuth({
    appName: 'Folio',
@@ -36,6 +40,31 @@ export const auth = betterAuth({
             type: 'string',
             required: false,
             defaultValue: 'viewer',
+         },
+      },
+      deleteUser: {
+         enabled: true,
+         beforeDelete: async (u) => {
+            // Don't let the last admin lock everyone out of role management
+            const [self] = await db
+               .select({ role: userTable.globalRole })
+               .from(userTable)
+               .where(eq(userTable.id, u.id));
+
+            if (self?.role === 'admin') {
+               const [{ n }] = await db
+                  .select({ n: count() })
+                  .from(userTable)
+                  .where(eq(userTable.globalRole, 'admin'));
+               if (n <= 1) {
+                  throw new APIError('BAD_REQUEST', {
+                     message:
+                        'You are the only admin. Promote someone else first.',
+                  });
+               }
+            }
+
+            await deleteUserContent(u.id);
          },
       },
    },

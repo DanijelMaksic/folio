@@ -4,7 +4,7 @@ import type { User } from './auth.js';
 export const transcriptionSchema = z.object({
    id: z.string(),
    pageId: z.string(),
-   userId: z.string(),
+   userId: z.string().nullable(),
    content: z.string(),
    status: z.enum(['draft', 'submitted', 'approved', 'rejected']),
    rejectionReason: z.string().nullable(),
@@ -46,7 +46,7 @@ export const queueItemSchema = z.object({
    pageNumber: z.number(),
    documentId: z.string(),
    documentTitle: z.string(),
-   contributorUsername: z.string(),
+   contributorUsername: z.string().nullable(),
    status: z.enum(['submitted']),
    updatedAt: z.string(),
 });

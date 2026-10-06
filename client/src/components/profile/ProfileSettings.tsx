@@ -4,6 +4,7 @@ import { signOut } from '@/lib/auth-client';
 import { Button } from '@/components/ui/button';
 import EditProfileModal from '@/components/profile/EditProfileModal';
 import ChangePasswordModal from '@/components/profile/ChangePasswordModal';
+import DeleteProfileModal from '@/components/profile/DeleteProfileModal';
 
 interface ProfileSettingsProps {
    name: string;
@@ -29,10 +30,13 @@ function SettingRow({ title, description, children }: SettingRowProps) {
 }
 
 function ProfileSettings({ name, username }: ProfileSettingsProps) {
-   const navigate = useNavigate();
    const [editOpen, setEditOpen] = useState(false);
    const [passwordOpen, setPasswordOpen] = useState(false);
+   const [deleteOpen, setDeleteOpen] = useState(false);
+
    const [signingOut, setSigningOut] = useState(false);
+
+   const navigate = useNavigate();
 
    async function handleSignOut() {
       setSigningOut(true);
@@ -85,12 +89,14 @@ function ProfileSettings({ name, username }: ProfileSettingsProps) {
             <h2 className="text-xl text-destructive">Danger zone</h2>
             <div className="mt-2 rounded-lg border border-destructive/40 px-4">
                <SettingRow
-                  title="Delete account"
-                  description="Permanently delete your account and the documents you uploaded. This cannot be undone."
+                  title="Delete profile"
+                  description="Permanently delete your profile and the documents you uploaded. This cannot be undone."
                >
-                  {/* Wired up when we build deletion later in the sprint */}
-                  <Button variant="destructive" disabled>
-                     Delete account
+                  <Button
+                     variant="destructive"
+                     onClick={() => setDeleteOpen(true)}
+                  >
+                     Delete profile
                   </Button>
                </SettingRow>
             </div>
@@ -102,10 +108,13 @@ function ProfileSettings({ name, username }: ProfileSettingsProps) {
             initialName={name}
             initialUsername={username}
          />
+
          <ChangePasswordModal
             open={passwordOpen}
             onOpenChange={setPasswordOpen}
          />
+
+         <DeleteProfileModal open={deleteOpen} onOpenChange={setDeleteOpen} />
       </div>
    );
 }

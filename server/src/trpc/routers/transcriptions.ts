@@ -217,12 +217,16 @@ export const transcriptionsRouter = router({
          });
 
          if (!transcription) throw new TRPCError({ code: 'NOT_FOUND' });
+
+         if (!transcription.user) throw new TRPCError({ code: 'NOT_FOUND' });
+
          if (transcription.userId === ctx.user.id) {
             throw new TRPCError({
                code: 'FORBIDDEN',
                message: 'Cannot approve your own transcription',
             });
          }
+
          if (transcription.status !== 'submitted') {
             throw new TRPCError({
                code: 'BAD_REQUEST',
@@ -260,12 +264,16 @@ export const transcriptionsRouter = router({
          });
 
          if (!transcription) throw new TRPCError({ code: 'NOT_FOUND' });
+
+         if (!transcription.user) throw new TRPCError({ code: 'NOT_FOUND' });
+
          if (transcription.userId === ctx.user.id) {
             throw new TRPCError({
                code: 'FORBIDDEN',
                message: 'Cannot reject your own transcription.',
             });
          }
+
          if (transcription.status !== 'submitted') {
             throw new TRPCError({
                code: 'BAD_REQUEST',

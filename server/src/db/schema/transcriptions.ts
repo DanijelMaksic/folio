@@ -12,9 +12,7 @@ export const transcriptions = pgTable(
       pageId: text()
          .notNull()
          .references(() => pages.id, { onDelete: 'cascade' }),
-      userId: text()
-         .notNull()
-         .references(() => user.id, { onDelete: 'cascade' }),
+      userId: text().references(() => user.id, { onDelete: 'set null' }),
       content: text().notNull().default(''),
       status: transcriptionStatusEnum().notNull().default('draft'),
       rejectionReason: text(),
