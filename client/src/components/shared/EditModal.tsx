@@ -1,5 +1,15 @@
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import {
+   Dialog,
+   DialogContent,
+   DialogDescription,
+   DialogFooter,
+   DialogHeader,
+   DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 
 interface EditModalProps {
@@ -25,52 +35,81 @@ function EditModal({
    onTitleChange,
    onDescriptionChange,
 }: EditModalProps) {
+   // The parents render this modal conditionally and set the values before
+   // opening, so the props at mount time are the original values.
+   const [initial] = useState({ title, description });
+
+   const trimmedTitle = title.trim();
+   const hasChanges =
+      trimmedTitle !== initial.title.trim() ||
+      description.trim() !== initial.description.trim();
+   const canSave = hasChanges && trimmedTitle.length > 0 && !isPending;
+
+   function handleSubmit(e: React.FormEvent) {
+      e.preventDefault();
+      if (canSave) onEdit();
+   }
+
    return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-         <div className="bg-background rounded-xl p-6 w-full max-w-md space-y-4">
-            <h2 className="text-lg font-semibold">{heading}</h2>
+      <Dialog
+         open
+         onOpenChange={(open) => {
+            if (!open && !isPending) onClose();
+         }}
+      >
+         <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+               <DialogTitle className="text-lg font-semibold">
+                  {heading}
+               </DialogTitle>
+               <DialogDescription>
+                  Update the title and description.
+               </DialogDescription>
+            </DialogHeader>
 
-            <div className="space-y-2">
-               <label
-                  className="text-sm font-medium"
-                  htmlFor="edit-title-field"
-               >
-                  Title
-               </label>
-               <Input
-                  value={title}
-                  id="edit-title-field"
-                  onChange={(e) => onTitleChange(e.target.value)}
-               />
-            </div>
+            <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+               <div className="space-y-2">
+                  <Label htmlFor="edit-title-field">Title</Label>
+                  <Input
+                     id="edit-title-field"
+                     value={title}
+                     onChange={(e) => onTitleChange(e.target.value)}
+                     aria-invalid={trimmedTitle.length === 0}
+                  />
+                  {trimmedTitle.length === 0 && (
+                     <p className="text-sm text-destructive">
+                        Title is required
+                     </p>
+                  )}
+               </div>
 
-            <div className="space-y-2">
-               <label
-                  className="text-sm font-medium"
-                  htmlFor="edit-description-field"
-               >
-                  Description
-               </label>
-               <Textarea
-                  value={description}
-                  id="edit-description-field"
-                  onChange={(e) => onDescriptionChange(e.target.value)}
-               />
-            </div>
+               <div className="space-y-2">
+                  <Label htmlFor="edit-description-field">Description</Label>
+                  <Textarea
+                     id="edit-description-field"
+                     value={description}
+                     onChange={(e) => onDescriptionChange(e.target.value)}
+                  />
+               </div>
 
-            {error && <p className="text-sm text-destructive">{error}</p>}
+               {error && <p className="text-sm text-destructive">{error}</p>}
 
-            <div className="flex justify-end gap-2">
-               <Button variant="outline" onClick={onClose}>
-                  Cancel
-               </Button>
-
-               <Button onClick={onEdit} disabled={isPending}>
-                  {isPending ? 'Saving...' : 'Save'}
-               </Button>
-            </div>
-         </div>
-      </div>
+               <DialogFooter>
+                  <Button
+                     type="button"
+                     variant="outline"
+                     onClick={onClose}
+                     disabled={isPending}
+                  >
+                     Cancel
+                  </Button>
+                  <Button type="submit" disabled={!canSave}>
+                     {isPending ? 'Saving...' : 'Save Changes'}
+                  </Button>
+               </DialogFooter>
+            </form>
+         </DialogContent>
+      </Dialog>
    );
 }
 

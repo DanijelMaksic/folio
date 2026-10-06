@@ -63,7 +63,12 @@ export const usernameSchema = z
 export const registerSchema = z.object({
    username: usernameSchema,
    email: z.string().email('Must be a valid email address'),
-   password: z.string().min(8, 'Password must be at least 8 characters'),
+   password: z
+      .string()
+      .min(8, 'Password must be at least 8 characters')
+      .max(128, 'Password must be 128 characters or less')
+      .regex(/[a-zA-Z]/, 'Password must contain at least one letter')
+      .regex(/[0-9]/, 'Password must contain at least one number'),
 });
 
 export const loginSchema = z.object({
@@ -89,7 +94,58 @@ export const userSchema = z.object({
    updatedAt: z.string(),
 });
 
+export const updateProfileSchema = z.object({
+   name: z
+      .string()
+      .trim()
+      .min(1, 'Name is required')
+      .max(50, 'Name must be 50 characters or less'),
+   username: z
+      .string()
+      .trim()
+      .min(3, 'Username must be at least 3 characters')
+      .max(30, 'Username must be 30 characters or less')
+      .regex(
+         /^[a-zA-Z0-9_.]+$/,
+         'Only letters, numbers, underscores and periods',
+      ),
+});
+
+export const passwordSchema = z
+   .string()
+   .min(8, 'Password must be at least 8 characters')
+   .max(128, 'Password must be 128 characters or less')
+   .regex(/[a-zA-Z]/, 'Password must contain at least one letter')
+   .regex(/[0-9]/, 'Password must contain at least one number');
+
+export const changePasswordSchema = z
+   .object({
+      currentPassword: z.string().min(1, 'Current password is required'),
+      newPassword: passwordSchema,
+      confirmPassword: z.string().min(1, 'Please confirm your new password'),
+   })
+   .refine((data) => data.newPassword === data.confirmPassword, {
+      path: ['confirmPassword'],
+      message: 'Passwords do not match',
+   })
+   .refine((data) => data.newPassword !== data.currentPassword, {
+      path: ['newPassword'],
+      message: 'New password must be different from the current one',
+   });
+
+export const AVATAR_MAX_BYTES = 5 * 1024 * 1024;
+
+export const uploadAvatarSchema = z.object({
+   fileBase64: z
+      .string()
+      .startsWith('data:image/', 'File must be an image')
+      // base64 inflates size by ~4/3
+      .max(Math.ceil(AVATAR_MAX_BYTES * 1.37), 'Image must be 5MB or less'),
+});
+
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>;
 export type User = z.infer<typeof userSchema>;
+export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;

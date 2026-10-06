@@ -34,7 +34,7 @@ test.describe('Page CRUD operations', () => {
       await expect(titleInput).toHaveValue('Page 1');
       await titleInput.fill('Edited Page Title');
 
-      await page.getByRole('button', { name: 'Save' }).click();
+      await page.getByRole('button', { name: 'Save Changes' }).click();
       await expect(page.getByText('Edited Page Title')).toBeVisible({
          timeout: 15_000,
       });

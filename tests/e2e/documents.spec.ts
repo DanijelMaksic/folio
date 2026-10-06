@@ -27,7 +27,7 @@ test.describe('Document CRUD operations', () => {
       });
    });
 
-   test('contributor can edit a document', async ({ page, auth }) => {
+   test('contributor can edit a document title', async ({ page, auth }) => {
       // page is already logged in via fixture
       await uploadTestDocument(page, title);
 
@@ -41,7 +41,7 @@ test.describe('Document CRUD operations', () => {
       await expect(titleInput).toHaveValue(title);
       await titleInput.fill('Edited title');
 
-      await page.getByRole('button', { name: 'Save' }).click();
+      await page.getByRole('button', { name: 'Save Changes' }).click();
       await expect(page.getByText('Edited title')).toBeVisible({
          timeout: 15_000,
       });

@@ -8,7 +8,7 @@ import DocumentPages from '@/pages/DocumentPages';
 import UploadDocument from '@/pages/UploadDocument';
 import ReviewQueue from '@/pages/ReviewQueue';
 import Layout from '@/components/shared/Layout';
-import Account from './pages/Account';
+import Profile from './pages/Profile';
 import Home from '@/pages/Home';
 import PageNotFound from '@/pages/PageNotFound';
 import Collections from '@/components/collections/Collections';
@@ -79,10 +79,10 @@ export default function App() {
                />
 
                <Route
-                  path="/account"
+                  path="/profile"
                   element={
                      <ProtectedRoute>
-                        <Account />
+                        <Profile />
                      </ProtectedRoute>
                   }
                />

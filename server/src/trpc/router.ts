@@ -4,6 +4,7 @@ import { pagesRouter } from '@/trpc/routers/pages.js';
 import { documentsRouter } from '@/trpc/routers/documents.js';
 import { collectionsRouter } from '@/trpc/routers/collections.js';
 import { transcriptionsRouter } from '@/trpc/routers/transcriptions.js';
+import { profileRouter } from '@/trpc/routers/profile.js';
 
 // API endpoints
 export const appRouter = router({
@@ -12,6 +13,7 @@ export const appRouter = router({
    transcriptions: transcriptionsRouter,
    collections: collectionsRouter,
    pages: pagesRouter,
+   profile: profileRouter,
 });
 
 // This line ensures type safety across client and server, and it is this AppRouter type that we'll use in client

@@ -21,3 +21,9 @@
 - Add searching by description, not just title
 
 - Add a link that leads editor+ to /review page
+
+- Change export default on all components to be under the component
+
+- "Request to becoma a ${globalRole}" section in profile page
+
+- Change Sign In and Sign up instead of Log in and Register
