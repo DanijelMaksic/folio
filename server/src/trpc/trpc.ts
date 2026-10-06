@@ -23,4 +23,11 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
    });
 });
 
+export const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
+   if (ctx.user.globalRole !== 'admin') {
+      throw new TRPCError({ code: 'FORBIDDEN' });
+   }
+   return next({ ctx });
+});
+
 export const createCallerFactory = t.createCallerFactory;

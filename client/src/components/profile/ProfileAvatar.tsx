@@ -2,8 +2,7 @@ import { useRef, useState } from 'react';
 import { AVATAR_MAX_BYTES } from '@folio/shared';
 import { updateUser } from '@/lib/auth-client';
 import { trpc } from '@/lib/trpc';
-import { Button } from '@/components/ui/button';
-import { Loader2, X } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
@@ -34,7 +33,6 @@ function ProfileAvatar({ image, displayName }: ProfileAvatarProps) {
    const [error, setError] = useState<string | null>(null);
 
    const uploadAvatar = trpc.profile.uploadAvatar.useMutation();
-   const removeAvatar = trpc.profile.removeAvatar.useMutation();
 
    async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
       const file = e.target.files?.[0];
@@ -68,23 +66,6 @@ function ProfileAvatar({ image, displayName }: ProfileAvatarProps) {
       }
    }
 
-   async function handleRemove() {
-      setError(null);
-      setBusy(true);
-      try {
-         const { error: updateError } = await updateUser({ image: null });
-         if (updateError) {
-            setError(updateError.message ?? 'Could not remove avatar');
-            return;
-         }
-         await removeAvatar.mutateAsync();
-      } catch (err) {
-         setError(err instanceof Error ? err.message : 'Removal failed');
-      } finally {
-         setBusy(false);
-      }
-   }
-
    return (
       <div className="flex flex-col items-center gap-2">
          <div className="relative size-24 shrink-0">
@@ -93,7 +74,7 @@ function ProfileAvatar({ image, displayName }: ProfileAvatarProps) {
                onClick={() => inputRef.current?.click()}
                disabled={busy}
                aria-label="Change profile photo"
-               className="group relative size-full overflow-hidden rounded-full focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+               className="group relative size-full overflow-hidden rounded-full focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none border-2"
             >
                {image ? (
                   <img
@@ -120,18 +101,6 @@ function ProfileAvatar({ image, displayName }: ProfileAvatarProps) {
                   )}
                </span>
             </button>
-
-            {image && (
-               <button
-                  type="button"
-                  onClick={handleRemove}
-                  disabled={busy}
-                  aria-label="Remove profile photo"
-                  className="absolute top-0.5 right-0.5 flex size-6 items-center justify-center rounded-full border bg-background text-muted-foreground shadow-sm transition-colors hover:bg-destructive hover:text-white focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
-               >
-                  <X className="size-3.5" />
-               </button>
-            )}
          </div>
 
          <input

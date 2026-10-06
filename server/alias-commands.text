@@ -1,9 +1,3 @@
 alias db='docker exec -it folio-postgres-1 psql -U postgres -d folio'
 
-UPDATE "user" SET global_role = 'contributor' WHERE email = 'danijel.maksic77@gmail.com';
-
-DELETE FROM transcriptions WHERE user_id = 'id';
-
-31a90bf3-bf59-46e0-af9b-af2c8c2f615a
-
-SELECT COUNT(*) FROM transcriptions WHERE page_id = '4190a895-fde2-414e-ab2b-758a6f28623d' AND status = 'approved';
+UPDATE "user" SET two_factor_enabled = 'false' WHERE email = 'name@email.com';

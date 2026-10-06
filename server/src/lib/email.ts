@@ -76,3 +76,26 @@ export async function sendRejectionEmail({
     `,
    });
 }
+
+export async function sendRoleRequestApprovedEmail(to: string, role: string) {
+   await resend.emails.send({
+      from: FROM,
+      to,
+      subject: `You're now a ${role} on Folio`,
+      html: `<p>Your request was approved. You now have <strong>${role}</strong> access.</p>
+             <p>Sign out and back in if you don't see the change.</p>`,
+   });
+}
+
+export async function sendRoleRequestRejectedEmail(
+   to: string,
+   reason?: string,
+) {
+   await resend.emails.send({
+      from: FROM,
+      to,
+      subject: 'Your Folio role request',
+      html: `<p>Your request for a higher role wasn't approved this time.</p>
+             ${reason ? `<p>Reason: ${reason}</p>` : ''}`,
+   });
+}

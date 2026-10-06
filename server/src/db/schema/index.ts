@@ -5,3 +5,4 @@ export * from './collections.js';
 export * from './transcriptions.js';
 export * from './relations.js';
 export * from './pages.js';
+export * from './roleRequests.js';

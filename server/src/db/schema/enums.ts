@@ -19,3 +19,9 @@ export const transcriptionStatusEnum = pgEnum('transcription_status', [
    'approved',
    'rejected',
 ]);
+
+export const roleRequestStatusEnum = pgEnum('role_request_status', [
+   'pending',
+   'approved',
+   'rejected',
+]);
