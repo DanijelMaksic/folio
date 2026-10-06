@@ -143,9 +143,27 @@ export const uploadAvatarSchema = z.object({
       .max(Math.ceil(AVATAR_MAX_BYTES * 1.37), 'Image must be 5MB or less'),
 });
 
+export const contributionStatsSchema = z.object({
+   documentsUploaded: z.number().int(),
+   totalTranscriptions: z.number().int(),
+   approved: z.number().int(),
+   submitted: z.number().int(),
+   rejected: z.number().int(),
+   drafts: z.number().int(),
+});
+
+export const requestRoleSchema = z.object({
+   message: z
+      .string()
+      .trim()
+      .min(20, 'Please write at least 20 characters')
+      .max(1000, 'Message must be 1000 characters or less'),
+});
+
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>;
 export type User = z.infer<typeof userSchema>;
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+export type ContributionStats = z.infer<typeof contributionStatsSchema>;

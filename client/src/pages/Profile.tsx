@@ -1,10 +1,13 @@
+import { Navigate, useSearchParams } from 'react-router-dom';
 import { useSession } from '@/lib/auth-client';
-import { Navigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { useState } from 'react';
-import EditProfileModal from '@/components/profile/EditProfileModal';
-import ChangePasswordModal from '@/components/profile/ChangePasswordModal';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ProfileAvatar from '@/components/profile/ProfileAvatar';
+import ContributionStats from '@/components/profile/ContributionStats';
+import ProfileSettings from '@/components/profile/ProfileSettings';
+import RoleRequestCard from '@/components/profile/RoleRequestCard';
+
+const TABS = ['stats', 'settings'] as const;
+type ProfileTab = (typeof TABS)[number];
 
 const dateFormatter = new Intl.DateTimeFormat(undefined, {
    year: 'numeric',
@@ -13,10 +16,26 @@ const dateFormatter = new Intl.DateTimeFormat(undefined, {
 });
 
 function Profile() {
-   const [editOpen, setEditOpen] = useState(false);
-   const [passwordOpen, setPasswordOpen] = useState(false);
-
    const { data: session, isPending } = useSession();
+   const [searchParams, setSearchParams] = useSearchParams();
+
+   const rawTab = searchParams.get('tab') as ProfileTab | null;
+   const tab: ProfileTab = rawTab && TABS.includes(rawTab) ? rawTab : 'stats';
+
+   const handleTabChange = (value: string) => {
+      setSearchParams(
+         (prev) => {
+            const next = new URLSearchParams(prev);
+            if (value === 'stats') {
+               next.delete('tab');
+            } else {
+               next.set('tab', value);
+            }
+            return next;
+         },
+         { replace: true },
+      );
+   };
 
    if (isPending) {
       return (
@@ -33,8 +52,8 @@ function Profile() {
    const memberSince = dateFormatter.format(new Date(user.createdAt));
 
    return (
-      <div className="max-w-4xl mx-auto px-6 pt-12">
-         <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+      <div className="max-w-3xl mx-auto px-6 pt-12 pb-16">
+         <header className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-6">
                <ProfileAvatar image={user.image} displayName={displayName} />
 
@@ -54,16 +73,8 @@ function Profile() {
                </div>
             </div>
 
-            <div className="flex gap-3 self-start">
-               <Button variant="outline" onClick={() => setEditOpen(true)}>
-                  Edit profile
-               </Button>
-
-               <Button variant="outline" onClick={() => setPasswordOpen(true)}>
-                  Change password
-               </Button>
-            </div>
-         </div>
+            <RoleRequestCard globalRole={user.globalRole!} />
+         </header>
 
          <dl className="mt-8 grid gap-6 border-y py-5 sm:grid-cols-2">
             <div>
@@ -80,17 +91,23 @@ function Profile() {
             </div>
          </dl>
 
-         <EditProfileModal
-            open={editOpen}
-            onOpenChange={setEditOpen}
-            initialName={user.name ?? ''}
-            initialUsername={user.username ?? ''}
-         />
+         <Tabs value={tab} onValueChange={handleTabChange} className="mt-6">
+            <TabsList>
+               <TabsTrigger value="stats">Contribution stats</TabsTrigger>
+               <TabsTrigger value="settings">Profile settings</TabsTrigger>
+            </TabsList>
 
-         <ChangePasswordModal
-            open={passwordOpen}
-            onOpenChange={setPasswordOpen}
-         />
+            <TabsContent value="stats" className="mt-6">
+               <ContributionStats />
+            </TabsContent>
+
+            <TabsContent value="settings" className="mt-6">
+               <ProfileSettings
+                  name={user.name ?? ''}
+                  username={user.username ?? ''}
+               />
+            </TabsContent>
+         </Tabs>
       </div>
    );
 }

@@ -1,7 +1,10 @@
 import { TRPCError } from '@trpc/server';
-import { uploadAvatarSchema } from '@folio/shared';
+import { contributionStatsSchema, uploadAvatarSchema } from '@folio/shared';
 import { router, protectedProcedure } from '@/trpc/trpc.js';
 import cloudinary from '@/lib/cloudinary.js';
+import { eq, sql } from 'drizzle-orm';
+import { db } from '@/db/index.js';
+import { documents, transcriptions } from '@/db/schema/index.js';
 
 const avatarPublicId = (userId: string) => `avatars/${userId}`;
 
@@ -47,4 +50,34 @@ export const profileRouter = router({
       }
       return { success: true };
    }),
+
+   getStats: protectedProcedure
+      .output(contributionStatsSchema)
+      .query(async ({ ctx }) => {
+         const [[docRow], [txRow]] = await Promise.all([
+            db
+               .select({ count: sql<number>`COUNT(*)::int` })
+               .from(documents)
+               .where(eq(documents.uploadedBy, ctx.user.id)),
+            db
+               .select({
+                  total: sql<number>`COUNT(*)::int`,
+                  approved: sql<number>`COUNT(CASE WHEN ${transcriptions.status} = 'approved' THEN 1 END)::int`,
+                  submitted: sql<number>`COUNT(CASE WHEN ${transcriptions.status} = 'submitted' THEN 1 END)::int`,
+                  rejected: sql<number>`COUNT(CASE WHEN ${transcriptions.status} = 'rejected' THEN 1 END)::int`,
+                  drafts: sql<number>`COUNT(CASE WHEN ${transcriptions.status} = 'draft' THEN 1 END)::int`,
+               })
+               .from(transcriptions)
+               .where(eq(transcriptions.userId, ctx.user.id)),
+         ]);
+
+         return {
+            documentsUploaded: docRow?.count ?? 0,
+            totalTranscriptions: txRow?.total ?? 0,
+            approved: txRow?.approved ?? 0,
+            submitted: txRow?.submitted ?? 0,
+            rejected: txRow?.rejected ?? 0,
+            drafts: txRow?.drafts ?? 0,
+         };
+      }),
 });
