@@ -29,3 +29,5 @@
 - Change Sign In and Sign up instead of Log in and Register
 
 - Account or profile?
+
+- Show avatar/name across the app
