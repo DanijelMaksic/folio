@@ -3,3 +3,4 @@ export * from './schemas/documents.js';
 export * from './schemas/transcriptions.js';
 export * from './schemas/collections.js';
 export * from './schemas/pages.js';
+export * from './schemas/dashboard.js';
