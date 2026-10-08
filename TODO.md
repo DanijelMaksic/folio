@@ -31,3 +31,7 @@
 - Account or profile?
 
 - Show avatar/name across the app
+
+- On login, navigate viewers to /documents instead of /dashboard
+
+- Change "Become a ${role}" to be more adaptive (to include "an")

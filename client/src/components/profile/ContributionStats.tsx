@@ -1,4 +1,6 @@
+import { useSession } from '@/lib/auth-client';
 import { trpc } from '@/lib/trpc';
+import { isContributor } from '@shared';
 
 interface StatProps {
    label: string;
@@ -20,6 +22,9 @@ function Stat({ label, value, hint }: StatProps) {
 
 function ContributionStats() {
    const { data, isLoading, isError } = trpc.profile.getStats.useQuery();
+   const { data: session, isPending } = useSession();
+   const user = session?.user;
+   const canContribute = isContributor(user?.globalRole);
 
    if (isLoading) {
       return (
@@ -41,6 +46,13 @@ function ContributionStats() {
          </p>
       );
    }
+
+   if (!canContribute)
+      return (
+         <p className="text-muted-foreground">
+            Become a contributor to see your contribution stats
+         </p>
+      );
 
    // Approval rate is only meaningful once something has been reviewed
    const reviewed = data.approved + data.rejected;

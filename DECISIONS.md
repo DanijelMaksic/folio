@@ -429,6 +429,6 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 ## Sprint 7 — Dashboard and Profile Settings
 
-## Sprint 8 — App Visual Design Revamp
+## Sprint 8 — Deployment
 
-## Sprint 9 — Deployment
+## Sprint 9 — App Visual Design Revamp

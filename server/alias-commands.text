@@ -1,3 +1,5 @@
 alias db='docker exec -it folio-postgres-1 psql -U postgres -d folio'
 
 UPDATE "user" SET two_factor_enabled = 'false' WHERE email = 'name@email.com';
+
+UPDATE "user" SET email_verified = 'true' WHERE email = 'name@email.com';
