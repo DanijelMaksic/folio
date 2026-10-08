@@ -1,5 +1,5 @@
 import { useViewerStore } from '@/store/useViewerStore';
-import type { Page } from '@shared';
+import type { PageBase } from '@shared';
 import { useState } from 'react';
 import {
    TransformWrapper,
@@ -47,7 +47,7 @@ const TransformTracker = ({ pageId }: { pageId: string }) => {
    return null;
 };
 
-function PageViewer({ page }: { page: Page | undefined }) {
+function PageViewer({ page }: { page: PageBase | undefined }) {
    const { viewers } = useViewerStore();
    const savedState = viewers[page?.id ?? ''];
    const [isHovered, setIsHovered] = useState(false);

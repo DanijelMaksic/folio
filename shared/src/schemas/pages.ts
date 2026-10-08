@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const pageSchema = z.object({
+export const pageBaseSchema = z.object({
    id: z.string(),
    documentId: z.string().nullable().optional(),
    title: z.string(),
@@ -9,6 +9,9 @@ export const pageSchema = z.object({
    imageUrl: z.string(),
    cloudinaryPublicId: z.string().optional(),
    createdAt: z.string(),
+});
+
+export const pageSchema = pageBaseSchema.extend({
    approvedTranscriptionCount: z.number(),
 });
 
@@ -48,6 +51,7 @@ export const getByPageNumberSchema = z.object({
    pageNumber: z.number().int().min(1),
 });
 
+export type PageBase = z.infer<typeof pageBaseSchema>;
 export type Page = z.infer<typeof pageSchema>;
 export type UpdatePageInput = z.infer<typeof updatePageSchema>;
 export type ReplaceImageInput = z.infer<typeof replaceImageSchema>;

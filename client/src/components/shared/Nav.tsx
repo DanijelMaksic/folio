@@ -45,6 +45,12 @@ function Nav() {
                <>
                   <NavigationMenuItem>
                      <NavigationMenuLink
+                        render={<Link to="/dashboard">Dashboard</Link>}
+                     />
+                  </NavigationMenuItem>
+
+                  <NavigationMenuItem>
+                     <NavigationMenuLink
                         render={<Link to="/profile">Profile</Link>}
                      />
                   </NavigationMenuItem>

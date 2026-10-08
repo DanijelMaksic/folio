@@ -16,6 +16,7 @@ import CollectionDetails from '@/pages/CollectionDetails';
 import CreateCollection from '@/components/collections/CreateCollection';
 import PageDetails from '@/pages/PageDetails';
 import ReviewPage from '@/pages/ReviewPage';
+import Dashboard from '@/pages/Dashboard';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
    const { data: session, isPending } = useSession();
@@ -86,6 +87,16 @@ export default function App() {
                      </ProtectedRoute>
                   }
                />
+
+               <Route
+                  path="/dashboard"
+                  element={
+                     <ProtectedRoute>
+                        <Dashboard />
+                     </ProtectedRoute>
+                  }
+               />
+
                <Route path="*" element={<PageNotFound />} />
             </Route>
          </Routes>
