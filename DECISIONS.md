@@ -429,6 +429,102 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 ## Sprint 7 — Dashboard and Profile Settings
 
+**Goal:** A logged-in user has a profile where they can manage their account, see their contribution stats and request a higher role, and contributors have a dashboard summarizing their work.
+
+**Completed:**
+
+- Profile page reworked into a tabbed layout (`/profile?tab=stats|settings|roles`) with a header (avatar, name, `@username`, role pill), a details strip (email, member since) and tabs synced to the URL. The admin-only "Role requests" tab shows a pending-count badge; non-admins fall back to stats
+
+- Avatar upload and removal: base64 goes through `profile.uploadAvatar` to Cloudinary under a fixed `avatars/<userId>` public id (overwrite + invalidate, 400x400 fill crop), then the client calls BetterAuth `updateUser({ image })` so the session stays in sync
+
+- Profile settings: edit profile (name, username), change password (with "sign out other sessions" option), sign out, and a danger zone with delete account. Edit modals validate with shared Zod schemas (`updateProfileSchema`, `changePasswordSchema`)
+
+- Contribution stats: `getUserStats(userId)` helper in `server/src/lib/user-stats.ts` (two parallel `db.select()` aggregates with `::int` casts), shared by `profile.getStats` and the dashboard
+
+- Role request flow end to end: `role_requests` table with a partial unique index (one pending request per user), `profile.requestRole` / `getMyRoleRequest`, admin `listRoleRequests` / `approveRoleRequest` / `rejectRoleRequest`, approval and rejection emails, `RoleRequestCard`, `RequestRoleModal`, `RoleManagement` and `RejectRoleRequestModal`
+
+- `adminProcedure` added to `trpc.ts`; `admin.setUserRole` now uses it instead of an inline role check
+
+- Account deletion: `deleteUserContent(userId)` runs in a single transaction from a BetterAuth `beforeDelete` hook (which also blocks deleting the only admin), followed by best-effort Cloudinary cleanup. Approved transcriptions on other people's documents survive with `userId` set to NULL
+
+- `transcriptions.userId` made nullable (`ON DELETE SET NULL`). Follow-ups: `!transcription.user` guards in `approve` / `reject`, `listQueue` selects `user.id` so its type stays non-null, and `getApprovedByPage` now uses a `leftJoin` on `user` and returns only public author fields (`authorName`, `authorUsername`, `authorImage`) (confirm)
+
+- Approved transcriptions show "Transcribed by [avatar] name" on the page view, falling back to "Deleted user" (confirm)
+
+- Dashboard (`/dashboard`): new `dashboard.getOverview` procedure returning stats, five most recent documents (with page count and cover image), recent rejected transcriptions, a review queue count (editors and above) and a pending role request count (admins). Client components: `OverviewStats`, `AttentionCards`, `RejectedList`, `RecentDocuments`. Viewers see a "become a contributor" gate that links to their profile instead of an empty dashboard. Login now lands on `/dashboard`
+
+- `EditModal` rewritten as a shadcn `Dialog` with the same props (Save disabled until changed, blocked while pending)
+
+- Zod aligned on v4 across client, server and shared
+
+- Vitest mock-based tests added for `dashboard` and `profile` routers, plus new `transcriptions` cases for deleted authors (`approve` / `reject` return `NOT_FOUND`, `getApprovedByPage` with a null author)
+
+- Playwright e2e added for the dashboard (access gate, contributor, editor and admin views) and the profile page (tabs and deep links, edit name, role request flow with an admin approving or rejecting in a second browser context). Fixtures extended with a `loginAs(role)` helper
+
+**Decisions:**
+
+- Dashboard gets its own router and route rather than living under `profile`, since it is a separate page in the client with a different purpose
+
+- Viewers see an explanatory gate on the dashboard instead of a redirect or an empty page, so they know why and where to act (the role request lives on the profile). The Nav link stays visible so they can find it
+
+- The target role of a request is derived server-side from the current role (viewer to contributor, contributor to editor); the client never sends it. A race between two simultaneous submits is caught by the partial unique index (Postgres `23505`) and mapped to `CONFLICT`
+
+- Approval is guarded by `status = 'pending'` inside a transaction, and the approval email is sent in a try/catch so an email failure never undoes the approval
+
+- Role requests are reviewed by admins only. The review queue count on the dashboard excludes the editor's own submissions, since editors can't review their own work
+
+- Avatar upload needs no new DB column: the image URL lives on the BetterAuth `user.image` field and the Cloudinary public id is deterministic per user
+
+- On account deletion, the user's collections are removed by the `collections.createdBy` FK cascade rather than an explicit delete. Other users' documents inside them become uncollected because `documents.collectionId` is `ON DELETE SET NULL`
+
+- Approved transcriptions outlive their author ("Deleted user"), while non-approved ones are deleted with the account. Content cleanup is idempotent, so a retry after a partial failure is safe
+
+- Public author data on approved transcriptions is limited to name, username and image. The `getApprovedByPage` procedure is public, so it must never return the full user row (email)
+
+- Author attribution is shown on the single page view only, not the page grid, to avoid a join and a wall of avatars for no real benefit
+
+- `getByPageNumber` results and list items share a base page schema; `approvedTranscriptionCount` only belongs to the list query, so it is not required where it isn't produced (confirm)
+
+- Two users in one e2e test (for example viewer requests, admin approves) use separate browser contexts, since one `page` shares one set of session cookies
+
+**Issues resolved:**
+
+- `ERR_CONNECTION_REFUSED` on every request after adding new server code: the server had crashed on a bad import or a missing shared export (Node reports "does not provide an export named ..."). Fixed the import and re-exported new shared schemas from `shared/src/index.ts`
+
+- `Property '_zod' is missing in type ...` when wrapping a shared schema in `z.array(...)`: shared schemas were on Zod v3 while the router used v4. Fixed by aligning all workspaces on v4 (`npm ls zod` to check for duplicates)
+
+- Dashboard `useQuery` was enabled for non-contributors instead of contributors (inverted `enabled` condition), leaving contributors on skeletons forever
+
+- `asChild` console warning on shadcn `Button` wrapping a `Link`: the generated button is not Radix-based, so the prop leaked to the DOM. Fixed by using the library's `render` prop (or `buttonVariants` on the `Link`) instead of nesting `<a>` inside `<button>`
+
+- Type error passing a `getByPageNumber` result to `PageViewer`: the viewer's prop type required `approvedTranscriptionCount`, which only the list query returns. Fixed with a base page schema (confirm)
+
+- Playwright strict mode violation on `getByLabel('Name')` in the edit profile dialog, because it also matched "Username" by substring. Fixed with `{ exact: true }`
+
+**Known issues carried forward:**
+
+- Resend free tier: only delivers to Resend account owner email in dev. Real domain verification deferred to Sprint 8, and the email-change flow and non-owner verification emails stay untested until then
+
+- Password strength rule (letter + number) is enforced client-side only; BetterAuth only enforces min/max length server-side. Needs BetterAuth `hooks.before` on `/sign-up/email`, `/change-password` and `/reset-password`, and `passwordSchema` reused in Register
+
+- Stale session after role approval: if the BetterAuth session cookie cache is enabled, an approved user keeps the old role until it expires or they log in again. Option: delete that user's session rows in the approve transaction (this would also push new editors straight into email OTP)
+
+- `dashboard.getOverview` still returns empty or null data for viewers instead of throwing `FORBIDDEN`; the gate is client-side only. Making it strict would allow a non-nullable `stats` in the schema
+
+- Account deletion is not atomic across BetterAuth's steps (content deleted in `beforeDelete`, user row afterward). Deleting while a PDF job is processing makes the worker's inserts fail on the FK (a harmless failed BullMQ job). Password-confirmed deletion works for credential accounts only
+
+- Approved transcriptions on a document that gets cascade-deleted are lost with it
+
+- Role requests can be re-submitted immediately after a rejection (no cooldown)
+
+- Not yet written: unit tests for `deleteUserContent`, `getUserStats` and the admin role-request procedures; e2e for account deletion (throwaway user, redirect to `/login`, login fails afterwards), avatar upload (needs Cloudinary cleanup for `avatars/<userId>`), change password and "Deleted user" attribution
+
+- Not built: Security tab (active sessions, sign out everywhere), toast notifications, role request history, a UI for direct role changes (`setUserRole` exists server-side only), `refetchInterval` for the pending-count badge, `DeleteModal` conversion to `Dialog`, and confirming `express.json` limit is at least 10mb for 5MB avatar uploads (about 6.8MB as base64)
+
+- Resend domain verification (above), Docker Golang warnings and the drizzle-kit esbuild advisory are unchanged from earlier sprints
+
 ## Sprint 8 — Deployment
 
-## Sprint 9 — App Visual Design Revamp
+## Sprint 9 — Bug Fixes and General Improvements
+
+## Sprint 10 — Visual Design Revamp
