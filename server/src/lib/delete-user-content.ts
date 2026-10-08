@@ -1,6 +1,11 @@
 import { and, eq, ne } from 'drizzle-orm';
 import { db } from '@/db/index.js';
-import { documents, pages, transcriptions } from '@/db/schema/index.js';
+import {
+   collections,
+   documents,
+   pages,
+   transcriptions,
+} from '@/db/schema/index.js';
 import cloudinary from '@/lib/cloudinary.js';
 
 const CLOUDINARY_BATCH = 100; // delete_resources limit per call
@@ -27,8 +32,6 @@ export async function deleteUserContent(userId: string) {
       // Cascades to pages, their transcriptions and revisions.
       // Approved transcriptions on others' documents stay (userId -> NULL via FK).
       await tx.delete(documents).where(eq(documents.uploadedBy, userId));
-
-      // TODO: collections. See notes below.
 
       return rows.map((r) => r.publicId);
    });

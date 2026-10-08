@@ -562,6 +562,22 @@ describe('transcriptions.approve', () => {
       ).rejects.toMatchObject({ code: 'NOT_FOUND' });
    });
 
+   it('throws NOT_FOUND if the transcription author was deleted', async () => {
+      mockFindFirst.mockResolvedValueOnce({
+         ...mockTranscriptionWithUser,
+         userId: null,
+         user: null,
+      });
+
+      const caller = createAuthenticatedCaller(editorUser);
+      await expect(
+         caller.transcriptions.approve({ transcriptionId: 'transcription-1' }),
+      ).rejects.toMatchObject({ code: 'NOT_FOUND' });
+
+      expect(mockUpdate).not.toHaveBeenCalled();
+      expect(mockSendApprovalEmail).not.toHaveBeenCalled();
+   });
+
    it('throws FORBIDDEN if editor tries to approve their own transcription', async () => {
       mockFindFirst.mockResolvedValueOnce({
          ...mockTranscriptionWithUser,
@@ -640,6 +656,25 @@ describe('transcriptions.reject', () => {
             reason: 'x',
          }),
       ).rejects.toMatchObject({ code: 'NOT_FOUND' });
+   });
+
+   it('throws NOT_FOUND if the transcription author was deleted', async () => {
+      mockFindFirst.mockResolvedValueOnce({
+         ...mockTranscriptionWithUser,
+         userId: null,
+         user: null,
+      });
+
+      const caller = createAuthenticatedCaller(editorUser);
+      await expect(
+         caller.transcriptions.reject({
+            transcriptionId: 'transcription-1',
+            reason: 'x',
+         }),
+      ).rejects.toMatchObject({ code: 'NOT_FOUND' });
+
+      expect(mockUpdate).not.toHaveBeenCalled();
+      expect(mockSendRejectionEmail).not.toHaveBeenCalled();
    });
 
    it('throws FORBIDDEN if editor tries to reject their own transcription', async () => {
@@ -755,6 +790,22 @@ describe('transcriptions.getApprovedByPage', () => {
       });
 
       expect(result).toMatchObject({ status: 'approved' });
+   });
+
+   it('returns approved transcription even when the author was deleted', async () => {
+      const approved = {
+         ...mockTranscription,
+         status: 'approved',
+         userId: null,
+      };
+      mockFindFirst.mockResolvedValueOnce(approved);
+
+      const caller = createUnauthenticatedCaller();
+      const result = await caller.transcriptions.getApprovedByPage({
+         pageId: 'page-1',
+      });
+
+      expect(result).toMatchObject({ status: 'approved', userId: null });
    });
 
    it('returns null if no approved transcription exists', async () => {

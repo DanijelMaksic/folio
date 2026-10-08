@@ -27,3 +27,5 @@
 - "Request to becoma a ${globalRole}" section in profile page
 
 - Change Sign In and Sign up instead of Log in and Register
+
+- Account or profile?
