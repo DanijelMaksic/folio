@@ -64,7 +64,9 @@ const processPdf = async (job: Job<PdfJobData>) => {
 
 export const pdfWorker = new Worker<PdfJobData>('pdf-processing', processPdf, {
    connection,
-   concurrency: 2,
+   concurrency: 1,
+   drainDelay: 30,
+   stalledInterval: 5 * 60 * 1000,
 });
 
 pdfWorker.on('completed', (job) => {

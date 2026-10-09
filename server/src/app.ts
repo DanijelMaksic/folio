@@ -9,22 +9,20 @@ import { appRouter } from './trpc/router.js';
 
 export const app = express();
 
+app.set('trust proxy', 1);
+
+// UptimeRobot / Render health check: touches nothing (no DB, no Redis)
+app.get('/api/health', (_req, res) => {
+   res.status(200).send('ok');
+});
+
 // Enable CORS
-app.use(
-   cors({
-      origin: process.env.CLIENT_URL,
-      credentials: true,
-   }),
-);
+app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 
 // Better Auth -- must be before express.json()
 app.all('/api/auth/{*any}', toNodeHandler(auth));
 
 app.use(express.json({ limit: '10mb' }));
-
-app.get('/api/health', (_req, res) => {
-   res.sendStatus(200);
-});
 
 // tRPC
 app.use(

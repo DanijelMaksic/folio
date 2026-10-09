@@ -10,7 +10,9 @@
       "db:studio": "dotenv -e .env -- drizzle-kit studio",
       "db:generate": "dotenv -e .env -- drizzle-kit generate",
       "seed:admin": "tsx src/scripts/seed-admin.ts",
-      "test:unit": "vitest run --passWithNoTests"
+      "test:unit": "vitest run --passWithNoTests",
+      "build": "tsup",
+      "start": "node dist/server.js"
    },
    "dependencies": {
       "@folio/shared": "*",
@@ -25,7 +27,6 @@
       "ioredis": "^6.0.0",
       "pdf-to-img": "^7.0.0",
       "pg": "^8.22.0",
-      "resend": "^6.17.1",
       "sharp": "^0.35.4",
       "zod": "^4.6.5"
    },
@@ -38,6 +39,7 @@
       "@types/supertest": "^7.2.0",
       "drizzle-kit": "^0.31.10",
       "supertest": "^7.2.2",
+      "tsup": "^8.5.1",
       "tsx": "^4.22.4",
       "typescript": "^6.0.3",
       "vitest": "^4.1.9"
