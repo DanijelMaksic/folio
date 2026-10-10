@@ -8,6 +8,20 @@ const esc = (s: string) =>
 type Mail = { to: string; subject: string; html: string };
 
 async function sendEmail({ to, subject, html }: Mail) {
+   // Locally, mail is sent to the server terminal
+   if (process.env.MAIL_TRANSPORT === 'console') {
+      const links = [...html.matchAll(/href="([^"]+)"/g)].map((m) => m[1]);
+      const text = html
+         .replace(/<[^>]+>/g, ' ')
+         .replace(/\s+/g, ' ')
+         .trim();
+      console.log(
+         `\n[DEV EMAIL] to: ${to}\nsubject: ${subject}\n${text}\n${links.map((l) => `link: ${l}`).join('\n')}\n`,
+      );
+      return;
+   }
+
+   // Production
    const auth = Buffer.from(
       `${process.env.MAILJET_API_KEY}:${process.env.MAILJET_API_SECRET}`,
    ).toString('base64');
