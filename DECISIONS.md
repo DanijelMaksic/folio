@@ -525,6 +525,82 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 ## Sprint 8 — Deployment
 
+**Goal:** Folio runs on the public internet using free tiers only, with no paid subscriptions, and local development stays fully separated from production.
+
+**Completed:**
+
+- Production stack: client on Vercel, Express API and BullMQ worker in a single Render Web Service, Postgres on Neon, Redis on Upstash, email via Mailjet, and an UptimeRobot monitor hitting the health route to stop Render from spinning down (confirm monitor is set up)
+
+- `client/vercel.json` rewrites `/api/:path*` to the Render URL and falls back to `/index.html` for React Router. The browser only ever talks to the Vercel origin, so Better Auth session cookies stay first-party
+
+- Server production build with `tsup` (`server/tsup.config.ts`): bundles `@folio/shared` (which ships TS source only), resolves the `@/` alias through the tsconfig `paths`, and keeps `node_modules` external. New scripts `build` (`tsup`) and `start` (`node dist/server.js`). Render runs `npm ci --include=dev && npm run build -w server` and `npm run start -w server`
+
+- `/api/health` moved to the top of `app.ts`, above CORS, and answers `ok` without touching Postgres or Redis. `app.set('trust proxy', 1)` added for the Render/Vercel proxy chain
+
+- Better Auth config gets explicit `baseURL` (`BETTER_AUTH_URL`) and `secret` (`BETTER_AUTH_SECRET`)
+
+- `db/index.ts`: pool limited to 10 connections with a connection timeout and an `error` handler, so idle connections dropped by a suspended Neon compute don't crash the process
+
+- `lib/queue.ts`: `removeOnComplete`, `removeOnFail: { count: 5 }` so base64 job payloads don't pile up in Redis, plus a Redis `error` handler. Worker polling options (`drainDelay`, `stalledInterval`) raised to reduce idle commands (confirm applied in `pdf-worker.ts`)
+
+- `lib/email.ts` rewritten from the Resend SDK to the Mailjet HTTP API (plain `fetch`, no SDK). Verification and OTP emails throw on failure, notification emails (approval, rejection, role request outcomes) go through a `sendQuietly` wrapper so a failed send never undoes the action that triggered it. User-supplied text (`username`, `reason`, `otp`, `role`) is HTML-escaped. `resend` removed from dependencies
+
+- Local email mode: `MAIL_TRANSPORT=console` prints the email text and its links to the server terminal instead of sending (local `.env` only)
+
+- Fail-fast check for required environment variables at startup (confirm applied)
+
+- Migrations and `seed:admin` run from the local machine against Neon's direct (non-pooled) connection string
+
+- Local development isolated from production: Docker Postgres and Redis for dev and e2e, a separate Cloudinary account for local/e2e, production credentials only in Render's and Vercel's environment settings
+
+**Decisions:**
+
+- Free-tier-only stack, each piece chosen for what the free plan allows: Render keeps a Node process alive (needed for the in-process worker), Neon provides a managed Postgres, Upstash provides Redis over TLS, Mailjet provides transactional email without requiring a domain, Vercel serves the static build
+
+- The health route must not query Postgres or Redis. Neon's free plan has 100 CU-hours a month and suspends compute after 5 idle minutes; an UptimeRobot ping that woke the database every 5 minutes would burn through the quota in about two weeks. Only real user traffic wakes Neon
+
+- Vercel rewrite instead of cross-origin cookies: the client (`*.vercel.app`) and API (`*.onrender.com`) are different sites, so third-party cookie blocking would likely break sessions. With the rewrite, `BETTER_AUTH_URL`, `CLIENT_URL`, `VITE_API_URL` and `VITE_CLIENT_URL` all hold the Vercel origin (no trailing slash). Verification email links are built from `BETTER_AUTH_URL`, so they go through the rewrite as well. This overrides the "client uses the full API URL" assumption for production only; local dev still talks to `localhost:3000` directly
+
+- `tsup` bundling over running `tsx` in production: resolves the `@/` alias and the TS-only shared package at build time, with less memory use and a faster start on a small free instance
+
+- Upstash over Render's free Key Value: Render's free instance does not persist data across restarts. Upstash's free tier (500K commands a month) is tight for BullMQ, which polls even when idle, so the dashboard needs watching
+
+- Mailjet over Resend: Resend's free tier needs a verified domain to send to anyone but the account owner. Mailjet needs only a verified sender address. Mails from a Gmail sender will likely land in spam (DMARC); acceptable for a learning project. Mailjet's HTTP API is used instead of SMTP, since free Render services block outbound SMTP
+
+- Migrations are run manually from the local machine instead of at boot, so a cold Neon compute or a bad migration can't crash-loop the service. Moving this into CI is deferred
+
+- Notification emails never throw, auth emails do: a failed verification or OTP email should surface to the user, a failed "your transcription was approved" notification should not roll back the approval
+
+- Separate local and production resources instead of a Neon dev branch or a third Cloudinary account: Docker Postgres and Redis for dev and Playwright, the test Cloudinary account for local work, so e2e cleanup (`cleanupCloudinaryFolder`) can't touch production images
+
+**Issues resolved:**
+
+- Render build failed with `tsup: not found`: `NODE_ENV=production` made `npm ci` skip devDependencies. Fixed by building with `npm ci --include=dev`
+
+- `ECONNREFUSED 127.0.0.1:6379` on Render: `REDIS_URL` was missing, and ioredis silently falls back to `localhost:6379`. The same fallback hides a missing variable locally. Fixed by setting the variable and adding the fail-fast check. Upstash needs the TCP connection string with `rediss://`, not the REST URL and token
+
+- Registration through the deployed app sent `callbackURL: "undefined/"`: `VITE_CLIENT_URL` was missing from the Vercel build. Vite inlines env variables at build time, so the project had to be redeployed after setting it
+
+- Requests through Vercel's `/api` rewrite returned 404 while the same paths on Render returned 200: the rewrite destination in the deployed `vercel.json` was wrong (confirm exact cause). The CORS header also showed a trailing slash on `CLIENT_URL`, which never matches a browser origin and would also fail Better Auth's `trustedOrigins`; the trailing slash was removed
+
+- Local `ETIMEDOUT` from ioredis on a TLS socket: the local `server/.env` pointed `REDIS_URL` at Upstash (`rediss://`). Locally it must be `redis://localhost:6379` for the Docker Redis
+
+- No verification email printed locally while testing: registering with an email that already exists returns a normal-looking 200 and sends nothing when email verification is required (Better Auth hides which emails are registered). Fixed by using fresh emails and deleting the stale rows with `psql`. In PowerShell, curl mangles inner JSON quotes, so `Invoke-RestMethod` was used for server-only tests. A `folio-#` prompt in `psql` means an unterminated statement; `\r` clears the buffer
+
+**Known issues carried forward:**
+
+- Upstash's request size limit is 10 MB and the PDF job carries the whole file as base64 (about 33% larger). PDFs over roughly 5 MB need a hard cap in the client and in `uploadDocumentSchema`
+
+- Redis restart or a Render restart during a PDF job loses the job and leaves the document in `processing` forever (and `DocumentPages` polling forever). Needs a stale-processing sweep
+
+- Large base64 uploads through the Vercel rewrite are untested (Vercel's limits for proxied bodies not verified)
+
+- Only the production Vercel URL passes Better Auth's origin check; preview deployments will fail
+
+- CI/CD deploy step, running migrations from GitHub Actions, rate limiting on auth endpoints and `helmet` are not done yet
+
+- The Resend-related known issues from Sprints 1–7 are superseded by this sprint's email setup
+
 ## Sprint 9 — Bug Fixes and General Improvements
 
 ## Sprint 10 — Visual Design Revamp
