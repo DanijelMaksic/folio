@@ -5,6 +5,8 @@
 - Add number of pages on document card
 - Show avatar/name across the app
 - Still-open Sprint 7 work: the unwritten tests (user-stats, admin additions, deleteUserContent, profile.removeAvatar, and the e2e gaps), plus the deferred items like server-side password strength, stale session after role approval, and the express.json limit.
+- On empty collection page, show `add docs to col` button
+- On `/dashboard`, on view all (docs) navigate the user to filtered `/documents` where they can see only their own docs
 
 ## Things to fix
 

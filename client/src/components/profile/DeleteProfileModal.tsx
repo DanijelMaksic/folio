@@ -31,7 +31,7 @@ function DeleteProfileModal({ open, onOpenChange }: DeleteProfileModalProps) {
       }
    }, [open]);
 
-   async function handleSubmit(e: React.FormEvent) {
+   async function handleSubmit(e: React.SubmitEvent) {
       e.preventDefault();
       if (!password || deleting) return;
 

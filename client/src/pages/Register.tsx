@@ -10,7 +10,7 @@ export default function Register() {
    const [success, setSuccess] = useState(false);
    const [isPending, setIsPending] = useState(false);
 
-   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
       e.preventDefault();
       setIsPending(true);
       setError(null);
@@ -39,7 +39,7 @@ export default function Register() {
             <Card className="w-full max-w-sm">
                <CardContent className="pt-6">
                   <p className="text-center text-muted-foreground">
-                     Check your email to verify your account.
+                     Check your email (spam folder) to verify your account.
                   </p>
                </CardContent>
             </Card>

@@ -36,7 +36,7 @@ function RejectRoleRequestModal({
       if (open) setReason('');
    }, [open]);
 
-   function handleSubmit(e: React.FormEvent) {
+   function handleSubmit(e: React.SubmitEvent) {
       e.preventDefault();
       if (!isPending) onConfirm(reason.trim());
    }

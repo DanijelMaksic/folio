@@ -49,7 +49,7 @@ function ChangePasswordModal({ open, onOpenChange }: ChangePasswordModalProps) {
       newPassword.length > 0 &&
       confirmPassword.length > 0;
 
-   async function handleSubmit(e: React.FormEvent) {
+   async function handleSubmit(e: React.SubmitEvent) {
       e.preventDefault();
       setFormError(null);
 

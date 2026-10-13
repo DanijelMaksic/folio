@@ -24,7 +24,6 @@ export function DocumentCard({ document }: { document: Document }) {
             {!uploaderName ? (
                <span className="space-x-2 text-sm text-gray-300/70">
                   {/* {hasApprovedTranscription ? 'Transcribed' : 'Not transcribed'} */}
-                  s
                </span>
             ) : (
                <div className="space-x-2 text-sm text-gray-300/70">

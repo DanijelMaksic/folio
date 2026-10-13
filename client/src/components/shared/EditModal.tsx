@@ -45,7 +45,7 @@ function EditModal({
       description.trim() !== initial.description.trim();
    const canSave = hasChanges && trimmedTitle.length > 0 && !isPending;
 
-   function handleSubmit(e: React.FormEvent) {
+   function handleSubmit(e: React.SubmitEvent) {
       e.preventDefault();
       if (canSave) onEdit();
    }

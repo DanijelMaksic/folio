@@ -4,7 +4,7 @@ function Home() {
          <h1 className="text-2xl my-24">Welcome to FOLIO</h1>
 
          <p className="text-muted-foreground text-lg">
-            This project is currently under development
+            This app is currently under development
          </p>
       </div>
    );
