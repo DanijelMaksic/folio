@@ -19,7 +19,6 @@
 
 ## Things to refactor
 
-- Switch to ctx.user.id in trpc procedures
 - Switch from doc to document (in routers escpecially)
 - Choose between SQL-like db.select() and ORM-like db.query()
 - Replace id (from URL params) with documentId

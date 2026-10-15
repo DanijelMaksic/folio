@@ -4,7 +4,7 @@ import { db } from '@/db/index.js';
 
 const createCaller = createCallerFactory(appRouter);
 
-export function createUnauthenticatedCaller() {
+export function createUnauthenticatedCaller(): ReturnType<typeof createCaller> {
    return createCaller({ session: null, user: null, db } as any);
 }
 
@@ -13,7 +13,7 @@ export function createAuthenticatedCaller(user: {
    globalRole: string;
    email: string;
    username: string;
-}) {
+}): ReturnType<typeof createCaller> {
    return createCaller({
       session: { id: 'test-session' } as any,
       user: user as any,

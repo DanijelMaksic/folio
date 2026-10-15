@@ -6,6 +6,7 @@ import { and, desc, eq, ilike, sql } from 'drizzle-orm';
 import cloudinary from '@/lib/cloudinary.js';
 import { TRPCError } from '@trpc/server';
 import {
+   isEditor,
    listDocumentsSchema,
    searchDocumentsSchema,
    updateDocumentSchema,
@@ -237,12 +238,48 @@ export const documentsRouter = router({
             });
          }
 
+         const [existing] = await db
+            .select({ id: documents.id, uploadedBy: documents.uploadedBy })
+            .from(documents)
+            .where(eq(documents.id, input.id))
+            .limit(1);
+
+         if (!existing) throw new TRPCError({ code: 'NOT_FOUND' });
+
+         if (
+            existing.uploadedBy !== ctx.user.id &&
+            !isEditor(ctx.user.globalRole)
+         ) {
+            throw new TRPCError({
+               code: 'FORBIDDEN',
+               message: 'You can only delete your own documents',
+            });
+         }
+
+         const pageRows = await db
+            .select({ publicId: pages.cloudinaryPublicId })
+            .from(pages)
+            .where(eq(pages.documentId, input.id));
+
          const [deleted] = await db
             .delete(documents)
             .where(eq(documents.id, input.id))
             .returning();
 
          if (!deleted) throw new TRPCError({ code: 'NOT_FOUND' });
+
+         // Best-effort: a Cloudinary failure must not undo or fail the delete
+         const ids = pageRows.map((p) => p.publicId);
+         for (let i = 0; i < ids.length; i += 100) {
+            const results = await Promise.allSettled([
+               cloudinary.api.delete_resources(ids.slice(i, i + 100)),
+            ]);
+            for (const r of results) {
+               if (r.status === 'rejected') {
+                  console.error('Cloudinary cleanup failed:', r.reason);
+               }
+            }
+         }
 
          return deleted;
       }),

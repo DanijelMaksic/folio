@@ -396,6 +396,20 @@ describe('documents.update', () => {
 
 describe('documents.delete', () => {
    it('deletes a document and returns it', async () => {
+      mockSelect.mockReturnValueOnce({
+         from: vi.fn(() => ({
+            where: vi.fn(() => ({
+               limit: vi.fn().mockReturnValueOnce([mockDoc]),
+            })),
+         })),
+      });
+
+      mockSelect.mockReturnValueOnce({
+         from: vi.fn(() => ({
+            where: vi.fn().mockReturnValueOnce([mockDoc]),
+         })),
+      });
+
       mockDelete.mockReturnValueOnce({
          where: vi.fn(() => ({
             returning: vi.fn().mockResolvedValueOnce([mockDoc]),
