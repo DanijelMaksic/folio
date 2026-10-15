@@ -50,11 +50,9 @@ export default function Dashboard() {
                   Here's what's happening in your workspace.
                </p>
             </div>
-            {canContribute && (
-               <Button>
-                  <Link to="/documents/upload">Upload document</Link>
-               </Button>
-            )}
+            <Button>
+               <Link to="/documents/upload">Upload document</Link>
+            </Button>
          </header>
 
          {overview.isError && (
@@ -70,19 +68,17 @@ export default function Dashboard() {
             />
          )}
 
-         {canContribute && (
-            <section aria-labelledby="stats-heading" className="space-y-3">
-               <h2 id="stats-heading" className="text-lg font-medium">
-                  Your activity
-               </h2>
-               <OverviewStats
-                  stats={data?.stats ?? null}
-                  isLoading={overview.isLoading}
-               />
-            </section>
-         )}
+         <section aria-labelledby="stats-heading" className="space-y-3">
+            <h2 id="stats-heading" className="text-lg font-medium">
+               Your activity
+            </h2>
+            <OverviewStats
+               stats={data?.stats ?? null}
+               isLoading={overview.isLoading}
+            />
+         </section>
 
-         {canContribute && data && data.rejectedTranscriptions.length > 0 && (
+         {data && data.rejectedTranscriptions.length > 0 && (
             <section aria-labelledby="rejected-heading" className="space-y-3">
                <h2 id="rejected-heading" className="text-lg font-medium">
                   Needs your attention
@@ -106,7 +102,6 @@ export default function Dashboard() {
             <RecentDocuments
                documents={data?.recentDocuments ?? []}
                isLoading={overview.isLoading}
-               canContribute={canContribute}
             />
          </section>
       </div>

@@ -20,7 +20,7 @@ export const dashboardRejectedSchema = z.object({
 });
 
 export const dashboardOverviewSchema = z.object({
-   stats: contributionStatsSchema.nullable(), // null for viewers
+   stats: contributionStatsSchema,
    recentDocuments: z.array(dashboardDocumentSchema),
    rejectedTranscriptions: z.array(dashboardRejectedSchema),
    reviewQueueCount: z.number().int().nullable(), // editors+ only

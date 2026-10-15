@@ -11,6 +11,7 @@ import {
    isEditor,
 } from '@folio/shared';
 import { and, desc, eq, ne, sql } from 'drizzle-orm';
+import { TRPCError } from '@trpc/server';
 
 const RECENT_LIMIT = 5;
 
@@ -20,11 +21,17 @@ export const dashboardRouter = router({
       .query(async ({ ctx }) => {
          const userId = ctx.user.id;
          const role = ctx.user.globalRole;
-         const canContribute = isContributor(role);
+
+         if (!isContributor(role)) {
+            throw new TRPCError({
+               code: 'FORBIDDEN',
+               message: 'Dashboard is for contributors and above',
+            });
+         }
 
          const [stats, recentDocs, rejected, queueCount, roleCount] =
             await Promise.all([
-               canContribute ? getUserStats(userId) : Promise.resolve(null),
+               getUserStats(userId),
 
                db
                   .select({
@@ -44,28 +51,26 @@ export const dashboardRouter = router({
                   .orderBy(desc(documents.updatedAt))
                   .limit(RECENT_LIMIT),
 
-               canContribute
-                  ? db
-                       .select({
-                          id: transcriptions.id,
-                          documentId: documents.id,
-                          documentTitle: documents.title,
-                          pageNumber: pages.pageNumber,
-                          rejectionReason: transcriptions.rejectionReason,
-                          updatedAt: transcriptions.updatedAt,
-                       })
-                       .from(transcriptions)
-                       .innerJoin(pages, eq(pages.id, transcriptions.pageId))
-                       .innerJoin(documents, eq(documents.id, pages.documentId))
-                       .where(
-                          and(
-                             eq(transcriptions.userId, userId),
-                             eq(transcriptions.status, 'rejected'),
-                          ),
-                       )
-                       .orderBy(desc(transcriptions.updatedAt))
-                       .limit(RECENT_LIMIT)
-                  : Promise.resolve([]),
+               db
+                  .select({
+                     id: transcriptions.id,
+                     documentId: documents.id,
+                     documentTitle: documents.title,
+                     pageNumber: pages.pageNumber,
+                     rejectionReason: transcriptions.rejectionReason,
+                     updatedAt: transcriptions.updatedAt,
+                  })
+                  .from(transcriptions)
+                  .innerJoin(pages, eq(pages.id, transcriptions.pageId))
+                  .innerJoin(documents, eq(documents.id, pages.documentId))
+                  .where(
+                     and(
+                        eq(transcriptions.userId, userId),
+                        eq(transcriptions.status, 'rejected'),
+                     ),
+                  )
+                  .orderBy(desc(transcriptions.updatedAt))
+                  .limit(RECENT_LIMIT),
 
                // Editors can't review their own work, so exclude it from the count
                isEditor(role)

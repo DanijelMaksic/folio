@@ -4,14 +4,9 @@ import type { DashboardOverview } from '@folio/shared';
 type Props = {
    documents: DashboardOverview['recentDocuments'];
    isLoading: boolean;
-   canContribute: boolean;
 };
 
-export function RecentDocuments({
-   documents,
-   isLoading,
-   canContribute,
-}: Props) {
+export function RecentDocuments({ documents, isLoading }: Props) {
    if (isLoading) {
       return (
          <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
@@ -28,9 +23,7 @@ export function RecentDocuments({
    if (documents.length === 0) {
       return (
          <p className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">
-            {canContribute
-               ? "You haven't uploaded any documents yet."
-               : 'Request the contributor role from your profile to start uploading documents.'}
+            You haven't uploaded any documents yet.
          </p>
       );
    }
