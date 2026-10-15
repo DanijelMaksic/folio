@@ -234,19 +234,18 @@ describe('dashboard.getOverview', () => {
       expect(mockSelect).toHaveBeenCalledTimes(4);
    });
 
-   it('returns null stats and empty rejections for a viewer', async () => {
+   it('throws FORBIDDEN for a viewer', async () => {
       mockRecentDocsQuery([]);
 
       const caller = createAuthenticatedCaller(viewerUser);
-      const result = await caller.dashboard.getOverview();
 
-      expect(result.stats).toBeNull();
-      expect(result.rejectedTranscriptions).toHaveLength(0);
-      expect(result.reviewQueueCount).toBeNull();
-      expect(result.pendingRoleRequestCount).toBeNull();
+      await expect(caller.dashboard.getOverview()).rejects.toMatchObject({
+         code: 'FORBIDDEN',
+      });
+
+      // the guard runs before any query
       expect(mockGetUserStats).not.toHaveBeenCalled();
-      // only the recent documents query runs
-      expect(mockSelect).toHaveBeenCalledTimes(1);
+      expect(mockSelect).not.toHaveBeenCalled();
    });
 
    it('throws UNAUTHORIZED if not signed in', async () => {
