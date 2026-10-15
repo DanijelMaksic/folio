@@ -12,6 +12,7 @@ const {
    mockDelete,
    mockUpload,
    mockPdfQueue,
+   mockDeleteResources,
 } = vi.hoisted(() => ({
    mockInsert: vi.fn(),
    mockSelect: vi.fn(),
@@ -19,6 +20,7 @@ const {
    mockDelete: vi.fn(),
    mockUpload: vi.fn(),
    mockPdfQueue: vi.fn(),
+   mockDeleteResources: vi.fn(),
 }));
 
 vi.mock('@/db/index.js', () => ({
@@ -39,6 +41,7 @@ vi.mock('@/lib/cloudinary.js', () => ({
       uploader: {
          upload: mockUpload,
       },
+      api: { delete_resources: mockDeleteResources },
    },
 }));
 
@@ -406,9 +409,10 @@ describe('documents.delete', () => {
 
       mockSelect.mockReturnValueOnce({
          from: vi.fn(() => ({
-            where: vi.fn().mockReturnValueOnce([mockDoc]),
+            where: vi.fn().mockResolvedValueOnce([{ publicId: 'folio/abc' }]),
          })),
       });
+      mockDeleteResources.mockResolvedValueOnce({});
 
       mockDelete.mockReturnValueOnce({
          where: vi.fn(() => ({
@@ -420,12 +424,15 @@ describe('documents.delete', () => {
       const result = await caller.documents.delete({ id: 'doc-1' });
 
       expect(result).toMatchObject({ id: 'doc-1' });
+      expect(mockDeleteResources).toHaveBeenCalledWith(['folio/abc']);
    });
 
    it('throws NOT_FOUND if document does not exist', async () => {
-      mockDelete.mockReturnValueOnce({
-         where: vi.fn(() => ({
-            returning: vi.fn().mockResolvedValueOnce([]),
+      mockSelect.mockReturnValueOnce({
+         from: vi.fn(() => ({
+            where: vi.fn(() => ({
+               limit: vi.fn().mockResolvedValueOnce([]),
+            })),
          })),
       });
 
@@ -440,6 +447,30 @@ describe('documents.delete', () => {
       await expect(
          caller.documents.delete({ id: 'doc-1' }),
       ).rejects.toMatchObject({ code: 'FORBIDDEN' });
+   });
+
+   it('throws FORBIDDEN if user is a non-owner contributor', async () => {
+      const caller = createAuthenticatedCaller(contributorUser);
+
+      // existing-row lookup: select().from().where().limit()
+      mockSelect.mockReturnValueOnce({
+         from: vi.fn().mockReturnValue({
+            where: vi.fn().mockReturnValue({
+               limit: vi
+                  .fn()
+                  .mockResolvedValue([
+                     { id: 'doc-1', uploadedBy: 'someone-else' },
+                  ]),
+            }),
+         }),
+      });
+
+      await expect(
+         caller.documents.delete({ id: 'doc-1' }),
+      ).rejects.toMatchObject({ code: 'FORBIDDEN' });
+
+      // the check must stop before touching anything destructive
+      expect(mockDelete).not.toHaveBeenCalled();
    });
 
    it('throws UNAUTHORIZED if not signed in', async () => {

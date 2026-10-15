@@ -271,13 +271,10 @@ export const documentsRouter = router({
          // Best-effort: a Cloudinary failure must not undo or fail the delete
          const ids = pageRows.map((p) => p.publicId);
          for (let i = 0; i < ids.length; i += 100) {
-            const results = await Promise.allSettled([
-               cloudinary.api.delete_resources(ids.slice(i, i + 100)),
-            ]);
-            for (const r of results) {
-               if (r.status === 'rejected') {
-                  console.error('Cloudinary cleanup failed:', r.reason);
-               }
+            try {
+               await cloudinary.api.delete_resources(ids.slice(i, i + 100));
+            } catch (err) {
+               console.error('Cloudinary cleanup failed:', err);
             }
          }
 
