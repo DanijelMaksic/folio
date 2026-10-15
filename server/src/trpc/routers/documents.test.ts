@@ -3,6 +3,7 @@ import {
    createAuthenticatedCaller,
    createUnauthenticatedCaller,
 } from '@/__tests__/helpers/trpc-helper.js';
+import { PDF_MAX_BASE64_LENGTH } from '@folio/shared';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const {
@@ -115,6 +116,18 @@ describe('documents.upload', () => {
          fileBase64: 'data:application/pdf;base64,abc123',
       });
       expect(mockUpload).not.toHaveBeenCalled();
+   });
+
+   it('rejects a PDF over the size cap', async () => {
+      const caller = createAuthenticatedCaller(contributorUser);
+      await expect(
+         caller.documents.upload({
+            title: 'Big',
+            fileType: 'pdf',
+            fileBase64: 'a'.repeat(PDF_MAX_BASE64_LENGTH + 1),
+         }),
+      ).rejects.toMatchObject({ code: 'BAD_REQUEST' });
+      expect(mockPdfQueue).not.toHaveBeenCalled();
    });
 
    it('uploads images and inserts pages when fileType is image', async () => {

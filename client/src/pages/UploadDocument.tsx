@@ -18,6 +18,7 @@ import {
 import { TRPCClientErrorLike } from '@trpc/client';
 import type { AppRouter } from '@server/trpc/router';
 import { ImageIcon, Paperclip, FileText, X } from 'lucide-react';
+import { PDF_MAX_BYTES } from '@shared';
 
 interface SelectedFile {
    file: File;
@@ -46,21 +47,15 @@ export default function UploadDocument() {
       e.target.value = '';
 
       if (incoming[0].type === 'application/pdf') {
-         // PDF: replace entirely — only one allowed
+         if (incoming[0].size > PDF_MAX_BYTES) {
+            setError(
+               `PDF is too large (${formatSize(incoming[0].size)}). Maximum size is ${formatSize(PDF_MAX_BYTES)}.`,
+            );
+            return;
+         }
+         setError('');
          setFileType('pdf');
          setSelectedFiles([{ file: incoming[0], previewUrl: null }]);
-      } else {
-         // Images: append, avoiding duplicates by name+size
-         setFileType('image');
-         setSelectedFiles((prev) => {
-            const existing = new Set(
-               prev.map((f) => `${f.file.name}-${f.file.size}`),
-            );
-            const toAdd = incoming
-               .filter((f) => !existing.has(`${f.name}-${f.size}`))
-               .map((f) => ({ file: f, previewUrl: URL.createObjectURL(f) }));
-            return [...prev, ...toAdd];
-         });
       }
    };
 
