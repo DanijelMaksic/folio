@@ -18,7 +18,7 @@ import {
 import { TRPCClientErrorLike } from '@trpc/client';
 import type { AppRouter } from '@server/trpc/router';
 import { ImageIcon, Paperclip, FileText, X } from 'lucide-react';
-import { PDF_MAX_BYTES } from '@shared';
+import { IMAGES_MAX_TOTAL_BYTES, PDF_MAX_BYTES } from '@shared';
 
 interface SelectedFile {
    file: File;
@@ -56,10 +56,50 @@ export default function UploadDocument() {
          setError('');
          setFileType('pdf');
          setSelectedFiles([{ file: incoming[0], previewUrl: null }]);
+      } else {
+         // If a PDF was selected, picking images replaces it instead of mixing with it
+         const base = fileType === 'pdf' ? [] : selectedFiles;
+
+         const existing = new Set(
+            base.map((f) => `${f.file.name}-${f.file.size}`),
+         );
+         const fresh = incoming.filter(
+            (f) => !existing.has(`${f.name}-${f.size}`),
+         );
+
+         const currentTotal = base.reduce((s, f) => s + f.file.size, 0);
+         const addedTotal = fresh.reduce((s, f) => s + f.size, 0);
+
+         const tooBig = fresh.find((f) => f.size > IMAGES_MAX_TOTAL_BYTES);
+
+         if (tooBig) {
+            setError(
+               `"${tooBig.name}" is too large (${formatSize(tooBig.size)}). Images must be under ${formatSize(IMAGES_MAX_TOTAL_BYTES)}.`,
+            );
+            return;
+         }
+
+         if (currentTotal + addedTotal > IMAGES_MAX_TOTAL_BYTES) {
+            setError(
+               `Images are too large together (limit ${formatSize(IMAGES_MAX_TOTAL_BYTES)}). Remove some or upload them in smaller batches.`,
+            );
+            return;
+         }
+
+         setError('');
+         setFileType('image');
+         setSelectedFiles([
+            ...base,
+            ...fresh.map((f) => ({
+               file: f,
+               previewUrl: URL.createObjectURL(f),
+            })),
+         ]);
       }
    };
 
    const removeFile = (index: number) => {
+      setError('');
       setSelectedFiles((prev) => {
          const updated = [...prev];
          const removed = updated.splice(index, 1)[0];

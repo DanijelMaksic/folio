@@ -3,6 +3,7 @@ import { z } from 'zod';
 export const PDF_MAX_BYTES = 5 * 1024 * 1024;
 // base64 is 4 chars per 3 bytes, plus slack for the "data:application/pdf;base64," prefix
 export const PDF_MAX_BASE64_LENGTH = Math.ceil(PDF_MAX_BYTES / 3) * 4 + 100;
+export const IMAGES_MAX_TOTAL_BYTES = 6 * 1024 * 1024;
 
 export const uploadDocumentSchema = z.object({
    title: z

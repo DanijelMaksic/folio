@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { trpc } from '@/lib/trpc';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Label } from '@/components/ui/label';
 import {
    Attachment,
@@ -13,6 +13,7 @@ import {
    AttachmentTitle,
 } from '@/components/ui/attachment';
 import { Paperclip, X } from 'lucide-react';
+import { IMAGES_MAX_TOTAL_BYTES } from '@shared';
 
 interface SelectedFile {
    file: File;
@@ -32,6 +33,14 @@ function AddPagesModal({ documentId, onSuccess, onClose }: AddPagesModalProps) {
 
    const utils = trpc.useUtils();
 
+   const filesRef = useRef(selectedFiles);
+   filesRef.current = selectedFiles;
+   useEffect(
+      () => () =>
+         filesRef.current.forEach((f) => URL.revokeObjectURL(f.previewUrl)),
+      [],
+   );
+
    const addPages = trpc.pages.addPages.useMutation({
       onSuccess: () => {
          utils.pages.getByDocument.invalidate({ documentId });
@@ -43,19 +52,43 @@ function AddPagesModal({ documentId, onSuccess, onClose }: AddPagesModalProps) {
    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const incoming = Array.from(e.target.files ?? []);
       e.target.value = '';
+      if (incoming.length === 0) return;
 
-      setSelectedFiles((prev) => {
-         const existing = new Set(
-            prev.map((f) => `${f.file.name}-${f.file.size}`),
+      const existing = new Set(
+         selectedFiles.map((f) => `${f.file.name}-${f.file.size}`),
+      );
+      const fresh = incoming.filter(
+         (f) => !existing.has(`${f.name}-${f.size}`),
+      );
+
+      const currentTotal = selectedFiles.reduce((s, f) => s + f.file.size, 0);
+      const addedTotal = fresh.reduce((s, f) => s + f.size, 0);
+
+      const tooBig = fresh.find((f) => f.size > IMAGES_MAX_TOTAL_BYTES);
+
+      if (tooBig) {
+         setError(
+            `"${tooBig.name}" is too large (${formatSize(tooBig.size)}). Each image must be under ${formatSize(IMAGES_MAX_TOTAL_BYTES)}.`,
          );
-         const toAdd = incoming
-            .filter((f) => !existing.has(`${f.name}-${f.size}`))
-            .map((f) => ({ file: f, previewUrl: URL.createObjectURL(f) }));
-         return [...prev, ...toAdd];
-      });
+         return;
+      }
+
+      if (currentTotal + addedTotal > IMAGES_MAX_TOTAL_BYTES) {
+         setError(
+            `Images are too large together (limit ${formatSize(IMAGES_MAX_TOTAL_BYTES)}). Remove some or add them in smaller batches.`,
+         );
+         return;
+      }
+
+      setError('');
+      setSelectedFiles((prev) => [
+         ...prev,
+         ...fresh.map((f) => ({ file: f, previewUrl: URL.createObjectURL(f) })),
+      ]);
    };
 
    const removeFile = (index: number) => {
+      setError('');
       setSelectedFiles((prev) => {
          const updated = [...prev];
          URL.revokeObjectURL(updated.splice(index, 1)[0].previewUrl);
