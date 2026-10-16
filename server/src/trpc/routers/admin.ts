@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import { and, asc, eq } from 'drizzle-orm';
 import { router, adminProcedure } from '@/trpc/trpc.js';
-import { roleRequests, user } from '@/db/schema/index.js';
 import { TRPCError } from '@trpc/server';
 import {
    adminRoleRequestSchema,
@@ -14,23 +13,42 @@ import {
    sendRoleRequestApprovedEmail,
    sendRoleRequestRejectedEmail,
 } from '@/lib/email.js';
+import { session as sessionTable, user } from '@/db/schema/auth.js';
+import { roleRequests } from '@/db/schema/roleRequests.js';
 
 export const adminRouter = router({
    setUserRole: adminProcedure
-      .input(
-         z.object({
-            userId: z.string(),
-            role: z.enum(GLOBAL_ROLES),
-         }),
-      )
+      .input(z.object({ userId: z.string(), role: z.enum(GLOBAL_ROLES) }))
       .mutation(async ({ ctx, input }) => {
-         // Determines whether the new role requires 2FA
+         // Optional guard: stops an admin demoting themselves (and the last admin vanishing)
+         if (input.userId === ctx.user.id) {
+            throw new TRPCError({
+               code: 'BAD_REQUEST',
+               message: 'You cannot change your own role',
+            });
+         }
+
          const twoFactorEnabled = isEditor(input.role);
 
-         await db
-            .update(user)
-            .set({ globalRole: input.role, twoFactorEnabled })
-            .where(eq(user.id, input.userId));
+         const found = await db.transaction(async (tx) => {
+            const [row] = await tx
+               .update(user)
+               .set({ globalRole: input.role, twoFactorEnabled })
+               .where(eq(user.id, input.userId))
+               .returning({ id: user.id });
+
+            if (!row) return false;
+
+            // Force a fresh login: the user passes email OTP if now editor+,
+            // and no session keeps a stale role
+            await tx
+               .delete(sessionTable)
+               .where(eq(sessionTable.userId, input.userId));
+
+            return true;
+         });
+
+         if (!found) throw new TRPCError({ code: 'NOT_FOUND' });
 
          return { success: true };
       }),
@@ -119,6 +137,10 @@ export const adminRouter = router({
                      eq(roleRequests.status, 'pending'),
                   ),
                );
+
+            await tx
+               .delete(sessionTable)
+               .where(eq(sessionTable.userId, request.userId));
          });
 
          // A failed email must not undo a completed approval

@@ -4,10 +4,11 @@ import { betterAuth } from 'better-auth/minimal';
 import { sendVerificationEmail, sendOtpEmail } from './email.js';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { twoFactor } from 'better-auth/plugins';
-import { APIError } from 'better-auth/api';
+import { APIError, createAuthMiddleware } from 'better-auth/api';
 import { count, eq } from 'drizzle-orm';
 import { user as userTable } from '@/db/schema/index.js';
 import { deleteUserContent } from '@/lib/delete-user-content.js';
+import { passwordSchema } from '@folio/shared';
 
 export const auth = betterAuth({
    appName: 'Folio',
@@ -81,6 +82,37 @@ export const auth = betterAuth({
       }),
    ],
    trustedOrigins: [process.env.CLIENT_URL!],
+   hooks: {
+      before: createAuthMiddleware(async (ctx) => {
+         let password: unknown;
+         if (ctx.path === '/sign-up/email') password = ctx.body?.password;
+         else if (
+            ctx.path === '/change-password' ||
+            ctx.path === '/reset-password'
+         )
+            password = ctx.body?.newPassword;
+         else return;
+
+         const result = passwordSchema.safeParse(password);
+         if (!result.success) {
+            throw new APIError('BAD_REQUEST', {
+               message: result.error.issues[0].message,
+               code: 'PASSWORD_TOO_WEAK',
+            });
+         }
+      }),
+   },
+   rateLimit: {
+      enabled: true,
+      window: 60,
+      max: 60,
+      customRules: {
+         '/sign-in/email': { window: 60, max: 5 },
+         '/sign-up/email': { window: 60, max: 5 },
+         '/two-factor/send-otp': { window: 60, max: 3 },
+         '/two-factor/verify-otp': { window: 60, max: 5 },
+      },
+   },
 });
 
 export type Auth = typeof auth;
