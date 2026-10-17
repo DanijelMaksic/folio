@@ -102,9 +102,10 @@ function DocumentPages() {
             page,
             limit: 20,
             search: search || undefined,
+            status,
          },
          {
-            refetchInterval: document?.status === 'processing' ? 2000 : false,
+            enabled: document?.status === 'ready',
             placeholderData: (prev) => prev,
             staleTime: 1000,
          },
@@ -197,18 +198,13 @@ function DocumentPages() {
       });
    };
 
-   const filteredPages = pages?.filter((page) => {
-      if (status === 'transcribed') return page.approvedTranscriptionCount > 0;
-      if (status === 'not-transcribed')
-         return page.approvedTranscriptionCount === 0;
-      return true; // 'all-pages'
-   });
-
    const hasActiveFilter = status !== 'all-pages' || !!search;
 
    if (isLoadingDocument) return <p>Loading...</p>;
-
    if (!document) return <p>Document not found</p>;
+
+   const isReady = document.status === 'ready';
+   const showControls = isReady && (!!pages.length || hasActiveFilter);
 
    return (
       <div className="max-w-full mx-auto py-6 px-12 space-y-6">
@@ -223,7 +219,7 @@ function DocumentPages() {
             </div>
 
             <div className="flex items-center justify-center gap-3">
-               {(!!pages?.length || hasActiveFilter) && (
+               {showControls && (
                   <SearchBar
                      placeholder="Search pages..."
                      value={inputValue}
@@ -231,14 +227,14 @@ function DocumentPages() {
                   />
                )}
 
-               {(!!pages?.length || hasActiveFilter) && (
+               {showControls && (
                   <TranscriptionFilter
                      onSetStatus={handleSetStatus}
                      status={status}
                   />
                )}
 
-               {(isMyDocument || editor) && document.status === 'ready' && (
+               {(isMyDocument || editor) && isReady && (
                   <Button
                      variant="outline"
                      size="sm"
@@ -248,7 +244,7 @@ function DocumentPages() {
                   </Button>
                )}
 
-               {(isMyDocument || editor) && document.status === 'ready' && (
+               {(isMyDocument || editor) && isReady && (
                   <ActionsMenu
                      show={canTranscribe && (isMyDocument || editor)}
                      onEdit={handleEditOpen}
@@ -273,19 +269,23 @@ function DocumentPages() {
             </p>
          )}
 
-         {document.status === 'ready' && (
+         {isReady && (
             <>
                {isLoadingPages ? (
                   <p>Loading pages...</p>
-               ) : !pages?.length ? (
-                  <p className="text-muted-foreground">No pages found.</p>
-               ) : !filteredPages?.length ? (
+               ) : !pages.length ? (
                   <p className="text-muted-foreground">
-                     No pages match this filter.
+                     {search && status !== 'all-pages'
+                        ? 'No pages match your search and filter.'
+                        : search
+                          ? `No results found for your search.`
+                          : status !== 'all-pages'
+                            ? 'No pages match this filter.'
+                            : 'No pages found.'}
                   </p>
                ) : (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                     {filteredPages.map((page) => (
+                     {pages.map((page) => (
                         <PageCard
                            page={page}
                            documentId={documentId!}
@@ -355,7 +355,7 @@ function DocumentPages() {
             />
          )}
 
-         {!!pages.length && (
+         {isReady && !!pages.length && (
             <AppPagination
                currentPage={page}
                totalPages={totalPages}

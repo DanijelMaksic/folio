@@ -5,23 +5,28 @@ export const PDF_MAX_BYTES = 5 * 1024 * 1024;
 export const PDF_MAX_BASE64_LENGTH = Math.ceil(PDF_MAX_BYTES / 3) * 4 + 100;
 export const IMAGES_MAX_TOTAL_BYTES = 6 * 1024 * 1024;
 
-export const uploadDocumentSchema = z.object({
-   title: z
-      .string()
-      .min(1, 'Title is required')
-      .max(225, 'Title cannot be longer than 255 characters'),
-   description: z
-      .string()
-      .max(1000, 'Description cannot be longer than 1000 characters')
-      .optional(),
-   fileType: z.enum(['image', 'pdf']).optional(),
-   fileBase64: z
-      .string()
-      .max(PDF_MAX_BASE64_LENGTH, 'PDF is too large. Maximum size is 5 MB.')
-      .optional(),
+export const uploadDocumentSchema = z
+   .object({
+      title: z
+         .string()
+         .min(1, 'Title is required')
+         .max(225, 'Title cannot be longer than 255 characters'),
+      description: z
+         .string()
+         .max(1000, 'Description cannot be longer than 1000 characters')
+         .optional(),
+      fileType: z.enum(['image', 'pdf']).optional(),
+      fileBase64: z
+         .string()
+         .max(PDF_MAX_BASE64_LENGTH, 'PDF is too large. Maximum size is 5 MB')
+         .optional(),
 
-   files: z.array(z.string()).optional(),
-});
+      files: z.array(z.string()).optional(),
+   })
+   .refine((d) => d.fileType !== 'pdf' || !!d.fileBase64, {
+      message: 'A PDF file is required',
+      path: ['fileBase64'],
+   });
 
 export const listDocumentsSchema = z.object({
    page: z.number().int().min(1).default(1),

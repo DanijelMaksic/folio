@@ -24,9 +24,19 @@ export const pagesRouter = router({
       .query(async ({ ctx, input }) => {
          const offset = (input.page - 1) * input.limit;
 
+         const approvedExists = sql`EXISTS (
+             SELECT 1 FROM ${transcriptions}
+             WHERE ${transcriptions.pageId} = ${pages.id}
+             AND ${transcriptions.status} = 'approved'
+             )`;
+
          const where = and(
             eq(pages.documentId, input.documentId),
             input.search ? ilike(pages.title, `%${input.search}%`) : undefined,
+            input.status === 'transcribed' ? approvedExists : undefined,
+            input.status === 'not-transcribed'
+               ? sql`NOT ${approvedExists}`
+               : undefined,
          );
 
          const [results, [{ total }]] = await Promise.all([

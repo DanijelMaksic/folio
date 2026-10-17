@@ -28,7 +28,14 @@ export const documentsRouter = router({
             });
          }
 
-         if (input.fileType === 'pdf' && input.fileBase64) {
+         if (input.fileType === 'pdf') {
+            if (!input.fileBase64) {
+               throw new TRPCError({
+                  code: 'BAD_REQUEST',
+                  message: 'A PDF file is required',
+               });
+            }
+
             const [document] = await db
                .insert(documents)
                .values({
@@ -58,21 +65,61 @@ export const documentsRouter = router({
                })
                .returning();
 
-            for (let i = 0; i < input.files.length; i++) {
-               const uploaded = await cloudinary.uploader.upload(
-                  input.files[i],
-                  {
-                     folder: 'folio/documents',
-                     resource_type: 'image',
-                  },
+            const uploadedIds: string[] = [];
+
+            try {
+               for (let i = 0; i < input.files.length; i++) {
+                  const uploaded = await cloudinary.uploader.upload(
+                     input.files[i],
+                     {
+                        folder: 'folio/documents',
+                        resource_type: 'image',
+                     },
+                  );
+
+                  // Track before the DB insert, so an insert failure still cleans up
+                  uploadedIds.push(uploaded.public_id);
+
+                  await db.insert(pages).values({
+                     documentId: document.id,
+                     pageNumber: i + 1,
+                     title: `Page ${i + 1}`,
+                     imageUrl: uploaded.secure_url,
+                     cloudinaryPublicId: uploaded.public_id,
+                  });
+               }
+            } catch (err) {
+               console.error(
+                  'Image upload failed, rolling back document:',
+                  err,
                );
 
-               await db.insert(pages).values({
-                  documentId: document.id,
-                  pageNumber: i + 1,
-                  title: `Page ${i + 1}`,
-                  imageUrl: uploaded.secure_url,
-                  cloudinaryPublicId: uploaded.public_id,
+               try {
+                  // cascade removes any pages already inserted
+                  await db
+                     .delete(documents)
+                     .where(eq(documents.id, document.id));
+               } catch (cleanupErr) {
+                  console.error(
+                     'Failed to delete partial document:',
+                     cleanupErr,
+                  );
+               }
+
+               if (uploadedIds.length) {
+                  try {
+                     await cloudinary.api.delete_resources(uploadedIds);
+                  } catch (cleanupErr) {
+                     console.error(
+                        'Failed to delete orphaned images:',
+                        cleanupErr,
+                     );
+                  }
+               }
+
+               throw new TRPCError({
+                  code: 'INTERNAL_SERVER_ERROR',
+                  message: 'Failed to upload images. Please try again.',
                });
             }
 
