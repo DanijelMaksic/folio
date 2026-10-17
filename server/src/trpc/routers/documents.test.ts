@@ -67,8 +67,26 @@ const mockDoc = {
    updatedAt: new Date().toISOString(),
 };
 
+const mockLookup = (rows: unknown[]) =>
+   mockSelect.mockReturnValueOnce({
+      from: vi.fn(() => ({
+         where: vi.fn(() => ({
+            limit: vi.fn().mockResolvedValueOnce(rows),
+         })),
+      })),
+   });
+
+const mockUpdateReturning = (rows: unknown[]) =>
+   mockUpdate.mockReturnValueOnce({
+      set: vi.fn(() => ({
+         where: vi.fn(() => ({
+            returning: vi.fn().mockResolvedValueOnce(rows),
+         })),
+      })),
+   });
+
 beforeEach(() => {
-   vi.clearAllMocks();
+   vi.resetAllMocks();
 });
 
 // ── upload ───────────────────────
@@ -252,6 +270,16 @@ describe('documents.list', () => {
       expect(result.totalPages).toBe(0);
    });
 
+   it('rejects a PDF upload without fileBase64', async () => {
+      const caller = createAuthenticatedCaller(contributorUser);
+      await expect(
+         caller.documents.upload({ title: 'No file', fileType: 'pdf' }),
+      ).rejects.toMatchObject({ code: 'BAD_REQUEST' });
+
+      expect(mockInsert).not.toHaveBeenCalled();
+      expect(mockPdfQueue).not.toHaveBeenCalled();
+   });
+
    it('filters by search term', async () => {
       mockSelect.mockReturnValueOnce({
          from: vi.fn(() => ({
@@ -358,16 +386,10 @@ describe('documents.getByCollection', () => {
 // ── update ───────────────────────
 
 describe('documents.update', () => {
-   it('updates a document and returns it', async () => {
-      const updated = { ...mockDoc, title: 'Updated Title' };
-
-      mockUpdate.mockReturnValueOnce({
-         set: vi.fn(() => ({
-            where: vi.fn(() => ({
-               returning: vi.fn().mockResolvedValueOnce([updated]),
-            })),
-         })),
-      });
+   it('updates a document the user owns', async () => {
+      const owned = { ...mockDoc, uploadedBy: contributorUser.id };
+      mockLookup([owned]);
+      mockUpdateReturning([{ ...owned, title: 'Updated Title' }]);
 
       const caller = createAuthenticatedCaller(contributorUser);
       const result = await caller.documents.update({
@@ -378,18 +400,50 @@ describe('documents.update', () => {
       expect(result).toMatchObject({ title: 'Updated Title' });
    });
 
-   it('throws NOT_FOUND if document does not exist', async () => {
-      mockUpdate.mockReturnValueOnce({
-         set: vi.fn(() => ({
-            where: vi.fn(() => ({
-               returning: vi.fn().mockResolvedValueOnce([]),
-            })),
-         })),
-      });
+   it('throws NOT_FOUND if the document does not exist', async () => {
+      mockLookup([]);
 
       const caller = createAuthenticatedCaller(contributorUser);
       await expect(
          caller.documents.update({ id: 'nonexistent', title: 'X' }),
+      ).rejects.toMatchObject({ code: 'NOT_FOUND' });
+      expect(mockUpdate).not.toHaveBeenCalled();
+   });
+
+   it("throws FORBIDDEN if a contributor edits someone else's document", async () => {
+      mockLookup([{ ...mockDoc, uploadedBy: 'someone-else' }]);
+
+      const caller = createAuthenticatedCaller(contributorUser);
+      await expect(
+         caller.documents.update({ id: 'doc-1', title: 'X' }),
+      ).rejects.toMatchObject({ code: 'FORBIDDEN' });
+      expect(mockUpdate).not.toHaveBeenCalled();
+   });
+
+   it("lets an editor update someone else's document", async () => {
+      const others = { ...mockDoc, uploadedBy: 'someone-else' };
+      mockLookup([others]);
+      mockUpdateReturning([{ ...others, title: 'Edited' }]);
+
+      const caller = createAuthenticatedCaller(
+         mockUser({ globalRole: 'editor' }),
+      );
+      const result = await caller.documents.update({
+         id: 'doc-1',
+         title: 'Edited',
+      });
+
+      expect(result).toMatchObject({ title: 'Edited' });
+   });
+
+   it('throws NOT_FOUND if the update returns no row', async () => {
+      const owned = { ...mockDoc, uploadedBy: contributorUser.id };
+      mockLookup([owned]);
+      mockUpdateReturning([]);
+
+      const caller = createAuthenticatedCaller(contributorUser);
+      await expect(
+         caller.documents.update({ id: 'doc-1', title: 'X' }),
       ).rejects.toMatchObject({ code: 'NOT_FOUND' });
    });
 
@@ -440,7 +494,7 @@ describe('documents.delete', () => {
       expect(mockDeleteResources).toHaveBeenCalledWith(['folio/abc']);
    });
 
-   it('throws NOT_FOUND if document does not exist', async () => {
+   it('throws NOT_FOUND if the document does not exist', async () => {
       mockSelect.mockReturnValueOnce({
          from: vi.fn(() => ({
             where: vi.fn(() => ({

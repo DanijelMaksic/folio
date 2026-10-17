@@ -120,6 +120,24 @@ export const pagesRouter = router({
 
          const { id, ...fields } = input;
 
+         const [page] = await db
+            .select({ id: pages.id, uploadedBy: documents.uploadedBy })
+            .from(pages)
+            .innerJoin(documents, eq(documents.id, pages.documentId))
+            .where(eq(pages.id, id));
+
+         if (!page) throw new TRPCError({ code: 'NOT_FOUND' });
+
+         if (
+            page.uploadedBy !== ctx.user.id &&
+            !isEditor(ctx.user.globalRole)
+         ) {
+            throw new TRPCError({
+               code: 'FORBIDDEN',
+               message: 'You do not have permission to edit this page',
+            });
+         }
+
          const [updated] = await db
             .update(pages)
             .set(fields)
@@ -168,8 +186,6 @@ export const pagesRouter = router({
             });
          }
 
-         await cloudinary.uploader.destroy(page.cloudinaryPublicId);
-
          const [deleted] = await db
             .delete(pages)
             .where(eq(pages.id, input.pageId))
@@ -197,12 +213,25 @@ export const pagesRouter = router({
                ),
             );
 
+         try {
+            await cloudinary.uploader.destroy(page.cloudinaryPublicId);
+         } catch (err) {
+            console.error('Failed to delete page image:', err);
+         }
+
          return deleted;
       }),
 
    addPages: protectedProcedure
       .input(addPagesSchema)
       .mutation(async ({ ctx, input }) => {
+         if (!isContributor(ctx.user.globalRole)) {
+            throw new TRPCError({
+               code: 'FORBIDDEN',
+               message: 'Only contributors and above can delete documents',
+            });
+         }
+
          const document = await db.query.documents.findFirst({
             where: eq(documents.id, input.documentId),
          });
@@ -214,10 +243,14 @@ export const pagesRouter = router({
             });
          }
 
-         if (!isContributor(ctx.user.globalRole)) {
+         if (
+            document.uploadedBy !== ctx.user.id &&
+            !isEditor(ctx.user.globalRole)
+         ) {
             throw new TRPCError({
                code: 'FORBIDDEN',
-               message: 'Only contributors and above can delete documents',
+               message:
+                  'You do not have permission to add pages to this document',
             });
          }
 
@@ -282,21 +315,51 @@ export const pagesRouter = router({
             });
          }
 
-         await cloudinary.uploader.destroy(page.cloudinaryPublicId);
-
+         // Upload the new image first, so a failed upload leaves the page untouched
          const uploaded = await cloudinary.uploader.upload(input.fileBase64, {
             folder: 'folio/documents',
             resource_type: 'image',
          });
 
-         const [updated] = await db
-            .update(pages)
-            .set({
-               imageUrl: uploaded.secure_url,
-               cloudinaryPublicId: uploaded.public_id,
-            })
-            .where(eq(pages.id, input.pageId))
-            .returning();
+         let updated;
+         try {
+            [updated] = await db
+               .update(pages)
+               .set({
+                  imageUrl: uploaded.secure_url,
+                  cloudinaryPublicId: uploaded.public_id,
+               })
+               .where(eq(pages.id, input.pageId))
+               .returning();
+         } catch (err) {
+            // DB update failed: remove the new image and keep the old one
+            try {
+               await cloudinary.uploader.destroy(uploaded.public_id);
+            } catch (cleanupErr) {
+               console.error('Failed to delete orphaned image:', cleanupErr);
+            }
+            throw err;
+         }
+
+         if (!updated) {
+            // Page was deleted in the meantime: remove the new image
+            try {
+               await cloudinary.uploader.destroy(uploaded.public_id);
+            } catch (cleanupErr) {
+               console.error('Failed to delete orphaned image:', cleanupErr);
+            }
+            throw new TRPCError({
+               code: 'NOT_FOUND',
+               message: 'Page not found',
+            });
+         }
+
+         // The DB now points at the new image, so removing the old one is best-effort
+         try {
+            await cloudinary.uploader.destroy(page.cloudinaryPublicId);
+         } catch (err) {
+            console.error('Failed to delete old image:', err);
+         }
 
          return updated;
       }),

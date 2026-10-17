@@ -270,7 +270,10 @@ export const documentsRouter = router({
             .limit(1);
 
          if (!existing) throw new TRPCError({ code: 'NOT_FOUND' });
-         if (existing.uploadedBy !== ctx.user.id)
+         if (
+            existing.uploadedBy !== ctx.user.id &&
+            !isEditor(ctx.user.globalRole)
+         )
             throw new TRPCError({ code: 'FORBIDDEN' });
 
          // Update the document
