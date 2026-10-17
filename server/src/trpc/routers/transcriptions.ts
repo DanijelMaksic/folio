@@ -76,6 +76,7 @@ export const transcriptionsRouter = router({
    update: protectedProcedure
       .input(z.object({ transcriptionId: z.string(), content: z.string() }))
       .mutation(async ({ ctx, input }) => {
+         // A user cannot edit another user's transcription
          const [existing] = await db
             .select()
             .from(transcriptions)
@@ -93,6 +94,7 @@ export const transcriptionsRouter = router({
             });
          }
 
+         // Update the transcription
          const [updated] = await db
             .update(transcriptions)
             .set({ content: input.content, updatedAt: new Date() })

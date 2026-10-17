@@ -215,6 +215,18 @@ export const documentsRouter = router({
             });
          }
 
+         // A user cannot edit another user's document
+         const [existing] = await db
+            .select()
+            .from(documents)
+            .where(eq(documents.id, input.id))
+            .limit(1);
+
+         if (!existing) throw new TRPCError({ code: 'NOT_FOUND' });
+         if (existing.uploadedBy !== ctx.user.id)
+            throw new TRPCError({ code: 'FORBIDDEN' });
+
+         // Update the document
          const { id, ...fields } = input;
 
          const [updated] = await db
