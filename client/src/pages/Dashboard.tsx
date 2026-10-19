@@ -19,7 +19,7 @@ export default function Dashboard() {
 
    if (isPending) return null;
 
-   if (!session?.user) return <Navigate to="/login" replace />;
+   if (!session?.user) return <Navigate to="/sign-in" replace />;
 
    const data = overview.data;
 

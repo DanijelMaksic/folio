@@ -7,9 +7,11 @@ test.afterAll(async () => {
 });
 
 test.describe('Dashboard access', () => {
-   test('unauthenticated visitor is redirected to login', async ({ page }) => {
+   test('unauthenticated visitor is redirected to sign in', async ({
+      page,
+   }) => {
       await page.goto('/dashboard');
-      await page.waitForURL('/login', { timeout: 15_000 });
+      await page.waitForURL('/sign-in', { timeout: 15_000 });
    });
 
    test('viewer sees the contributor gate instead of the dashboard', async ({

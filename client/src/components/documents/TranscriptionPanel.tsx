@@ -44,7 +44,10 @@ function TranscriptionPanel({
 
    function handleSubmit() {
       if (!transcription) return;
-      submitMutation.mutate({ transcriptionId: transcription.id });
+      submitMutation.mutate({
+         transcriptionId: transcription.id,
+         content: transcriptionContent,
+      });
    }
 
    return (
@@ -98,6 +101,7 @@ function TranscriptionPanel({
                         >
                            {updateMutation.isPending ? 'Saving...' : 'Save'}
                         </button>
+
                         <button
                            className="px-3 py-1 text-sm bg-primary text-primary-foreground rounded hover:opacity-90 disabled:opacity-50"
                            onClick={handleSubmit}

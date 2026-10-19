@@ -50,7 +50,7 @@ function DeleteProfileModal({ open, onOpenChange }: DeleteProfileModalProps) {
       }
 
       localStorage.removeItem('folio-viewer');
-      navigate('/login', { replace: true });
+      navigate('/sign-in', { replace: true });
    }
 
    return (

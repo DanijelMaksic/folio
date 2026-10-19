@@ -17,10 +17,6 @@ export const updateTranscriptionSchema = z.object({
    content: z.string().min(1, 'Transcription content cannot be empty'),
 });
 
-export const submitTranscriptionSchema = z.object({
-   id: z.string(),
-});
-
 export const transcriptionRevisionSchema = z.object({
    id: z.string(),
    transcriptionId: z.string(),
@@ -55,12 +51,9 @@ export const DocumentIdSchema = z.string();
 export const queueResponseSchema = z.array(queueItemSchema);
 
 export type Transcription = z.infer<typeof transcriptionSchema>;
-export type SubmittedTranscription = Transcription & { user: User };
+export type SubmittedTranscription = Transcription & { user: User | null };
 export type UpdateTranscriptionInput = z.infer<
    typeof updateTranscriptionSchema
->;
-export type SubmitTranscriptionInput = z.infer<
-   typeof submitTranscriptionSchema
 >;
 export type TranscriptionRevision = z.infer<typeof transcriptionRevisionSchema>;
 export type QueueItem = z.infer<typeof queueItemSchema>;

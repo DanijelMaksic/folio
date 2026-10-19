@@ -6,14 +6,17 @@ import { isEditor } from '@shared';
 import { useParams, useSearchParams } from 'react-router-dom';
 
 function ReviewPage() {
-   const { id, pageNumber } = useParams<{ id: string; pageNumber: string }>();
+   const { id: documentId, pageNumber } = useParams<{
+      id: string;
+      pageNumber: string;
+   }>();
    const [searchParams] = useSearchParams();
    const userId = searchParams.get('userId');
    const { data: session } = useSession();
    const currentUser = session?.user;
 
    const { data: page, isLoading } = trpc.pages.getByPageNumber.useQuery({
-      documentId: id!,
+      documentId: documentId!,
       pageNumber: Number(pageNumber),
    });
 
@@ -39,7 +42,9 @@ function ReviewPage() {
             <p className="text-sm text-muted-foreground">
                Submitted by{' '}
                <span className="font-medium text-foreground">
-                  {submittedTranscription?.user.username}
+                  {submittedTranscription
+                     ? (submittedTranscription.user?.username ?? 'Deleted user')
+                     : ''}{' '}
                </span>
             </p>
          </div>
@@ -48,7 +53,7 @@ function ReviewPage() {
             <PageViewer page={page} />
 
             {isEditor(session?.user?.globalRole) ? (
-               id &&
+               documentId &&
                submittedTranscription && (
                   <ReviewPanel
                      submittedTranscription={submittedTranscription}

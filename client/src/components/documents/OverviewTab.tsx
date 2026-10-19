@@ -6,17 +6,20 @@ import { isContributor } from '@shared';
 import { useParams } from 'react-router-dom';
 
 function OverviewTab() {
-   const { id, pageNumber } = useParams<{ id: string; pageNumber: string }>();
+   const { id: documentId, pageNumber } = useParams<{
+      id: string;
+      pageNumber: string;
+   }>();
    const { data: session } = useSession();
    const user = session?.user;
 
    const { data: page } = trpc.pages.getByPageNumber.useQuery({
-      documentId: id!,
+      documentId: documentId!,
       pageNumber: Number(pageNumber),
    });
 
    const placeholderType = !user
-      ? 'not-logged-in'
+      ? 'not-signed-in'
       : isContributor(user.globalRole)
         ? 'contributor'
         : 'viewer';

@@ -14,7 +14,7 @@ test.describe('Document CRUD operations', () => {
       auth,
    }) => {
       const uniqueTitle = `${title} ${Date.now()}`;
-      // page is already logged in via fixture
+      // page is already signed in via fixture
       await uploadTestDocument(page, uniqueTitle);
 
       await page.goto('/documents');
@@ -28,7 +28,7 @@ test.describe('Document CRUD operations', () => {
    });
 
    test('contributor can edit a document title', async ({ page, auth }) => {
-      // page is already logged in via fixture
+      // page is already signed in via fixture
       await uploadTestDocument(page, title);
 
       await page.getByTestId('actions-dropdown-btn').click();
@@ -48,7 +48,7 @@ test.describe('Document CRUD operations', () => {
    });
 
    test('contributor can delete a document', async ({ page, auth }) => {
-      // page is already logged in via fixture
+      // page is already signed in via fixture
       await uploadTestDocument(page, title);
 
       await page.getByTestId('actions-dropdown-btn').click();

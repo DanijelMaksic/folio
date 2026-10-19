@@ -60,7 +60,7 @@ async function sendQuietly(mail: Mail) {
    }
 }
 
-// Verification + OTP throw, so signup/login surface a delivery failure
+// Verification + OTP throw, so sign up/sign in surface a delivery failure
 export const sendVerificationEmail = (to: string, url: string) =>
    sendEmail({
       to,
@@ -74,9 +74,9 @@ export const sendVerificationEmail = (to: string, url: string) =>
 export const sendOtpEmail = (to: string, otp: string) =>
    sendEmail({
       to,
-      subject: 'Your Folio login code',
+      subject: 'Your Folio sign in code',
       html: `
-      <p>Your login verification code is:</p>
+      <p>Your sign in verification code is:</p>
       <h2 style="letter-spacing:0.25em;font-size:2em">${esc(otp)}</h2>
       <p>This code expires in 10 minutes. If you didn't try to sign in, ignore this email.</p>`,
    });

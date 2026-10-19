@@ -111,7 +111,7 @@ export const transcriptionsRouter = router({
 
    // Marks a transcription as submitted
    submit: protectedProcedure
-      .input(z.object({ transcriptionId: z.string() }))
+      .input(z.object({ transcriptionId: z.string(), content: z.string() }))
       .mutation(async ({ ctx, input }) => {
          const [existing] = await db
             .select()
@@ -131,6 +131,8 @@ export const transcriptionsRouter = router({
             });
          }
 
+         console.log(content);
+
          if (!existing.content.trim()) {
             throw new TRPCError({
                code: 'BAD_REQUEST',
@@ -138,6 +140,19 @@ export const transcriptionsRouter = router({
             });
          }
 
+         // Update the transcription
+         const [updated] = await db
+            .update(transcriptions)
+            .set({ content: input.content, updatedAt: new Date() })
+            .where(eq(transcriptions.id, input.transcriptionId))
+            .returning();
+
+         await db.insert(transcriptionRevisions).values({
+            transcriptionId: input.transcriptionId,
+            content: input.content,
+         });
+
+         // Submit the transcription
          const [submitted] = await db
             .update(transcriptions)
             .set({ status: 'submitted', updatedAt: new Date() })

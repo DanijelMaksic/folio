@@ -39,7 +39,7 @@ export const adminRouter = router({
 
             if (!row) return false;
 
-            // Force a fresh login: the user passes email OTP if now editor+,
+            // Force a fresh sign in: the user passes email OTP if now editor+,
             // and no session keeps a stale role
             await tx
                .delete(sessionTable)
@@ -117,7 +117,7 @@ export const adminRouter = router({
                .update(user)
                .set({
                   globalRole: request.requestedRole,
-                  // Editors must use email OTP on every login
+                  // Editors must use email OTP on every sign in
                   ...(request.requestedRole === 'editor'
                      ? { twoFactorEnabled: true }
                      : {}),

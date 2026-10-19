@@ -41,7 +41,7 @@ function ProfileSettings({ name, username }: ProfileSettingsProps) {
    async function handleSignOut() {
       setSigningOut(true);
       await signOut();
-      navigate('/login');
+      navigate('/sign-in');
    }
 
    return (

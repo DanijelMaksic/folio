@@ -59,7 +59,7 @@ function Profile() {
       );
    }
 
-   if (!session) return <Navigate to="/login" replace />;
+   if (!session) return <Navigate to="/sign-in" replace />;
 
    const { user } = session;
    const displayName = user.name || user.username;

@@ -19,7 +19,7 @@ function CollectionDetails() {
    const [editTitle, setEditTitle] = useState('');
    const [editDescription, setEditDescription] = useState('');
 
-   const { id } = useParams<{ id: string }>();
+   const { id: collectionId } = useParams<{ id: string }>();
    const { data: session } = useSession();
    const user = session?.user;
    const navigate = useNavigate();
@@ -37,17 +37,17 @@ function CollectionDetails() {
 
    const { data: collection, isLoading: isLoadingCollection } =
       trpc.collections.getById.useQuery({
-         id: id!,
+         id: collectionId!,
       });
 
    const { data: savedDocuments } = trpc.documents.getByCollection.useQuery({
-      collectionId: id!,
+      collectionId: collectionId!,
    });
 
    const { data: searchResults } = trpc.documents.search.useQuery(
       {
          query: debouncedSearch,
-         collectionId: id!,
+         collectionId: collectionId!,
       },
       {
          enabled: debouncedSearch.length > 0,
@@ -60,7 +60,7 @@ function CollectionDetails() {
 
    const editCollection = trpc.collections.update.useMutation({
       onSuccess: () => {
-         utils.collections.getById.invalidate({ id: id! });
+         utils.collections.getById.invalidate({ id: collectionId! });
          setIsEditOpen(false);
       },
       onError: (err: TRPCClientErrorLike<AppRouter>) => {
@@ -85,14 +85,14 @@ function CollectionDetails() {
 
    const handleEditSubmit = () => {
       editCollection.mutate({
-         id: id!,
+         id: collectionId!,
          title: editTitle,
          description: editDescription,
       });
    };
 
    const handleDelete = async () => {
-      deleteCollection.mutate({ id: id as string });
+      deleteCollection.mutate({ id: collectionId as string });
    };
 
    const isSearchActive = debouncedSearch.length > 0;

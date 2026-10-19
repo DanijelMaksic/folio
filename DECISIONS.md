@@ -50,7 +50,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - esbuild moderate vulnerability via drizzle-kit's dependency on `@esbuild-kit` — dev-only, unexploitable in production. Monitor for a drizzle-kit update that resolves it later
 
-## Sprint 1 — Registration and Login
+## Sprint 1 — Registration and Sign in
 
 **Goal:**A real user can create an account and log in through the browser.
 
@@ -60,7 +60,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Converted the project to ESM, as Better Auth doesn't support CommonJS module system
 
-- Built registration and login forms, HTML and Better Auth handle basic validation (will add Zod validation for tRPC procedures later)
+- Built registration and sign in forms, HTML and Better Auth handle basic validation (will add Zod validation for tRPC procedures later)
 
 - Form submission is handled with formData API
 - On registration, user data is sent to the DB, but with emailVerified set to false. User can't log in until email is verified
@@ -69,11 +69,11 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 - First admin is bootstrapped via a one-time seed script.
 - Integrated Better Auth's Two Factor plugin for `editor` and `admin` roles via `twoFactorEnabled: true`
 
-- On the Front-End, React Router's `ProtectedRoute` prevents rendering the UI (`/` route) for the logged-out users. On the Back-End, the actual route protection is enforced by Better Auth and tRPC's `protectedProcedure`
+- On the Front-End, React Router's `ProtectedRoute` prevents rendering the UI (`/` route) for the signed-out users. On the Back-End, the actual route protection is enforced by Better Auth and tRPC's `protectedProcedure`
 
 - Enabled CORS, because `locahhost:5173` works with `localhost:3000`, enabling communication between two origins.
 
-- Vitest tests the registration, login, session and 2FA flows.
+- Vitest tests the registration, sign in, session and 2FA flows.
 
 - `global-setup.ts`starts and tears down the Express server around the Vitest test suite, allowing integration tests to hit real HTTP endpoints without a separately running server process.
 
@@ -83,7 +83,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Gave up on REST in favor of tRPC, because this app is a monorepo full stack project based on TypeScript, a perfect candidate for tRPC, as tRPC ensures end-to-end type safety and synchronization over the whole stack
 
-- For this sprint there are no E2E tests, just Vitest integration tests related to registration and login, because email verification is currently restricted to just one email (Resend requires real domain, until then I'm restricted to just one email for testing)
+- For this sprint there are no E2E tests, just Vitest integration tests related to registration and sign in, because email verification is currently restricted to just one email (Resend requires real domain, until then I'm restricted to just one email for testing)
 
 - Chose to split tRPC init (`trpc.ts`) from route assembly (`router.ts`) to avoid circular dependency between the admin router and the main router
 
@@ -95,7 +95,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Email verification redirected to `localhost:3000` (Express) instead of `localhost:5173` (Vite) — fixed by passing `callbackURL: VITE_CLIENT_URL` from the client at signup time, not from server config
 
-- After email verification, user was redirected to `/login` instead of `/` — fixed with `autoSignInAfterVerification: true`
+- After email verification, user was redirected to `/sign-in` instead of `/` — fixed with `autoSignInAfterVerification: true`
 
 **Known issues carried forward:**
 
@@ -103,7 +103,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Email verification flow untested for non-owner emails as a result
 
-- No password strength validation on register — BetterAuth enforces 8 character minimum but nothing beyond that; proper validation deferred to a later sprint
+- No password strength validation on sign up — BetterAuth enforces 8 character minimum but nothing beyond that; proper validation deferred to a later sprint
 
 - Docker warns about some vulnerabilities related to Golang packages. No idea what that means, but a quick research showed that it's probably a false-flag warning. Will revisit later
 
@@ -113,7 +113,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 ## Sprint 2 — Document Upload
 
-**Goal:**A logged-in contributor can uplaod a document and anyone can view it.
+**Goal:**A signed-in contributor can uplaod a document and anyone can view it.
 
 **Completed:**
 
@@ -147,7 +147,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - DB columns were a mix of camelCase and snake_case due to migrations running before `casing: 'snake_case'` was added to both the Drizzle config and `drizzle.config.ts` — resolved by wiping the DB and regenerating a single clean migration from the current schema
 
-- Playwright `page.goto()` was aborting on the login page — fixed by inlining the login steps directly in the test rather than abstracting them into a helper function
+- Playwright `page.goto()` was aborting on the sign in page — fixed by inlining the sign in steps directly in the test rather than abstracting them into a helper function
 
 **Known issues carried forward:**
 
@@ -155,7 +155,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Email verification flow untested for non-owner emails as a result
 
-- No password strength validation on register — BetterAuth enforces 8 character minimum but nothing beyond that; proper validation deferred to a later sprint
+- No password strength validation on sign up — BetterAuth enforces 8 character minimum but nothing beyond that; proper validation deferred to a later sprint
 
 - Docker warns about some vulnerabilities related to Golang packages. No idea what that means, but a quick research showed that it's probably a false-flag warning. Will revisit later
 
@@ -163,11 +163,11 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - OTP cannot be tested end-to-end in Vitest since valid codes require intercepting Resend delivery, so only rejection paths are covered
 
-- The Playwrright `loginPage` helper function causes test failures when used — login steps are currently inlined in the test as a workaround; needs investigation
+- The Playwrright `signInPage` helper function causes test failures when used — sign in steps are currently inlined in the test as a workaround; needs investigation
 
 ## Sprint 3 — Transcription
 
-**Goal:**A logged-in contributor can transcribe a document and access revision history.
+**Goal:**A signed-in contributor can transcribe a document and access revision history.
 
 **Completed:**
 
@@ -195,13 +195,13 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Unique constraint on `(documentId, userId)` enforces one transcription per user per document at the DB level; `create` is idempotent and returns the existing row if it exists
 
-- Refactored e2e test helpers from a shared `helpers.ts` into Playwright fixtures (`fixtures.ts`), extending the base `test` function — login steps are now handled automatically per test via the overridden `page` fixture, solving the inlined login antipattern carried forward from Sprint 2
+- Refactored e2e test helpers from a shared `helpers.ts` into Playwright fixtures (`fixtures.ts`), extending the base `test` function — sign in steps are now handled automatically per test via the overridden `page` fixture, solving the inlined sign in antipattern carried forward from Sprint 2
 
 - `global-setup.ts` handles user seeding before the suite runs, removing the need for `beforeAll` in individual test files
 
 **Issues resolved:**
 
-- OTP verify page was redirecting to `/login` instead of `/` after successful verification — caused by `ProtectedRoute` checking the session before BetterAuth flushed the cookie; fixed by calling `refetch()` on the session before `navigate('/')`
+- OTP verify page was redirecting to `/sign-in` instead of `/` after successful verification — caused by `ProtectedRoute` checking the session before BetterAuth flushed the cookie; fixed by calling `refetch()` on the session before `navigate('/')`
 
 **Known issues carried forward:**
 
@@ -209,7 +209,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Email verification flow untested for non-owner emails as a result
 
-- No password strength validation on register — BetterAuth enforces 8 character minimum but nothing beyond that; proper validation deferred to a later sprint
+- No password strength validation on sign up — BetterAuth enforces 8 character minimum but nothing beyond that; proper validation deferred to a later sprint
 
 - Docker warns about some vulnerabilities related to Golang packages. No idea what that means, but a quick research showed that it's probably a false-flag warning. Will revisit later
 
@@ -219,7 +219,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 ## Sprint 4 — Transcription Review
 
-**Goal:**A logged-in editor can approve or reject a transcription.
+**Goal:**A signed-in editor can approve or reject a transcription.
 
 **Completed:**
 
@@ -253,7 +253,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 **Issues resolved:**
 
-- Editor role users had to log in twice — ProtectedRoute was seeing session: null briefly after login before the session cookie was picked up by useSession; fixed by awaiting refetch() before navigate('/') in Login.tsx, same pattern used in VerifyOtp.tsx
+- Editor role users had to log in twice — ProtectedRoute was seeing session: null briefly after sign in before the session cookie was picked up by useSession; fixed by awaiting refetch() before navigate('/') in SignIn.tsx, same pattern used in VerifyOtp.tsx
 
 **Known issues carried forward:**
 
@@ -271,7 +271,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 ## Sprint 5 — Collections
 
-**Goal:** A logged-in contributor can create a collection.
+**Goal:** A signed-in contributor can create a collection.
 
 **Completed:**
 
@@ -353,7 +353,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 ## Sprint 6 — PDF Pipeline & Pages
 
-**Goal:** A logged-in contributor can upload a PDF document, which is automatically split into individual pages. Pages can be browsed, searched, filtered, and managed independently.
+**Goal:** A signed-in contributor can upload a PDF document, which is automatically split into individual pages. Pages can be browsed, searched, filtered, and managed independently.
 
 **Completed:**
 
@@ -429,7 +429,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 ## Sprint 7 — Dashboard and Profile Settings
 
-**Goal:** A logged-in user has a profile where they can manage their account, see their contribution stats and request a higher role, and contributors have a dashboard summarizing their work.
+**Goal:** A signed-in user has a profile where they can manage their account, see their contribution stats and request a higher role, and contributors have a dashboard summarizing their work.
 
 **Completed:**
 
@@ -451,7 +451,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Approved transcriptions show "Transcribed by [avatar] name" on the page view, falling back to "Deleted user" (confirm)
 
-- Dashboard (`/dashboard`): new `dashboard.getOverview` procedure returning stats, five most recent documents (with page count and cover image), recent rejected transcriptions, a review queue count (editors and above) and a pending role request count (admins). Client components: `OverviewStats`, `AttentionCards`, `RejectedList`, `RecentDocuments`. Viewers see a "become a contributor" gate that links to their profile instead of an empty dashboard. Login now lands on `/dashboard`
+- Dashboard (`/dashboard`): new `dashboard.getOverview` procedure returning stats, five most recent documents (with page count and cover image), recent rejected transcriptions, a review queue count (editors and above) and a pending role request count (admins). Client components: `OverviewStats`, `AttentionCards`, `RejectedList`, `RecentDocuments`. Viewers see a "become a contributor" gate that links to their profile instead of an empty dashboard. Sign in now lands on `/dashboard`
 
 - `EditModal` rewritten as a shadcn `Dialog` with the same props (Save disabled until changed, blocked while pending)
 
@@ -505,7 +505,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Resend free tier: only delivers to Resend account owner email in dev. Real domain verification deferred to Sprint 8, and the email-change flow and non-owner verification emails stay untested until then
 
-- Password strength rule (letter + number) is enforced client-side only; BetterAuth only enforces min/max length server-side. Needs BetterAuth `hooks.before` on `/sign-up/email`, `/change-password` and `/reset-password`, and `passwordSchema` reused in Register
+- Password strength rule (letter + number) is enforced client-side only; BetterAuth only enforces min/max length server-side. Needs BetterAuth `hooks.before` on `/sign-up/email`, `/change-password` and `/reset-password`, and `passwordSchema` reused in SignUp
 
 - Stale session after role approval: if the BetterAuth session cookie cache is enabled, an approved user keeps the old role until it expires or they log in again. Option: delete that user's session rows in the approve transaction (this would also push new editors straight into email OTP)
 
@@ -517,7 +517,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Role requests can be re-submitted immediately after a rejection (no cooldown)
 
-- Not yet written: unit tests for `deleteUserContent`, `getUserStats` and the admin role-request procedures; e2e for account deletion (throwaway user, redirect to `/login`, login fails afterwards), avatar upload (needs Cloudinary cleanup for `avatars/<userId>`), change password and "Deleted user" attribution
+- Not yet written: unit tests for `deleteUserContent`, `getUserStats` and the admin role-request procedures; e2e for account deletion (throwaway user, redirect to `/sign-in`, sign in fails afterwards), avatar upload (needs Cloudinary cleanup for `avatars/<userId>`), change password and "Deleted user" attribution
 
 - Not built: Security tab (active sessions, sign out everywhere), toast notifications, role request history, a UI for direct role changes (`setUserRole` exists server-side only), `refetchInterval` for the pending-count badge, `DeleteModal` conversion to `Dialog`, and confirming `express.json` limit is at least 10mb for 5MB avatar uploads (about 6.8MB as base64)
 
@@ -585,7 +585,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Local `ETIMEDOUT` from ioredis on a TLS socket: the local `server/.env` pointed `REDIS_URL` at Upstash (`rediss://`). Locally it must be `redis://localhost:6379` for the Docker Redis
 
-- No verification email printed locally while testing: registering with an email that already exists returns a normal-looking 200 and sends nothing when email verification is required (Better Auth hides which emails are registered). Fixed by using fresh emails and deleting the stale rows with `psql`. In PowerShell, curl mangles inner JSON quotes, so `Invoke-RestMethod` was used for server-only tests. A `folio-#` prompt in `psql` means an unterminated statement; `\r` clears the buffer
+- No verification email printed locally while testing: signing up with an email that already exists returns a normal-looking 200 and sends nothing when email verification is required (Better Auth hides which emails are registered). Fixed by using fresh emails and deleting the stale rows with `psql`. In PowerShell, curl mangles inner JSON quotes, so `Invoke-RestMethod` was used for server-only tests. A `folio-#` prompt in `psql` means an unterminated statement; `\r` clears the buffer
 
 **Known issues carried forward:**
 
@@ -602,5 +602,9 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 - The Resend-related known issues from Sprints 1–7 are superseded by this sprint's email setup
 
 ## Sprint 9 — Bug Fixes and General Improvements
+
+**Issues resolved:**
+
+- Fixed a bug where if user hits submit before save when transcribing, revisions tab shows nothing and transcription is not submitted
 
 ## Sprint 10 — Visual Design Revamp

@@ -60,7 +60,7 @@ export const usernameSchema = z
       'This username is reserved',
    );
 
-export const registerSchema = z.object({
+export const signUpSchema = z.object({
    username: usernameSchema,
    email: z.email('Must be a valid email address'),
    password: z
@@ -71,7 +71,7 @@ export const registerSchema = z.object({
       .regex(/[0-9]/, 'Password must contain at least one number'),
 });
 
-export const loginSchema = z.object({
+export const signInSchema = z.object({
    username: usernameSchema,
    email: z.email('Must be a valid email address'),
    password: z.string().min(1, 'Password is required'),
@@ -189,8 +189,8 @@ export const reviewRoleRequestSchema = z.object({
    reason: z.string().trim().max(500).optional(),
 });
 
-export type RegisterInput = z.infer<typeof registerSchema>;
-export type LoginInput = z.infer<typeof loginSchema>;
+export type SignUpInput = z.infer<typeof signUpSchema>;
+export type SignInInput = z.infer<typeof signInSchema>;
 export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>;
 export type User = z.infer<typeof userSchema>;
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;

@@ -17,7 +17,7 @@ async function loginInNewContext(browser: Browser, role: Role) {
 
    const context = await browser.newContext();
    const page = await context.newPage();
-   await page.goto('/login');
+   await page.goto('/sign-in');
    await page.getByLabel('Email').fill(creds.email);
    await page.getByLabel('Password').fill(creds.password);
    await page.getByRole('button', { name: 'Sign in' }).click();
@@ -164,9 +164,9 @@ test.describe('Role requests', () => {
          await cleanupUser(admin.email);
       }
 
-      // Fresh login so a cached session can't hide the new role
+      // Fresh sign in so a cached session can't hide the new role
       await page.context().clearCookies();
-      await page.goto('/login');
+      await page.goto('/sign-in');
       await page.getByLabel('Email').fill(viewer.email);
       await page.getByLabel('Password').fill(viewer.password);
       await page.getByRole('button', { name: 'Sign in' }).click();

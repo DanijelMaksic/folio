@@ -4,14 +4,17 @@ import { isContributor } from '@shared';
 import { Navigate, useParams } from 'react-router-dom';
 
 function RevisionHistoryTab() {
-   const { id, pageNumber } = useParams<{ id: string; pageNumber: string }>();
+   const { id: documentId, pageNumber } = useParams<{
+      id: string;
+      pageNumber: string;
+   }>();
    const { data: session, isPending } = useSession();
    const user = session?.user;
 
    const canTranscribe = isContributor(user?.globalRole);
 
    const { data: page } = trpc.pages.getByPageNumber.useQuery({
-      documentId: id!,
+      documentId: documentId!,
       pageNumber: Number(pageNumber),
    });
 
@@ -29,7 +32,7 @@ function RevisionHistoryTab() {
 
    if (isPending) return null;
 
-   if (!session) return <Navigate to="/login" replace />;
+   if (!session) return <Navigate to="/sign-in" replace />;
 
    return (
       <div>

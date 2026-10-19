@@ -7,8 +7,8 @@ interface AuthFixture {
    username: string;
 }
 
-async function login(page: Page, email: string, password: string) {
-   await page.goto('/login');
+async function signIn(page: Page, email: string, password: string) {
+   await page.goto('/sign-in');
    await page.getByLabel('Email').fill(email);
    await page.getByLabel('Password').fill(password);
    await page.getByRole('button', { name: 'Sign in' }).click();
@@ -29,7 +29,7 @@ export const test = base.extend<{
          { email, password, username, name: `E2E User ${tag}` },
          'contributor',
       );
-      await login(page, email, password);
+      await signIn(page, email, password);
 
       await use({ email, password, username });
 
@@ -50,7 +50,7 @@ export const test = base.extend<{
          emails.push(creds.email);
 
          await seedUser({ ...creds, name: `E2E ${role} ${tag}` }, role);
-         await login(page, creds.email, creds.password);
+         await signIn(page, creds.email, creds.password);
          return creds;
       });
 

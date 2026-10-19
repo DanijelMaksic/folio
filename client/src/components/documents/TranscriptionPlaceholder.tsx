@@ -1,4 +1,3 @@
-import { useParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 
 function TranscriptionPlaceholder({ type }: { type: string }) {
@@ -10,9 +9,9 @@ function TranscriptionPlaceholder({ type }: { type: string }) {
          <div className="flex flex-col gap-3 justify-center items-center opacity-50">
             <h2 className="text-lg">No transcriptions yet...</h2>
 
-            {type === 'not-logged-in' && (
+            {type === 'not-signed-in' && (
                <Link
-                  to="/login"
+                  to="/sign-in"
                   className="border rounded-lg px-2 py-1 hover:bg-gray-100 border-gray-400 transition-all"
                >
                   Sign in to contribute
