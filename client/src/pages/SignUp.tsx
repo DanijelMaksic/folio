@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-export default function Register() {
+export default function SignUp() {
    const [error, setError] = useState<string | null>(null);
    const [success, setSuccess] = useState(false);
    const [isPending, setIsPending] = useState(false);
@@ -51,7 +51,7 @@ export default function Register() {
       <div className="min-h-screen flex items-center justify-center">
          <Card className="w-full max-w-sm shadow-2xl">
             <CardHeader>
-               <CardTitle className="text-2xl">Register</CardTitle>
+               <CardTitle className="text-2xl">Sign up</CardTitle>
             </CardHeader>
             <CardContent>
                <form onSubmit={handleSubmit} className="space-y-4">
@@ -99,7 +99,7 @@ export default function Register() {
                   </div>
                   {error && <p className="text-sm text-destructive">{error}</p>}
                   <Button type="submit" className="w-full" disabled={isPending}>
-                     {isPending ? 'Creating account...' : 'Register'}
+                     {isPending ? 'Creating account...' : 'Sign up'}
                   </Button>
                </form>
             </CardContent>

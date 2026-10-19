@@ -1,7 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { useSession } from './lib/auth-client';
-import Register from './pages/Register';
-import Login from './pages/Login';
+import SignUp from './pages/SignUp';
+import SignIn from './pages/SignIn';
 import VerifyOtp from '@/pages/VerifyOtp';
 import Documents from '@/pages/Documents';
 import DocumentPages from '@/pages/DocumentPages';
@@ -21,7 +21,7 @@ import Dashboard from '@/pages/Dashboard';
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
    const { data: session, isPending } = useSession();
    if (isPending) return <p>Loading...</p>;
-   if (!session) return <Navigate to="/login" replace />;
+   if (!session) return <Navigate to="/sign-in" replace />;
    return <>{children}</>;
 }
 
@@ -31,8 +31,8 @@ export default function App() {
          <Routes>
             <Route element={<Layout />}>
                <Route path="/" element={<Home />} />
-               <Route path="/register" element={<Register />} />
-               <Route path="/login" element={<Login />} />
+               <Route path="/sign-up" element={<SignUp />} />
+               <Route path="/sign-in" element={<SignIn />} />
                <Route path="/verify-otp" element={<VerifyOtp />} />
 
                <Route path="/documents" element={<Documents />} />

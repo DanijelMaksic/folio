@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-export default function Login() {
+export default function SignIn() {
    const [error, setError] = useState<string | null>(null);
    const [loading, setLoading] = useState(false);
    const navigate = useNavigate();
@@ -27,7 +27,7 @@ export default function Login() {
       setLoading(false);
 
       if (error) {
-         setError(error.message ?? 'Login failed');
+         setError(error.message ?? 'Sign in failed');
       } else if (data && !('twoFactorRedirect' in data)) {
          await refetch();
          navigate('/dashboard');
@@ -38,7 +38,7 @@ export default function Login() {
       <div className="min-h-screen flex items-center justify-center">
          <Card className="w-full max-w-sm shadow-2xl">
             <CardHeader>
-               <CardTitle className="text-2xl">Login</CardTitle>
+               <CardTitle className="text-2xl">Sign in</CardTitle>
             </CardHeader>
             <CardContent>
                <form onSubmit={handleSubmit} className="space-y-4">

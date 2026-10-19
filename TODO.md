@@ -20,9 +20,6 @@
 
 ## Things to refactor
 
-- Switch from doc to document (in routers escpecially)
-- Choose between SQL-like db.select() and ORM-like db.query()
 - Replace id (from URL params) with documentId
-- Change export default on all components to be under the component
 - Change Sign In and Sign up instead of Log in and Register
 - Account or profile?

@@ -32,12 +32,12 @@ function Nav() {
                <>
                   <NavigationMenuItem>
                      <NavigationMenuLink
-                        render={<Link to="/login">Log In</Link>}
+                        render={<Link to="/sign-in">Sign In</Link>}
                      />
                   </NavigationMenuItem>
                   <NavigationMenuItem>
                      <NavigationMenuLink
-                        render={<Link to="/register">Register</Link>}
+                        render={<Link to="/sign-up">Sign up</Link>}
                      />
                   </NavigationMenuItem>{' '}
                </>
