@@ -288,6 +288,18 @@ describe('transcriptions.submit', () => {
    it('submits a draft transcription', async () => {
       const submitted = { ...mockTranscription, status: 'submitted' };
 
+      mockUpdate.mockReturnValueOnce({
+         set: vi.fn(() => ({
+            where: vi.fn(() => ({
+               returning: vi.fn().mockResolvedValueOnce([submitted]),
+            })),
+         })),
+      });
+
+      mockInsert.mockReturnValueOnce({
+         values: vi.fn().mockResolvedValueOnce(undefined),
+      });
+
       mockSelect.mockReturnValueOnce({
          from: vi.fn(() => ({
             where: vi.fn(() => ({
@@ -307,6 +319,7 @@ describe('transcriptions.submit', () => {
       const caller = createAuthenticatedCaller(contributorUser);
       const result = await caller.transcriptions.submit({
          transcriptionId: 'transcription-1',
+         content: 'Updated content',
       });
 
       expect(result).toMatchObject({ status: 'submitted' });
@@ -327,7 +340,10 @@ describe('transcriptions.submit', () => {
 
       const caller = createAuthenticatedCaller(contributorUser);
       await expect(
-         caller.transcriptions.submit({ transcriptionId: 'transcription-1' }),
+         caller.transcriptions.submit({
+            transcriptionId: 'transcription-1',
+            content: 'Updated content',
+         }),
       ).rejects.toMatchObject({ code: 'FORBIDDEN' });
    });
 
@@ -346,7 +362,10 @@ describe('transcriptions.submit', () => {
 
       const caller = createAuthenticatedCaller(contributorUser);
       await expect(
-         caller.transcriptions.submit({ transcriptionId: 'transcription-1' }),
+         caller.transcriptions.submit({
+            transcriptionId: 'transcription-1',
+            content: 'Updated content',
+         }),
       ).rejects.toMatchObject({ code: 'FORBIDDEN' });
    });
 
@@ -365,7 +384,10 @@ describe('transcriptions.submit', () => {
 
       const caller = createAuthenticatedCaller(contributorUser);
       await expect(
-         caller.transcriptions.submit({ transcriptionId: 'transcription-1' }),
+         caller.transcriptions.submit({
+            transcriptionId: 'transcription-1',
+            content: '',
+         }),
       ).rejects.toMatchObject({ code: 'BAD_REQUEST' });
    });
 
@@ -380,14 +402,20 @@ describe('transcriptions.submit', () => {
 
       const caller = createAuthenticatedCaller(contributorUser);
       await expect(
-         caller.transcriptions.submit({ transcriptionId: 'nonexistent' }),
+         caller.transcriptions.submit({
+            transcriptionId: 'nonexistent',
+            content: 'x',
+         }),
       ).rejects.toMatchObject({ code: 'NOT_FOUND' });
    });
 
    it('throws UNAUTHORIZED if not signed in', async () => {
       const caller = createUnauthenticatedCaller();
       await expect(
-         caller.transcriptions.submit({ transcriptionId: 'transcription-1' }),
+         caller.transcriptions.submit({
+            transcriptionId: 'transcription-1',
+            content: 'x',
+         }),
       ).rejects.toMatchObject({ code: 'UNAUTHORIZED' });
    });
 });

@@ -131,8 +131,6 @@ export const transcriptionsRouter = router({
             });
          }
 
-         console.log(content);
-
          if (!existing.content.trim()) {
             throw new TRPCError({
                code: 'BAD_REQUEST',
