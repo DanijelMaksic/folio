@@ -16,6 +16,7 @@ export default defineConfig({
             ? 'npm run dev:ci'
             : 'npm run dev --workspace=server',
          url: 'http://localhost:3000/api/health',
+         env: { E2E_TESTING: 'true' },
          reuseExistingServer: true,
          timeout: 120_000,
       },
@@ -24,6 +25,7 @@ export default defineConfig({
             ? 'npm run preview'
             : 'npm run dev --workspace=client',
          url: 'http://localhost:5173',
+         env: { E2E_TESTING: 'true' },
          reuseExistingServer: true,
          timeout: 120_000,
       },

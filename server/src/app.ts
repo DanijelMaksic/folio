@@ -26,6 +26,8 @@ const trpcLimiter = rateLimit({
    limit: 120,
    standardHeaders: 'draft-7',
    legacyHeaders: false,
+   skip: () => process.env.E2E_TESTING === 'true',
+   message: { error: 'Too many requests. Please try again later.' },
 });
 
 // Enable CORS
