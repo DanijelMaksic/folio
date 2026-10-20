@@ -9,7 +9,4 @@
 
 ## Things to fix
 
-- Slow initial data load on prod
-- After a day, cloudinary images and missing
-
 ## Things to refactor

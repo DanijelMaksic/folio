@@ -24,6 +24,16 @@ export const transcriptionRevisionSchema = z.object({
    savedAt: z.string(),
 });
 
+export const transcriptionContentSchema = z.object({
+   transcriptionId: z.string(),
+   content: z.string(),
+});
+
+export const submittedByPageSchema = z.object({
+   pageId: z.string(),
+   userId: z.string(),
+});
+
 export const approveSchema = z.object({
    transcriptionId: z.string(),
 });
@@ -52,6 +62,10 @@ export const queueResponseSchema = z.array(queueItemSchema);
 
 export type Transcription = z.infer<typeof transcriptionSchema>;
 export type SubmittedTranscription = Transcription & { user: User | null };
+export type SubmitTranscriptionInput = z.infer<
+   typeof transcriptionContentSchema
+>;
+export type SubmittedByPageSchema = z.infer<typeof submittedByPageSchema>;
 export type UpdateTranscriptionInput = z.infer<
    typeof updateTranscriptionSchema
 >;

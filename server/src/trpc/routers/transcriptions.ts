@@ -10,6 +10,8 @@ import {
    isContributor,
    isEditor,
    rejectSchema,
+   submittedByPageSchema,
+   transcriptionContentSchema,
 } from '@folio/shared';
 import { TRPCError } from '@trpc/server';
 import { and, desc, eq } from 'drizzle-orm';
@@ -74,7 +76,7 @@ export const transcriptionsRouter = router({
 
    // Saves new content to a transcription and snapshots a revision
    update: protectedProcedure
-      .input(z.object({ transcriptionId: z.string(), content: z.string() }))
+      .input(transcriptionContentSchema)
       .mutation(async ({ ctx, input }) => {
          // A user cannot edit another user's transcription
          const [existing] = await db
@@ -111,7 +113,7 @@ export const transcriptionsRouter = router({
 
    // Marks a transcription as submitted
    submit: protectedProcedure
-      .input(z.object({ transcriptionId: z.string(), content: z.string() }))
+      .input(transcriptionContentSchema)
       .mutation(async ({ ctx, input }) => {
          const [existing] = await db
             .select()
@@ -317,7 +319,7 @@ export const transcriptionsRouter = router({
 
    // Returns submitted transcription for a page (editor view)
    getSubmittedByPageAndUser: protectedProcedure
-      .input(z.object({ pageId: z.string(), userId: z.string() }))
+      .input(submittedByPageSchema)
       .query(async ({ ctx, input }) => {
          if (!isEditor(ctx.user.globalRole)) {
             throw new TRPCError({

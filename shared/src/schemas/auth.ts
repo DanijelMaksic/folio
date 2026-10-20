@@ -184,6 +184,11 @@ export const adminRoleRequestSchema = roleRequestSchema.extend({
    currentRole: z.enum(GLOBAL_ROLES),
 });
 
+export const userRoleSchema = z.object({
+   userId: z.string(),
+   role: z.enum(GLOBAL_ROLES),
+});
+
 export const reviewRoleRequestSchema = z.object({
    id: z.string(),
    reason: z.string().trim().max(500).optional(),
@@ -193,8 +198,9 @@ export type SignUpInput = z.infer<typeof signUpSchema>;
 export type SignInInput = z.infer<typeof signInSchema>;
 export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>;
 export type User = z.infer<typeof userSchema>;
+export type UserRoleInput = z.infer<typeof userRoleSchema>;
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
 export type ContributionStats = z.infer<typeof contributionStatsSchema>;
 export type RoleRequest = z.infer<typeof roleRequestSchema>;
-export type AdminRoleRequest = z.infer<typeof adminRoleRequestSchema>;
+export type AdminRoleRequestOutput = z.infer<typeof adminRoleRequestSchema>;

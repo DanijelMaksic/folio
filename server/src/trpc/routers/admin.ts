@@ -7,6 +7,7 @@ import {
    GLOBAL_ROLES,
    isEditor,
    reviewRoleRequestSchema,
+   userRoleSchema,
 } from '@folio/shared';
 import { db } from '@/db/index.js';
 import {
@@ -19,7 +20,7 @@ import { syncTwoFactorRow } from '@/lib/two-factor.js';
 
 export const adminRouter = router({
    setUserRole: adminProcedure
-      .input(z.object({ userId: z.string(), role: z.enum(GLOBAL_ROLES) }))
+      .input(userRoleSchema)
       .mutation(async ({ ctx, input }) => {
          // Optional guard: stops an admin demoting themselves (and the last admin vanishing)
          if (input.userId === ctx.user.id) {
