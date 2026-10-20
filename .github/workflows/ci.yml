@@ -125,11 +125,11 @@ jobs:
            run: npm run test:e2e
            env:
               DATABASE_URL: postgresql://postgres:postgres@localhost:5432/folio_test
-              BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET_TEST }}
+              BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
               BETTER_AUTH_URL: http://localhost:3000
               CLIENT_URL: http://localhost:5173
               CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME_TEST }}
-              CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+              CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY_TEST }}
               CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET_TEST }}
               VITE_API_URL: http://localhost:3000
               VITE_CLIENT_URL: http://localhost:5173
