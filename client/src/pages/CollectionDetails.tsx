@@ -10,6 +10,7 @@ import SearchBar from '@/components/shared/SearchBar';
 import DeleteModal from '@/components/shared/DeleteModal';
 import EditModal from '@/components/shared/EditModal';
 import ActionsMenu from '@/components/shared/ActionsMenu';
+import { Link } from 'react-router-dom';
 
 function CollectionDetails() {
    const [editError, setEditError] = useState('');
@@ -128,7 +129,20 @@ function CollectionDetails() {
 
          {!displayedDocuments?.length ? (
             <p className="text-muted-foreground">
-               {isSearchActive ? 'No documents found.' : 'No documents yet.'}
+               {isSearchActive ? (
+                  'No documents found.'
+               ) : (
+                  <>
+                     Your collection is empty.{' '}
+                     <Link
+                        to="/documents"
+                        className="text-primary underline underline-offset-4 hover:opacity-80 transition-opacity"
+                     >
+                        Go to documents
+                     </Link>{' '}
+                     to add some.
+                  </>
+               )}
             </p>
          ) : (
             <div className="grid grid-cols-3 gap-4 transition-opacity duration-150">

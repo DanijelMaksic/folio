@@ -115,10 +115,10 @@ test.describe('Role requests', () => {
       );
    });
 
-   test('contributor sees "Become a editor"', async ({ page, auth }) => {
+   test('contributor sees "Become an editor"', async ({ page, auth }) => {
       await page.goto('/profile');
       await expect(
-         page.getByRole('button', { name: /Become a editor/ }),
+         page.getByRole('button', { name: /Become an editor/ }),
       ).toBeVisible();
    });
 
