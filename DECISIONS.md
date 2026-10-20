@@ -611,4 +611,6 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Fixed a bug where if user hits submit before save when transcribing, revisions tab shows nothing and transcription is not submitted
 
+- After doing local E2E testing, Cloudinary images were wiped on prod. Fixed by updating GitHub Actions Cloudinary env variables with local dev variables and by adding `_TEST` to Cloudinary variables in `CI.yml`
+
 ## Sprint 10 — Visual Design Revamp
