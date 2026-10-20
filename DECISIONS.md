@@ -603,6 +603,10 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 ## Sprint 9 — Bug Fixes and General Improvements
 
+**Decisions:**
+
+- User with viewer role is redirected to `/documents` on sign in, while other roles are redirected to `/dashboard`
+
 **Issues resolved:**
 
 - Fixed a bug where if user hits submit before save when transcribing, revisions tab shows nothing and transcription is not submitted

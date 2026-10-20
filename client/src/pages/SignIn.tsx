@@ -30,7 +30,10 @@ export default function SignIn() {
          setError(error.message ?? 'Sign in failed');
       } else if (data && !('twoFactorRedirect' in data)) {
          await refetch();
-         navigate('/dashboard');
+
+         data?.user.globalRole === 'viewer'
+            ? navigate('/documents')
+            : navigate('/dashboard');
       }
    };
 
