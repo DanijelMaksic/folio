@@ -15,6 +15,7 @@ import {
 } from '@/lib/email.js';
 import { session as sessionTable, user } from '@/db/schema/auth.js';
 import { roleRequests } from '@/db/schema/roleRequests.js';
+import { syncTwoFactorRow } from '@/lib/two-factor.js';
 
 export const adminRouter = router({
    setUserRole: adminProcedure
@@ -38,6 +39,8 @@ export const adminRouter = router({
                .returning({ id: user.id });
 
             if (!row) return false;
+
+            await syncTwoFactorRow(tx, input.userId, twoFactorEnabled);
 
             // Force a fresh sign in: the user passes email OTP if now editor+,
             // and no session keeps a stale role
@@ -105,6 +108,7 @@ export const adminRouter = router({
                message: 'Request not found',
             });
          }
+
          if (request.status !== 'pending') {
             throw new TRPCError({
                code: 'CONFLICT',
@@ -113,16 +117,17 @@ export const adminRouter = router({
          }
 
          await db.transaction(async (tx) => {
+            const twoFactorEnabled = isEditor(request.requestedRole);
+
             await tx
                .update(user)
                .set({
                   globalRole: request.requestedRole,
-                  // Editors must use email OTP on every sign in
-                  ...(request.requestedRole === 'editor'
-                     ? { twoFactorEnabled: true }
-                     : {}),
+                  twoFactorEnabled,
                })
                .where(eq(user.id, request.userId));
+
+            await syncTwoFactorRow(tx, request.userId, twoFactorEnabled);
 
             await tx
                .update(roleRequests)

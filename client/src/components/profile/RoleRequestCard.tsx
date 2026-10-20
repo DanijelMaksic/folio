@@ -75,7 +75,11 @@ function RoleRequestCard({ globalRole }: RoleRequestCardProps) {
                   )}
                </div>
                <Button size="sm" onClick={() => setOpen(true)}>
-                  {wasRejected ? 'Request again' : `Become a ${targetRole}`}
+                  {wasRejected
+                     ? 'Request again'
+                     : targetRole === 'contributor'
+                       ? 'Become a contributor'
+                       : ' Become an editor'}
                </Button>
             </div>
          </div>

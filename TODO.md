@@ -10,9 +10,9 @@
 
 ## Things to fix
 
-- On sign in, navigate users with viewer role to /documents instead of /dashboard
 - Change "Become a ${role}" to be more adaptive (to include "an")
 - Clean up the dashboard’s redundant canContribute code. `dashboard.getOverview` runs everything in one Promise.all and returns nulls or empty lists for viewers rather than FORBIDDEN. The client gates on isContributor, and there’s leftover redundancy (canContribute && wrappers and the canContribute prop on RecentDocuments) that can be cleaned up.
 - Slow initial data load on prod
+- After a day, cloudinary images and missing
 
 ## Things to refactor

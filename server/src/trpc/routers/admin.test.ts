@@ -11,12 +11,14 @@ const {
    mockTransaction,
    mockApprovedEmail,
    mockRejectedEmail,
+   mockSyncTwoFactorRow,
 } = vi.hoisted(() => ({
    mockSelect: vi.fn(),
    mockUpdate: vi.fn(),
    mockTransaction: vi.fn(),
    mockApprovedEmail: vi.fn(),
    mockRejectedEmail: vi.fn(),
+   mockSyncTwoFactorRow: vi.fn(),
 }));
 
 vi.mock('@/db/index.js', () => ({
@@ -25,6 +27,10 @@ vi.mock('@/db/index.js', () => ({
       update: mockUpdate,
       transaction: mockTransaction,
    },
+}));
+
+vi.mock('@/lib/two-factor.js', () => ({
+   syncTwoFactorRow: mockSyncTwoFactorRow,
 }));
 
 vi.mock('@/lib/email.js', () => ({
@@ -123,6 +129,12 @@ describe('admin.setUserRole', () => {
                twoFactorEnabled: expected,
             }),
          );
+
+         expect(mockSyncTwoFactorRow).toHaveBeenCalledWith(
+            expect.anything(),
+            'target-user-id',
+            expected,
+         );
       },
    );
 
@@ -147,6 +159,8 @@ describe('admin.setUserRole', () => {
       ).rejects.toMatchObject({ code: 'NOT_FOUND' });
 
       expect(txDelete).not.toHaveBeenCalled();
+
+      expect(mockSyncTwoFactorRow).not.toHaveBeenCalled();
    });
 
    it('throws BAD_REQUEST when an admin changes their own role', async () => {
@@ -240,16 +254,30 @@ describe('admin.approveRoleRequest', () => {
          'target@example.com',
          'editor',
       );
+
+      expect(mockSyncTwoFactorRow).toHaveBeenCalledWith(
+         expect.anything(),
+         'target-user-id',
+         true,
+      );
    });
 
-   it('does not touch twoFactorEnabled for a contributor request', async () => {
+   it('disables twoFactorEnabled for a contributor request', async () => {
       mockRequestLookup([pendingRequest('contributor')]);
       const { set } = mockApproveTx();
 
       const caller = createAuthenticatedCaller(adminUser);
       await caller.admin.approveRoleRequest({ id: 'req-1' });
 
-      expect(set).toHaveBeenCalledWith({ globalRole: 'contributor' });
+      expect(set).toHaveBeenCalledWith({
+         globalRole: 'contributor',
+         twoFactorEnabled: false,
+      });
+      expect(mockSyncTwoFactorRow).toHaveBeenCalledWith(
+         expect.anything(),
+         'target-user-id',
+         false,
+      );
    });
 
    it('still succeeds when the approval email fails', async () => {
