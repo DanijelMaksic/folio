@@ -27,11 +27,15 @@ export interface UserPayload {
 }
 
 export async function seedUser(payload: UserPayload, role: Role) {
-   await fetch(`${API}/api/auth/sign-up/email`, {
+   const res = await fetch(`${API}/api/auth/sign-up/email`, {
       method: 'POST',
       headers,
       body: JSON.stringify(payload),
    });
+
+   if (!res.ok) {
+      throw new Error(`Sign-up failed: ${res.status} ${await res.text()}`);
+   }
 
    await db
       .update(user)

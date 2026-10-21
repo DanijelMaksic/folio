@@ -1,7 +1,7 @@
 ## Things to add
 
 - Add searching by description, not just title
-- Status: indexed fromThePage
+- Status: indexed, needs review, not started from fromThePage
 - Add number of pages on document card
 - Show avatar/name across the app
 

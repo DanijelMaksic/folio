@@ -2,7 +2,7 @@ import { Document } from '@shared';
 import { Link } from 'react-router-dom';
 
 export function DocumentCard({ document }: { document: Document }) {
-   const { id, title, uploaderName, coverImageUrl } = document;
+   const { id, title, uploaderName, coverImageUrl, pageCount } = document;
 
    return (
       <Link
@@ -22,12 +22,21 @@ export function DocumentCard({ document }: { document: Document }) {
 
          <div className="z-20 space-y-0.5">
             {!uploaderName ? (
-               <span className="space-x-2 text-sm text-gray-300/70">
-                  {/* {hasApprovedTranscription ? 'Transcribed' : 'Not transcribed'} */}
-               </span>
+               <>
+                  <span>Deleted user</span>
+                  <span>•</span>
+                  <span className="space-x-2 text-sm text-gray-300/70">
+                     {' '}
+                     {pageCount} Pages
+                  </span>
+               </>
             ) : (
                <div className="space-x-2 text-sm text-gray-300/70">
                   <span>{uploaderName}</span>
+                  <span>•</span>
+                  <span className="space-x-2 text-sm text-gray-300/70">
+                     {pageCount} {Number(pageCount) === 1 ? 'Page' : 'Pages'}
+                  </span>
                </div>
             )}
 

@@ -21,9 +21,7 @@ export default defineConfig({
          timeout: 120_000,
       },
       {
-         command: process.env.CI
-            ? 'npm run preview'
-            : 'npm run dev --workspace=client',
+         command: process.env.CI ? 'npm run preview' : 'npm run dev',
          url: 'http://localhost:5173',
          env: { E2E_TESTING: 'true' },
          reuseExistingServer: true,
