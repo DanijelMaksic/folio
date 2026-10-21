@@ -21,32 +21,13 @@ export function DocumentCard({ document }: { document: Document }) {
          <span />
 
          <div className="z-20 space-y-0.5">
-            {/* <div className="space-x-2 text-sm text-gray-300/70">
-               <span>{uploaderName ?? "Deleted user"}</span>
+            <div className="space-x-2 text-sm text-gray-300/70">
+               <span>{uploaderName ?? 'Deleted user'}</span>
                <span>•</span>
                <span className="space-x-2 text-sm text-gray-300/70">
                   {pageCount} {Number(pageCount) === 1 ? 'Page' : 'Pages'}
                </span>
-            </div> */}
-
-            {!uploaderName ? (
-               <>
-                  <span>Deleted user</span>
-                  <span>•</span>
-                  <span className="space-x-2 text-sm text-gray-300/70">
-                     {' '}
-                     {pageCount} Pages
-                  </span>
-               </>
-            ) : (
-               <div className="space-x-2 text-sm text-gray-300/70">
-                  <span>{uploaderName}</span>
-                  <span>•</span>
-                  <span className="space-x-2 text-sm text-gray-300/70">
-                     {pageCount} {Number(pageCount) === 1 ? 'Page' : 'Pages'}
-                  </span>
-               </div>
-            )}
+            </div>
 
             <h2
                className="text-gray-50 text-xl font-medium font-title leading-9.5 2xl:leading-9 lg:leading-8 md:leading-10"
