@@ -3,6 +3,7 @@ import { documents } from '@/db/schema/documents.js';
 import { pages } from '@/db/schema/pages.js';
 import { transcriptions } from '@/db/schema/transcriptions.js';
 import cloudinary from '@/lib/cloudinary.js';
+import { escapeLike } from '@/lib/search.js';
 import { protectedProcedure, publicProcedure, router } from '@/trpc/trpc.js';
 import {
    addPagesSchema,
@@ -14,7 +15,7 @@ import {
    updatePageSchema,
 } from '@folio/shared';
 import { TRPCError } from '@trpc/server';
-import { and, asc, count, eq, gt, ilike, sql } from 'drizzle-orm';
+import { and, asc, count, eq, gt, ilike, or, sql } from 'drizzle-orm';
 import z from 'zod';
 
 export const pagesRouter = router({
@@ -30,9 +31,16 @@ export const pagesRouter = router({
              AND ${transcriptions.status} = 'approved'
              )`;
 
+         const term = input.search?.trim();
+         const pattern = term ? `%${escapeLike(term)}%` : undefined;
+
+         const searchFilter = pattern
+            ? or(ilike(pages.title, pattern), ilike(pages.description, pattern))
+            : undefined;
+
          const where = and(
             eq(pages.documentId, input.documentId),
-            input.search ? ilike(pages.title, `%${input.search}%`) : undefined,
+            searchFilter,
             input.status === 'transcribed' ? approvedExists : undefined,
             input.status === 'not-transcribed'
                ? sql`NOT ${approvedExists}`
