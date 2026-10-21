@@ -114,12 +114,6 @@ function DocumentPages() {
    const pages = pagesData?.pages ?? [];
    const totalPages = pagesData?.totalPages ?? 1;
 
-   const { data: collections, isLoading: isLoadingCollections } =
-      trpc.collections.getCurrentUserCollections.useQuery(
-         { page: 1, limit: 9 },
-         { enabled: !!user?.id },
-      );
-
    const canTranscribe = isContributor(user?.globalRole);
    const editor = isEditor(user?.globalRole);
    const isMyDocument = document?.uploadedBy === user?.id;
@@ -148,6 +142,9 @@ function DocumentPages() {
    const addToCollection = trpc.documents.update.useMutation({
       onSuccess: () => {
          utils.documents.getById.invalidate({ id: documentId! });
+         utils.documents.list.invalidate({
+            collectionId: document?.collectionId!,
+         });
          setIsCollectionOpen(false);
       },
       onError: (err: TRPCClientErrorLike<AppRouter>) => {
@@ -341,11 +338,9 @@ function DocumentPages() {
 
          {isCollectionOpen && (
             <CollectionPickerModal
-               collections={collections}
                selectedId={selectedCollectionId}
                error={collectionError}
                addToColPending={addToCollection.isPending}
-               isLoadingCollections={isLoadingCollections}
                onSelect={setSelectedCollectionId}
                onSave={handleAddToCollection}
                onClose={() => {

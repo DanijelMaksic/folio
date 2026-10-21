@@ -5,12 +5,14 @@ import { protectedProcedure, publicProcedure, router } from '@/trpc/trpc.js';
 import {
    createCollectionSchema,
    isContributor,
+   isEditor,
    listCollectionsSchema,
    updateCollectionSchema,
 } from '@folio/shared';
 import { TRPCError } from '@trpc/server';
-import { count, desc, eq, ilike, sql } from 'drizzle-orm';
+import { and, count, desc, eq, ilike, or, sql } from 'drizzle-orm';
 import z from 'zod';
+import { escapeLike } from '@/lib/search.js';
 
 export const collectionsRouter = router({
    create: protectedProcedure
@@ -39,8 +41,17 @@ export const collectionsRouter = router({
       .input(listCollectionsSchema)
       .query(async ({ ctx, input }) => {
          const offset = (input.page - 1) * input.limit;
-         const where = input.search
-            ? ilike(collections.title, `%${input.search}%`)
+
+         const term = input.search?.trim();
+         const pattern = term ? `%${escapeLike(term)}%` : undefined;
+
+         const where = pattern
+            ? or(
+                 ilike(collections.title, pattern),
+                 ilike(collections.description, pattern),
+                 ilike(user.username, pattern),
+                 ilike(user.name, pattern),
+              )
             : undefined;
 
          const [results, [{ total }]] = await Promise.all([
@@ -55,19 +66,24 @@ export const collectionsRouter = router({
                      SELECT dp.image_url FROM document_pages dp
                      INNER JOIN documents d ON d.id = dp.document_id
                      WHERE d.collection_id = ${collections.id}
+                     AND d.status = 'ready'
                      AND dp.page_number = 1
                      ORDER BY d.created_at ASC
                      LIMIT 1
                   )`,
                })
                .from(collections)
-               .innerJoin(user, eq(user.id, collections.createdBy))
+               .leftJoin(user, eq(user.id, collections.createdBy))
                .where(where)
                .limit(input.limit)
                .offset(offset)
                .orderBy(desc(collections.createdAt)),
 
-            db.select({ total: count() }).from(collections).where(where),
+            db
+               .select({ total: count() })
+               .from(collections)
+               .leftJoin(user, eq(user.id, collections.createdBy))
+               .where(where),
          ]);
 
          return {
@@ -100,15 +116,38 @@ export const collectionsRouter = router({
       .query(async ({ ctx, input }) => {
          const offset = (input.page - 1) * input.limit;
 
-         const result = await db
-            .select()
-            .from(collections)
-            .where(eq(collections.createdBy, ctx.user.id))
-            .limit(input.limit)
-            .offset(offset)
-            .orderBy(desc(collections.createdAt));
+         const term = input.search?.trim();
+         const pattern = term ? `%${escapeLike(term)}%` : undefined;
 
-         return result ?? null;
+         const searchFilter = pattern
+            ? or(
+                 ilike(collections.title, pattern),
+                 ilike(collections.description, pattern),
+              )
+            : undefined;
+
+         const where = and(
+            eq(collections.createdBy, ctx.user.id),
+            searchFilter,
+         );
+
+         const [results, [{ total }]] = await Promise.all([
+            db
+               .select()
+               .from(collections)
+               .where(where)
+               .limit(input.limit)
+               .offset(offset)
+               .orderBy(desc(collections.createdAt)),
+
+            db.select({ total: count() }).from(collections).where(where),
+         ]);
+
+         return {
+            collections: results,
+            totalCount: Number(total),
+            totalPages: Math.ceil(Number(total) / input.limit),
+         };
       }),
 
    update: protectedProcedure
@@ -120,8 +159,22 @@ export const collectionsRouter = router({
                message: 'Only contributors and above can edit collections',
             });
          }
-
          const { id, ...fields } = input;
+
+         const [existing] = await db
+            .select({ createdBy: collections.createdBy })
+            .from(collections)
+            .where(eq(collections.id, id))
+            .limit(1);
+
+         if (!existing) throw new TRPCError({ code: 'NOT_FOUND' });
+
+         if (
+            existing.createdBy !== ctx.user.id &&
+            !isEditor(ctx.user.globalRole)
+         ) {
+            throw new TRPCError({ code: 'FORBIDDEN' });
+         }
 
          const [updated] = await db
             .update(collections)
@@ -144,6 +197,23 @@ export const collectionsRouter = router({
                code: 'FORBIDDEN',
                message: 'Only contributors and above can delete collections',
             });
+         }
+
+         const { id } = input;
+
+         const [existing] = await db
+            .select({ createdBy: collections.createdBy })
+            .from(collections)
+            .where(eq(collections.id, id))
+            .limit(1);
+
+         if (!existing) throw new TRPCError({ code: 'NOT_FOUND' });
+
+         if (
+            existing.createdBy !== ctx.user.id &&
+            !isEditor(ctx.user.globalRole)
+         ) {
+            throw new TRPCError({ code: 'FORBIDDEN' });
          }
 
          const [deleted] = await db

@@ -41,21 +41,19 @@ function CollectionDetails() {
          id: collectionId!,
       });
 
-   const { data: savedDocuments } = trpc.documents.getByCollection.useQuery({
-      collectionId: collectionId!,
-   });
-
-   const { data: searchResults } = trpc.documents.search.useQuery(
+   const { data, isLoading: isLoadingDocs } = trpc.documents.list.useQuery(
       {
-         query: debouncedSearch,
          collectionId: collectionId!,
+         search: debouncedSearch || undefined,
+         page: 1,
+         limit: 100,
       },
       {
-         enabled: debouncedSearch.length > 0,
          placeholderData: (prev) => prev,
-         staleTime: 1000,
       },
    );
+
+   const displayedDocuments = data?.documents;
 
    const isMyCollection = collection?.createdBy === user?.id;
 
@@ -97,7 +95,7 @@ function CollectionDetails() {
    };
 
    const isSearchActive = debouncedSearch.length > 0;
-   const displayedDocuments = isSearchActive ? searchResults : savedDocuments;
+   const showSearchBar = search.length > 0 || !!displayedDocuments?.length;
 
    if (isLoadingCollection) return <p>Loading...</p>;
 
@@ -109,7 +107,7 @@ function CollectionDetails() {
             <h1 className="text-2xl font-semibold">{collection.title}</h1>
 
             <div className="flex items-center justify-end gap-3">
-               {savedDocuments?.length ? (
+               {showSearchBar ? (
                   <SearchBar
                      placeholder="Search documents..."
                      value={search}
@@ -127,7 +125,9 @@ function CollectionDetails() {
 
          <p className="text-gray-500 mb-8">{collection.description}</p>
 
-         {!displayedDocuments?.length ? (
+         {isLoadingDocs ? (
+            <p className="text-muted-foreground">Loading documents...</p>
+         ) : !displayedDocuments?.length ? (
             <p className="text-muted-foreground">
                {isSearchActive ? (
                   'No documents found.'

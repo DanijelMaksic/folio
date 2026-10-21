@@ -16,6 +16,7 @@ import { isContributor } from '@folio/shared';
 import { db } from '@/db/index.js';
 import { pdfQueue } from '@/lib/queue.js';
 import { escapeLike } from '@/lib/search.js';
+import { documentVisibility } from '@/lib/document-visibility.js';
 
 export const documentsRouter = router({
    upload: protectedProcedure
@@ -168,7 +169,13 @@ export const documentsRouter = router({
                    eq(documents.uploadedBy, currentUser.id),
                 );
 
-         const where = and(visibility, searchFilter); // and() skips undefined
+         const where = and(
+            documentVisibility(ctx.user),
+            searchFilter,
+            input.collectionId
+               ? eq(documents.collectionId, input.collectionId)
+               : undefined,
+         );
 
          const [results, [{ total }]] = await Promise.all([
             db
