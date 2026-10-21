@@ -255,36 +255,6 @@ export const documentsRouter = router({
          return document;
       }),
 
-   getByCollection: publicProcedure
-      .input(z.object({ collectionId: z.string() }))
-      .query(async ({ ctx, input }) => {
-         const results = await db
-            .select({
-               id: documents.id,
-               title: documents.title,
-               description: documents.description,
-               uploadedBy: documents.uploadedBy,
-               collectionId: documents.collectionId,
-               status: documents.status,
-               createdAt: documents.createdAt,
-               updatedAt: documents.updatedAt,
-               coverImageUrl: sql<string | null>`(
-                 SELECT image_url FROM document_pages
-                 WHERE document_id = "documents"."id"
-                 AND page_number = 1
-                 LIMIT 1
-               )`,
-               pageCount: sql<number>`(
-                 SELECT COUNT(*) FROM document_pages
-                 WHERE document_id = ${documents.id}
-               )`,
-            })
-            .from(documents)
-            .where(eq(documents.collectionId, input.collectionId));
-
-         return results;
-      }),
-
    update: protectedProcedure
       .input(updateDocumentSchema)
       .mutation(async ({ ctx, input }) => {
@@ -374,45 +344,5 @@ export const documentsRouter = router({
          }
 
          return deleted;
-      }),
-
-   search: publicProcedure
-      .input(searchDocumentsSchema)
-      .query(async ({ ctx, input }) => {
-         const results = await db
-            .select({
-               id: documents.id,
-               title: documents.title,
-               description: documents.description,
-               uploadedBy: documents.uploadedBy,
-               uploaderName: user.name,
-               collectionId: documents.collectionId,
-               status: documents.status,
-               createdAt: documents.createdAt,
-               updatedAt: documents.updatedAt,
-               coverImageUrl: sql<string | null>`(
-            SELECT image_url FROM document_pages
-            WHERE document_id = ${documents.id}
-            AND page_number = 1
-            LIMIT 1
-          )`,
-               pageCount: sql<number>`(
-            SELECT COUNT(*) FROM document_pages
-            WHERE document_id = ${documents.id}
-          )`,
-            })
-            .from(documents)
-            .leftJoin(user, eq(documents.uploadedBy, user.id))
-            .where(
-               and(
-                  ilike(documents.title, `%${input.query}%`),
-                  input.collectionId
-                     ? eq(documents.collectionId, input.collectionId)
-                     : undefined,
-               ),
-            )
-            .limit(20);
-
-         return results;
       }),
 });
