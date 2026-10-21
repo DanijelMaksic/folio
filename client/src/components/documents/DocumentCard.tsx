@@ -21,6 +21,14 @@ export function DocumentCard({ document }: { document: Document }) {
          <span />
 
          <div className="z-20 space-y-0.5">
+            {/* <div className="space-x-2 text-sm text-gray-300/70">
+               <span>{uploaderName ?? "Deleted user"}</span>
+               <span>•</span>
+               <span className="space-x-2 text-sm text-gray-300/70">
+                  {pageCount} {Number(pageCount) === 1 ? 'Page' : 'Pages'}
+               </span>
+            </div> */}
+
             {!uploaderName ? (
                <>
                   <span>Deleted user</span>

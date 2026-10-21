@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { protectedProcedure, publicProcedure, router } from '@/trpc/trpc.js';
 import { documents, pages } from '@/db/schema/index.js';
 import { user } from '@/db/schema/index.js';
-import { and, desc, eq, ilike, sql } from 'drizzle-orm';
+import { and, count, desc, eq, ilike, or, sql } from 'drizzle-orm';
 import cloudinary from '@/lib/cloudinary.js';
 import { TRPCError } from '@trpc/server';
 import {
@@ -14,8 +14,8 @@ import {
 } from '@folio/shared';
 import { isContributor } from '@folio/shared';
 import { db } from '@/db/index.js';
-import { count } from 'drizzle-orm';
 import { pdfQueue } from '@/lib/queue.js';
+import { escapeLike } from '@/lib/search.js';
 
 export const documentsRouter = router({
    upload: protectedProcedure
@@ -144,9 +144,31 @@ export const documentsRouter = router({
       .query(async ({ ctx, input }) => {
          const offset = (input.page - 1) * input.limit;
 
-         const where = input.search
-            ? ilike(documents.title, `%${input.search}%`)
+         const term = input.search?.trim();
+         const pattern = term ? `%${escapeLike(term)}%` : undefined;
+
+         const searchFilter = pattern
+            ? or(
+                 ilike(documents.title, pattern),
+                 ilike(documents.description, pattern),
+                 ilike(user.username, pattern),
+                 ilike(user.name, pattern),
+              )
             : undefined;
+
+         // processing/failed ones (so they can follow progress or delete)
+         const currentUser = ctx.user;
+
+         const visibility = !currentUser
+            ? eq(documents.status, 'ready')
+            : isEditor(currentUser.globalRole)
+              ? undefined // no restriction
+              : or(
+                   eq(documents.status, 'ready'),
+                   eq(documents.uploadedBy, currentUser.id),
+                );
+
+         const where = and(visibility, searchFilter); // and() skips undefined
 
          const [results, [{ total }]] = await Promise.all([
             db
@@ -172,13 +194,17 @@ export const documentsRouter = router({
             )`,
                })
                .from(documents)
-               .innerJoin(user, eq(user.id, documents.uploadedBy))
+               .leftJoin(user, eq(user.id, documents.uploadedBy))
                .where(where)
                .limit(input.limit)
                .offset(offset)
                .orderBy(desc(documents.createdAt)),
 
-            db.select({ total: count() }).from(documents).where(where),
+            db
+               .select({ total: count() })
+               .from(documents)
+               .leftJoin(user, eq(user.id, documents.uploadedBy))
+               .where(where),
          ]);
 
          return {

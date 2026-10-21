@@ -2,9 +2,11 @@
 
 - Add searching by description, not just title
 - Status: indexed, needs review, not started from fromThePage
-- Add number of pages on document card
 - Show avatar/name across the app
+- Add fuzzy search
 
 ## Things to fix
+
+- Add "Deleted user" label
 
 ## Things to refactor
