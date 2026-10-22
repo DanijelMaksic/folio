@@ -259,7 +259,7 @@ export const documentsRouter = router({
                )`,
             })
             .from(documents)
-            .innerJoin(user, eq(user.id, documents.uploadedBy))
+            .leftJoin(user, eq(user.id, documents.uploadedBy))
             .where(eq(documents.id, input.id));
 
          if (!document) throw new TRPCError({ code: 'NOT_FOUND' });

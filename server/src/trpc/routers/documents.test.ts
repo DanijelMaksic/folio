@@ -33,10 +33,6 @@ vi.mock('@/db/index.js', () => ({
    },
 }));
 
-vi.mock('@/lib/email.js', () => ({
-   sendEmail: vi.fn().mockResolvedValue({ success: true }),
-}));
-
 vi.mock('@/lib/cloudinary.js', () => ({
    default: {
       uploader: {
@@ -89,6 +85,33 @@ beforeEach(() => {
    vi.resetAllMocks();
 });
 
+// helpers
+
+// select().from().leftJoin().where() is shared by both queries; the results
+// query continues .limit().offset().orderBy(). Results are queued first,
+// because the router builds that query first.
+const mockListQueries = (rows: unknown[], total: number) => {
+   const resultsWhere = vi.fn((_where?: unknown) => ({
+      limit: vi.fn(() => ({
+         offset: vi.fn(() => ({
+            orderBy: vi.fn().mockResolvedValueOnce(rows),
+         })),
+      })),
+   }));
+   const countWhere = vi
+      .fn<(where?: unknown) => Promise<unknown>>()
+      .mockResolvedValueOnce([{ total }]);
+
+   mockSelect.mockReturnValueOnce({
+      from: vi.fn(() => ({ leftJoin: vi.fn(() => ({ where: resultsWhere })) })),
+   });
+   mockSelect.mockReturnValueOnce({
+      from: vi.fn(() => ({ leftJoin: vi.fn(() => ({ where: countWhere })) })),
+   });
+
+   return { resultsWhere, countWhere };
+};
+
 // ── upload ───────────────────────
 
 describe('documents.upload', () => {
@@ -134,6 +157,16 @@ describe('documents.upload', () => {
          fileBase64: 'data:application/pdf;base64,abc123',
       });
       expect(mockUpload).not.toHaveBeenCalled();
+   });
+
+   it('rejects a PDF upload without fileBase64', async () => {
+      const caller = createAuthenticatedCaller(contributorUser);
+      await expect(
+         caller.documents.upload({ title: 'No file', fileType: 'pdf' }),
+      ).rejects.toMatchObject({ code: 'BAD_REQUEST' });
+
+      expect(mockInsert).not.toHaveBeenCalled();
+      expect(mockPdfQueue).not.toHaveBeenCalled();
    });
 
    it('rejects a PDF over the size cap', async () => {
@@ -200,37 +233,20 @@ describe('documents.upload', () => {
 
 describe('documents.list', () => {
    it('returns a paginated list of documents', async () => {
-      const mockResults = [
-         {
-            id: mockDoc.id,
-            title: mockDoc.title,
-            status: mockDoc.status,
-            uploaderName: 'testUser',
-            createdAt: mockDoc.createdAt,
-            coverImageUrl: null,
-            pageCount: 0,
-         },
-      ];
-
-      mockSelect.mockReturnValueOnce({
-         from: vi.fn(() => ({
-            innerJoin: vi.fn(() => ({
-               where: vi.fn(() => ({
-                  limit: vi.fn(() => ({
-                     offset: vi.fn(() => ({
-                        orderBy: vi.fn().mockResolvedValueOnce(mockResults),
-                     })),
-                  })),
-               })),
-            })),
-         })),
-      });
-
-      mockSelect.mockReturnValueOnce({
-         from: vi.fn(() => ({
-            where: vi.fn().mockResolvedValueOnce([{ total: 1 }]),
-         })),
-      });
+      mockListQueries(
+         [
+            {
+               id: mockDoc.id,
+               title: mockDoc.title,
+               status: mockDoc.status,
+               uploaderName: 'testUser',
+               createdAt: mockDoc.createdAt,
+               coverImageUrl: null,
+               pageCount: 0,
+            },
+         ],
+         1,
+      );
 
       const caller = createUnauthenticatedCaller();
       const result = await caller.documents.list({ page: 1, limit: 20 });
@@ -241,26 +257,8 @@ describe('documents.list', () => {
       expect(result.totalPages).toBe(1);
    });
 
-   it('returns empty list when no documents exist', async () => {
-      mockSelect.mockReturnValueOnce({
-         from: vi.fn(() => ({
-            innerJoin: vi.fn(() => ({
-               where: vi.fn(() => ({
-                  limit: vi.fn(() => ({
-                     offset: vi.fn(() => ({
-                        orderBy: vi.fn().mockResolvedValueOnce([]),
-                     })),
-                  })),
-               })),
-            })),
-         })),
-      });
-
-      mockSelect.mockReturnValueOnce({
-         from: vi.fn(() => ({
-            where: vi.fn().mockResolvedValueOnce([{ total: 0 }]),
-         })),
-      });
+   it('returns an empty list when no documents exist', async () => {
+      mockListQueries([], 0);
 
       const caller = createUnauthenticatedCaller();
       const result = await caller.documents.list({ page: 1, limit: 20 });
@@ -270,36 +268,18 @@ describe('documents.list', () => {
       expect(result.totalPages).toBe(0);
    });
 
-   it('rejects a PDF upload without fileBase64', async () => {
-      const caller = createAuthenticatedCaller(contributorUser);
-      await expect(
-         caller.documents.upload({ title: 'No file', fileType: 'pdf' }),
-      ).rejects.toMatchObject({ code: 'BAD_REQUEST' });
+   it('rounds totalPages up', async () => {
+      mockListQueries([mockDoc], 25);
 
-      expect(mockInsert).not.toHaveBeenCalled();
-      expect(mockPdfQueue).not.toHaveBeenCalled();
+      const caller = createUnauthenticatedCaller();
+      const result = await caller.documents.list({ page: 1, limit: 10 });
+
+      expect(result.totalCount).toBe(25);
+      expect(result.totalPages).toBe(3);
    });
 
-   it('filters by search term', async () => {
-      mockSelect.mockReturnValueOnce({
-         from: vi.fn(() => ({
-            innerJoin: vi.fn(() => ({
-               where: vi.fn(() => ({
-                  limit: vi.fn(() => ({
-                     offset: vi.fn(() => ({
-                        orderBy: vi.fn().mockResolvedValueOnce([mockDoc]),
-                     })),
-                  })),
-               })),
-            })),
-         })),
-      });
-
-      mockSelect.mockReturnValueOnce({
-         from: vi.fn(() => ({
-            where: vi.fn().mockResolvedValueOnce([{ total: 1 }]),
-         })),
-      });
+   it('accepts a search term', async () => {
+      mockListQueries([mockDoc], 1);
 
       const caller = createUnauthenticatedCaller();
       const result = await caller.documents.list({
@@ -310,6 +290,43 @@ describe('documents.list', () => {
 
       expect(result.documents).toHaveLength(1);
    });
+
+   it('works without collectionId and with it', async () => {
+      mockListQueries([mockDoc], 1);
+      mockListQueries([{ ...mockDoc, collectionId: 'col-1' }], 1);
+
+      const caller = createUnauthenticatedCaller();
+      await expect(
+         caller.documents.list({ page: 1, limit: 20 }),
+      ).resolves.toBeDefined();
+
+      const result = await caller.documents.list({
+         page: 1,
+         limit: 100,
+         collectionId: 'col-1',
+      });
+      expect(result.documents[0]).toMatchObject({ collectionId: 'col-1' });
+   });
+
+   it.each([
+      ['anonymous', undefined],
+      ['contributor', contributorUser],
+      ['editor', editorUser],
+   ] as const)(
+      'passes the same where to results and count (%s, with search)',
+      async (_label, viewer) => {
+         const { resultsWhere, countWhere } = mockListQueries([mockDoc], 1);
+
+         const caller = viewer
+            ? createAuthenticatedCaller(viewer)
+            : createUnauthenticatedCaller();
+         await caller.documents.list({ page: 1, limit: 20, search: 'Test' });
+
+         expect(resultsWhere.mock.calls[0][0]).toStrictEqual(
+            countWhere.mock.calls[0][0],
+         );
+      },
+   );
 });
 
 // ── getById ───────────────────────
@@ -318,7 +335,7 @@ describe('documents.getById', () => {
    it('returns a document by id', async () => {
       mockSelect.mockReturnValueOnce({
          from: vi.fn(() => ({
-            innerJoin: vi.fn(() => ({
+            leftJoin: vi.fn(() => ({
                where: vi.fn().mockResolvedValueOnce([mockDoc]),
             })),
          })),
@@ -333,7 +350,7 @@ describe('documents.getById', () => {
    it('throws NOT_FOUND if document does not exist', async () => {
       mockSelect.mockReturnValueOnce({
          from: vi.fn(() => ({
-            innerJoin: vi.fn(() => ({
+            leftJoin: vi.fn(() => ({
                where: vi.fn().mockResolvedValueOnce([]),
             })),
          })),
@@ -343,43 +360,6 @@ describe('documents.getById', () => {
       await expect(
          caller.documents.getById({ id: 'nonexistent' }),
       ).rejects.toMatchObject({ code: 'NOT_FOUND' });
-   });
-});
-
-// ── getByCollection ───────────────────────
-
-describe('documents.getByCollection', () => {
-   it('returns documents for a collection', async () => {
-      const collectionDoc = { ...mockDoc, collectionId: 'col-1' };
-
-      mockSelect.mockReturnValueOnce({
-         from: vi.fn(() => ({
-            where: vi.fn().mockResolvedValueOnce([collectionDoc]),
-         })),
-      });
-
-      const caller = createUnauthenticatedCaller();
-      const result = await caller.documents.getByCollection({
-         collectionId: 'col-1',
-      });
-
-      expect(result).toHaveLength(1);
-      expect(result[0]).toMatchObject({ collectionId: 'col-1' });
-   });
-
-   it('returns empty array if collection has no documents', async () => {
-      mockSelect.mockReturnValueOnce({
-         from: vi.fn(() => ({
-            where: vi.fn().mockResolvedValueOnce([]),
-         })),
-      });
-
-      const caller = createUnauthenticatedCaller();
-      const result = await caller.documents.getByCollection({
-         collectionId: 'empty-col',
-      });
-
-      expect(result).toHaveLength(0);
    });
 });
 
@@ -545,66 +525,5 @@ describe('documents.delete', () => {
       await expect(
          caller.documents.delete({ id: 'doc-1' }),
       ).rejects.toMatchObject({ code: 'UNAUTHORIZED' });
-   });
-});
-
-// ── search ───────────────────────
-
-describe('documents.search', () => {
-   it('returns matching documents', async () => {
-      mockSelect.mockReturnValueOnce({
-         from: vi.fn(() => ({
-            leftJoin: vi.fn(() => ({
-               where: vi.fn(() => ({
-                  limit: vi.fn().mockResolvedValueOnce([mockDoc]),
-               })),
-            })),
-         })),
-      });
-
-      const caller = createUnauthenticatedCaller();
-      const result = await caller.documents.search({ query: 'Test' });
-
-      expect(result).toHaveLength(1);
-      expect(result[0]).toMatchObject({ title: 'Test Document' });
-   });
-
-   it('returns empty array when no documents match', async () => {
-      mockSelect.mockReturnValueOnce({
-         from: vi.fn(() => ({
-            leftJoin: vi.fn(() => ({
-               where: vi.fn(() => ({
-                  limit: vi.fn().mockResolvedValueOnce([]),
-               })),
-            })),
-         })),
-      });
-
-      const caller = createUnauthenticatedCaller();
-      const result = await caller.documents.search({ query: 'nonexistent' });
-
-      expect(result).toHaveLength(0);
-   });
-
-   it('filters by collectionId when provided', async () => {
-      const collectionDoc = { ...mockDoc, collectionId: 'col-1' };
-
-      mockSelect.mockReturnValueOnce({
-         from: vi.fn(() => ({
-            leftJoin: vi.fn(() => ({
-               where: vi.fn(() => ({
-                  limit: vi.fn().mockResolvedValueOnce([collectionDoc]),
-               })),
-            })),
-         })),
-      });
-
-      const caller = createUnauthenticatedCaller();
-      const result = await caller.documents.search({
-         query: 'Test',
-         collectionId: 'col-1',
-      });
-
-      expect(result[0]).toMatchObject({ collectionId: 'col-1' });
    });
 });
