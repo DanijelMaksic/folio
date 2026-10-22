@@ -22,7 +22,9 @@ function TranscriptionPanel({
       onSuccess: () => utils.transcriptions.getByPage.invalidate(),
    });
 
-   const updateMutation = trpc.transcriptions.update.useMutation();
+   const updateMutation = trpc.transcriptions.update.useMutation({
+      onSuccess: () => utils.transcriptions.getByPage.invalidate(),
+   });
 
    const submitMutation = trpc.transcriptions.submit.useMutation({
       onSuccess: () => utils.transcriptions.getByPage.invalidate(),

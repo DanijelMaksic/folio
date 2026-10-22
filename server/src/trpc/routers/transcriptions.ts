@@ -115,6 +115,7 @@ export const transcriptionsRouter = router({
    submit: protectedProcedure
       .input(transcriptionContentSchema)
       .mutation(async ({ ctx, input }) => {
+         // A user cannot edit another user's transcription
          const [existing] = await db
             .select()
             .from(transcriptions)
@@ -133,7 +134,8 @@ export const transcriptionsRouter = router({
             });
          }
 
-         if (!existing.content.trim()) {
+         // A user cannot submit an empty transcription
+         if (!input.content.trim()) {
             throw new TRPCError({
                code: 'BAD_REQUEST',
                message: 'Cannot submit an empty transcription',
@@ -141,7 +143,7 @@ export const transcriptionsRouter = router({
          }
 
          // Update the transcription
-         const [updated] = await db
+         await db
             .update(transcriptions)
             .set({ content: input.content, updatedAt: new Date() })
             .where(eq(transcriptions.id, input.transcriptionId))
