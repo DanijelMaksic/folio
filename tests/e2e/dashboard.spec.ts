@@ -14,19 +14,15 @@ test.describe('Dashboard access', () => {
       await page.waitForURL('/sign-in', { timeout: 15_000 });
    });
 
-   test('viewer sees the contributor gate instead of the dashboard', async ({
+   test('viewer sees the /documents page instead of the dashboard', async ({
       page,
       loginAs,
    }) => {
       await loginAs('viewer');
 
-      await expect(page.getByText('available to contributors')).toBeVisible();
-      await expect(page.getByText('Your activity')).not.toBeVisible();
-
-      await page
-         .getByRole('link', { name: 'Request contributor role' })
-         .click();
-      await page.waitForURL('/profile', { timeout: 15_000 });
+      await expect(page.getByText('Documents')).toBeVisible({
+         timeout: 15_000,
+      });
    });
 });
 

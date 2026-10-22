@@ -142,10 +142,7 @@ function CollectionPickerModal({
                </Button>
 
                {noCollections ? null : (
-                  <Button
-                     onClick={onSave}
-                     disabled={addToColPending || !selectedId}
-                  >
+                  <Button onClick={onSave} disabled={addToColPending}>
                      {addToColPending ? 'Saving...' : 'Save'}
                   </Button>
                )}
