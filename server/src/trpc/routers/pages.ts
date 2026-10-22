@@ -34,8 +34,18 @@ export const pagesRouter = router({
          const term = input.search?.trim();
          const pattern = term ? `%${escapeLike(term)}%` : undefined;
 
+         const contentMatch =
+            term && term.length >= 3
+               ? sql`EXISTS (
+                SELECT 1 FROM ${transcriptions}
+                WHERE ${transcriptions.pageId} = ${pages.id}
+                AND ${transcriptions.status} = 'approved'
+                AND ${transcriptions.content} ILIKE ${pattern}
+                )`
+               : undefined;
+
          const searchFilter = pattern
-            ? or(ilike(pages.title, pattern), ilike(pages.description, pattern))
+            ? or(ilike(pages.title, pattern), contentMatch)
             : undefined;
 
          const where = and(

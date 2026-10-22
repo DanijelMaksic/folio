@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { protectedProcedure, publicProcedure, router } from '@/trpc/trpc.js';
-import { documents, pages } from '@/db/schema/index.js';
+import { documents, pages, transcriptions } from '@/db/schema/index.js';
 import { user } from '@/db/schema/index.js';
 import { and, count, desc, eq, ilike, or, sql } from 'drizzle-orm';
 import cloudinary from '@/lib/cloudinary.js';
@@ -148,15 +148,27 @@ export const documentsRouter = router({
          const term = input.search?.trim();
          const pattern = term ? `%${escapeLike(term)}%` : undefined;
 
+         const contentMatch =
+            term && term.length >= 3
+               ? sql`EXISTS (
+                SELECT 1 FROM ${pages}
+                INNER JOIN ${transcriptions}
+                ON ${transcriptions.pageId} = ${pages.id}
+                WHERE ${pages.documentId} = ${documents.id}
+                AND ${transcriptions.status} = 'approved'
+                AND ${transcriptions.content} ILIKE ${pattern}
+                )`
+               : undefined;
+
          const searchFilter = pattern
             ? or(
                  ilike(documents.title, pattern),
                  ilike(documents.description, pattern),
                  ilike(user.username, pattern),
                  ilike(user.name, pattern),
+                 contentMatch, // or() ignores undefined
               )
             : undefined;
-
          // processing/failed ones (so they can follow progress or delete)
          const currentUser = ctx.user;
 
