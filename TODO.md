@@ -6,7 +6,6 @@
 
 ## Things to fix
 
-- Add "Deleted user" label
 - On initial transcribing, if use clicks submit before save, transcription is not saved and submitted, and revisions page doesn't even show "no revisions" message
 - Upon approving/rejecting a transcription as editor, review queue page loses horiontal margin
 

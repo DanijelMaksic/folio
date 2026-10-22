@@ -26,7 +26,7 @@ export function CollectionCard({ collection }: { collection: Collection }) {
 
          <div className="z-20 space-y-0.5">
             <span className="space-x-2 text-sm text-gray-300/70">
-               {creatorName}
+               {creatorName ?? 'Deleted user'}
             </span>
 
             <h2
