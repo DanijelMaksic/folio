@@ -6,10 +6,9 @@
 
 ## Things to fix
 
-- On initial transcribing, if use clicks submit before save, transcription is not saved and submitted, and revisions page doesn't even show "no revisions" message
 - Upon approving/rejecting a transcription as editor, review queue page loses horiontal margin
+- When transcribing, if user clicks start transcribing and navigates to revision history, empty state label dissapears in revision history
 
 ## Things to refactor
 
-- On dashboard, should editors be able to click on
-  "transcription await review" and "pending role requests" if they are 0?
+- On dashboard, should editors be able to click on "transcription await review" and "pending role requests" if they are 0?

@@ -143,16 +143,17 @@ export const transcriptionsRouter = router({
          }
 
          // Update the transcription
-         await db
+         const [updated] = await db
             .update(transcriptions)
             .set({ content: input.content, updatedAt: new Date() })
             .where(eq(transcriptions.id, input.transcriptionId))
             .returning();
 
-         await db.insert(transcriptionRevisions).values({
-            transcriptionId: input.transcriptionId,
-            content: input.content,
-         });
+         if (existing.content !== updated.content)
+            await db.insert(transcriptionRevisions).values({
+               transcriptionId: input.transcriptionId,
+               content: input.content,
+            });
 
          // Submit the transcription
          const [submitted] = await db
