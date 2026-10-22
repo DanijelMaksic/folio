@@ -7,7 +7,8 @@
 ## Things to fix
 
 - Upon approving/rejecting a transcription as editor, review queue page loses horiontal margin
-- When transcribing, if user clicks start transcribing and navigates to revision history, empty state label dissapears in revision history
+- When transcribing, if user clicks start transcribing and navigates to revision history tab, empty state label dissapears in revision history
+- Remove `/sign-in` and `/sign-up` from history stack, so auth user shouldn't be able to visit them if they are signed in
 
 ## Things to refactor
 
