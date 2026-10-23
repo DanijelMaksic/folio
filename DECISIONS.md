@@ -603,6 +603,14 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 ## Sprint 9 — Bug Fixes and General Improvements
 
+**Goal:**
+
+**Completed:**
+
+- Add number of pages label on document card
+
+- Implement searching by description, full name, username, approved transcription; not just by title
+
 **Decisions:**
 
 - User with viewer role is redirected to `/documents` on sign in, while other roles are redirected to `/dashboard`
@@ -610,6 +618,8 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 **Issues resolved:**
 
 - Fixed a bug where if user hits submit before save when transcribing, revisions tab shows nothing and transcription is not submitted
+
+- While transcribing, if user saved the transcription and opened the revisions tab, empty state label would disappear — fixed by adding `.length` to `!revisions` in a condition (`RevisionHistoryTab.tsx`)
 
 - After doing local E2E testing, Cloudinary images were wiped on prod. Fixed by updating GitHub Actions Cloudinary env variables with local dev variables and by adding `_TEST` to Cloudinary variables in `CI.yml`
 
