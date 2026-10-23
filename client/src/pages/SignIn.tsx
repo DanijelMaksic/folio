@@ -32,8 +32,8 @@ export default function SignIn() {
          await refetch();
 
          data?.user.globalRole === 'viewer'
-            ? navigate('/documents')
-            : navigate('/dashboard');
+            ? navigate('/documents', { replace: true })
+            : navigate('/dashboard', { replace: true });
       }
    };
 
