@@ -1,8 +1,11 @@
+import { useCloudinaryUrl } from '@/hooks/useCloudinaryUrl';
 import { Collection } from '@shared';
 import { Link } from 'react-router-dom';
 
 export function CollectionCard({ collection }: { collection: Collection }) {
    const { id, title, creatorName, coverImageUrl } = collection;
+
+   const { detail } = useCloudinaryUrl();
 
    return (
       <Link
@@ -14,7 +17,7 @@ export function CollectionCard({ collection }: { collection: Collection }) {
 
          {coverImageUrl ? (
             <img
-               src={coverImageUrl}
+               src={detail(coverImageUrl, 450)}
                alt="Document image"
                className="absolute inset-0 h-full w-full object-cover rounded-xl md:rounded-2xl"
             />

@@ -623,4 +623,6 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - After doing local E2E testing, Cloudinary images were wiped on prod. Fixed by updating GitHub Actions Cloudinary env variables with local dev variables and by adding `_TEST` to Cloudinary variables in `CI.yml`
 
+- Fixed pixelated images on cards
+
 ## Sprint 10 — Visual Design Revamp

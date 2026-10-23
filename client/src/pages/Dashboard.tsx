@@ -99,6 +99,7 @@ export default function Dashboard() {
                   View all
                </Link>
             </div>
+
             <RecentDocuments
                documents={data?.recentDocuments ?? []}
                isLoading={overview.isLoading}

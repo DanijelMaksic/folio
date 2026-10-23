@@ -1,8 +1,11 @@
+import { useCloudinaryUrl } from '@/hooks/useCloudinaryUrl';
 import { Document } from '@shared';
 import { Link } from 'react-router-dom';
 
 export function DocumentCard({ document }: { document: Document }) {
    const { id, title, uploaderName, coverImageUrl, pageCount } = document;
+
+   const { detail } = useCloudinaryUrl();
 
    return (
       <Link
@@ -13,7 +16,7 @@ export function DocumentCard({ document }: { document: Document }) {
          <span className="absolute -inset-px m-0 bg-linear-to-t from-gray-800 group-hover:from-gray-900 z-10 pointer-events-none rounded-xl md:rounded-2xl transition duration-300 group-hover:saturate-120" />
 
          <img
-            src={coverImageUrl ?? undefined}
+            src={detail(coverImageUrl, 450) || undefined}
             alt="Document image"
             className="absolute inset-0 h-full w-full object-cover rounded-xl md:rounded-2xl"
          />

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import type { DashboardOverview } from '@folio/shared';
+import { useCloudinaryUrl } from '@/hooks/useCloudinaryUrl';
 
 type Props = {
    documents: DashboardOverview['recentDocuments'];
@@ -7,6 +8,8 @@ type Props = {
 };
 
 export function RecentDocuments({ documents, isLoading }: Props) {
+   const { detail } = useCloudinaryUrl();
+
    if (isLoading) {
       return (
          <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
@@ -40,7 +43,7 @@ export function RecentDocuments({ documents, isLoading }: Props) {
                <div className="aspect-[3/4] bg-muted">
                   {doc.coverImageUrl ? (
                      <img
-                        src={doc.coverImageUrl}
+                        src={detail(doc.coverImageUrl, 200)}
                         alt=""
                         className="h-full w-full object-cover"
                      />

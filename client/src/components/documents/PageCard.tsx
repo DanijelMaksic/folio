@@ -1,8 +1,11 @@
+import { useCloudinaryUrl } from '@/hooks/useCloudinaryUrl';
 import { Page } from '@shared';
 import { useNavigate } from 'react-router-dom';
 
 function PageCard({ page, documentId }: { page: Page; documentId: string }) {
    const navigate = useNavigate();
+
+   const { detail } = useCloudinaryUrl();
 
    return (
       <button
@@ -14,7 +17,7 @@ function PageCard({ page, documentId }: { page: Page; documentId: string }) {
          className="group relative rounded-lg overflow-hidden border hover:border-primary transition-colors"
       >
          <img
-            src={page.imageUrl}
+            src={detail(page.imageUrl, 450)}
             alt={`Page ${page.pageNumber}`}
             className="w-full object-cover aspect-[3/4]"
          />
