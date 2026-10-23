@@ -99,6 +99,7 @@ jobs:
          - name: Start server
            run: npm run dev -w server &
            env:
+              E2E_TESTING: 'true'
               DATABASE_URL: postgresql://postgres:postgres@localhost:5432/folio_test
               BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
               BETTER_AUTH_URL: http://localhost:3000
@@ -124,6 +125,7 @@ jobs:
          - name: Run E2E tests
            run: npm run test:e2e
            env:
+              E2E_TESTING: 'true'
               DATABASE_URL: postgresql://postgres:postgres@localhost:5432/folio_test
               BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
               BETTER_AUTH_URL: http://localhost:3000

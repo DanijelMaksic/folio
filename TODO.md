@@ -1,7 +1,6 @@
 ## Things to add
 
 - Show avatar/name across the app
-- Add fuzzy search
 
 ## Things to fix
 

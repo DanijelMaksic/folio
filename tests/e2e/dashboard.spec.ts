@@ -20,7 +20,7 @@ test.describe('Dashboard access', () => {
    }) => {
       await loginAs('viewer');
 
-      await expect(page.getByText('Documents')).toBeVisible({
+      await expect(page.getByTestId('documents-label')).toBeVisible({
          timeout: 15_000,
       });
    });

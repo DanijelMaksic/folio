@@ -103,7 +103,7 @@ export const auth = betterAuth({
       }),
    },
    rateLimit: {
-      enabled: process.env.E2E_TESTING !== 'true',
+      ...(process.env.E2E_TESTING === 'true' && { enabled: false }),
       window: 60,
       max: 60,
       customRules: {
