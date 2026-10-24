@@ -37,8 +37,10 @@ function DocumentTabs({
    return (
       <Tabs defaultValue="pages">
          <TabsList>
-            <TabsTrigger value="pages">Pages</TabsTrigger>
-            <TabsTrigger value="about" data-testid="pages-tab-btn">
+            <TabsTrigger value="pages" data-testid="pages-tab-btn">
+               Pages
+            </TabsTrigger>
+            <TabsTrigger value="about" data-testid="about-tab-btn">
                About
             </TabsTrigger>
             <TabsTrigger value="statistics" data-testid="statistics-tab-btn">
