@@ -42,9 +42,14 @@ function ActionsMenu({
             }
          />
          <DropdownMenuContent>
-            <DropdownMenuItem onClick={onAddPages} data-testid="add-pages-btn">
-               Add Pages
-            </DropdownMenuItem>
+            {onAddPages && (
+               <DropdownMenuItem
+                  onClick={onAddPages}
+                  data-testid="add-pages-btn"
+               >
+                  Add Pages
+               </DropdownMenuItem>
+            )}
 
             <DropdownMenuGroup>
                {onSaveToCollection && (
