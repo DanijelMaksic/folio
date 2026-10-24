@@ -12,6 +12,7 @@ interface ActionsMenuProps {
    show: boolean;
    onEdit: () => void;
    onDelete: () => void;
+   onAddPages: () => void;
    onSaveToCollection?: () => void;
    inCollection?: boolean;
    testId?: string;
@@ -21,6 +22,7 @@ function ActionsMenu({
    show,
    onEdit,
    onDelete,
+   onAddPages,
    onSaveToCollection,
    inCollection,
 }: ActionsMenuProps) {
@@ -40,6 +42,10 @@ function ActionsMenu({
             }
          />
          <DropdownMenuContent>
+            <DropdownMenuItem onClick={onAddPages} data-testid="add-pages-btn">
+               Add Pages
+            </DropdownMenuItem>
+
             <DropdownMenuGroup>
                {onSaveToCollection && (
                   <DropdownMenuItem
@@ -53,6 +59,7 @@ function ActionsMenu({
                <DropdownMenuItem onClick={onEdit} data-testid="edit-modal-btn">
                   Edit
                </DropdownMenuItem>
+
                <DropdownMenuItem
                   className="text-red-600 focus:bg-red-100 focus:text-red-700 transition-all"
                   data-testid="delete-modal-btn"

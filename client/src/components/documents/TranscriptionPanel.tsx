@@ -83,7 +83,6 @@ function TranscriptionPanel({
                         Rejection reason: {transcription.rejectionReason}
                      </p>
                   )}
-
                <Textarea
                   className="h-90 text-sm font-mono resize-y disabled:opacity-60"
                   value={transcriptionContent}
@@ -92,7 +91,6 @@ function TranscriptionPanel({
                   disabled={isLocked}
                   placeholder="Type your transcription here..."
                />
-
                <div className="flex gap-2 items-center">
                   {!isLocked && (
                      <>

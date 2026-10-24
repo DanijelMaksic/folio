@@ -232,20 +232,11 @@ function DocumentPages() {
                )}
 
                {(isMyDocument || editor) && isReady && (
-                  <Button
-                     variant="outline"
-                     size="sm"
-                     onClick={() => setIsAddPagesOpen(true)}
-                  >
-                     Add Pages
-                  </Button>
-               )}
-
-               {(isMyDocument || editor) && isReady && (
                   <ActionsMenu
                      show={canTranscribe && (isMyDocument || editor)}
                      onEdit={handleEditOpen}
                      onDelete={() => setIsDeleteOpen(true)}
+                     onAddPages={() => setIsAddPagesOpen(true)}
                      onSaveToCollection={handleCollectionOpen}
                      inCollection={inCollection}
                   />

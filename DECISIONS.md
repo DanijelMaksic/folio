@@ -615,6 +615,8 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - User with viewer role is redirected to `/documents` on sign in, while other roles are redirected to `/dashboard`
 
+- Move "Add Pages" button to `ActionsMenu.tsx`
+
 **Issues resolved:**
 
 - Fixed a bug where if user hits submit before save when transcribing, revisions tab shows nothing and transcription is not submitted

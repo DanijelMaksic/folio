@@ -15,6 +15,7 @@
 ## Things to fix
 
 - Upon approving/rejecting a transcription as editor, review queue page loses horiontal margin
+- In forms, fix how errors are displayed (currently, errors are like this: `[ { "origin": "string", "code": "too_big", "maximum": 1000, "inclusive": true, "path": [ "description" ], "message": "Description cannot be longer than 1000 characters" } ]`)
 
 ## Things to refactor
 
