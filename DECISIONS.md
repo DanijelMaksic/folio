@@ -615,6 +615,8 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Add `CollectionTabs.tsx` to `CollectionDetails.tsx`, featuring "Documents", "About" and "Statistics" tabs
 
+- Include pagination in `CollectionDetails.tsx`
+
 **Decisions:**
 
 - User with viewer role is redirected to `/documents` on sign in, while other roles are redirected to `/dashboard`

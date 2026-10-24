@@ -21,6 +21,8 @@ function AppPagination({
 }: AppPaginationProps) {
    const pages = getPageNumbers(currentPage, totalPages);
 
+   if (totalPages <= 1) return null;
+
    return (
       <Pagination className="mt-8">
          <PaginationContent>

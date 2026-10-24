@@ -1,14 +1,18 @@
 import { CollectionTabsProps } from '@/components/collections/CollectionTabs';
 import { DocumentCard } from '@/components/documents/DocumentCard';
+import AppPagination from '@/components/shared/AppPagination';
 import { Link } from 'react-router-dom';
 
 function CollectionDocumentsTab({
    isLoadingDocs,
    displayedDocuments,
    isSearchActive,
+   page,
+   totalPages,
+   onPageChange,
 }: CollectionTabsProps) {
    return (
-      <>
+      <div className="space-y-4">
          {isLoadingDocs ? (
             <p className="text-muted-foreground">Loading documents...</p>
          ) : !displayedDocuments?.length ? (
@@ -35,7 +39,15 @@ function CollectionDocumentsTab({
                ))}
             </div>
          )}
-      </>
+
+         {!!displayedDocuments?.length && (
+            <AppPagination
+               currentPage={page}
+               totalPages={totalPages}
+               onPageChange={onPageChange}
+            />
+         )}
+      </div>
    );
 }
 

@@ -22,6 +22,9 @@ export interface CollectionTabsProps {
    displayedDocuments: DisplayedDocument[] | undefined;
    isSearchActive: boolean;
    description?: string | null;
+   page: number;
+   totalPages: number;
+   onPageChange: (page: number) => void;
 }
 
 function CollectionTabs({
@@ -29,19 +32,16 @@ function CollectionTabs({
    displayedDocuments,
    isSearchActive,
    description,
+   page,
+   totalPages,
+   onPageChange,
 }: CollectionTabsProps) {
    return (
-      <Tabs defaultValue="pages">
+      <Tabs defaultValue="documents">
          <TabsList>
-            <TabsTrigger value="documents" data-testid="documents-tab-btn">
-               Documents
-            </TabsTrigger>
-            <TabsTrigger value="about" data-testid="about-tab-btn">
-               About
-            </TabsTrigger>
-            <TabsTrigger value="statistics" data-testid="statistics-tab-btn">
-               Statistics
-            </TabsTrigger>
+            <TabsTrigger value="documents">Documents</TabsTrigger>
+            <TabsTrigger value="about">About</TabsTrigger>
+            <TabsTrigger value="statistics">Statistics</TabsTrigger>
          </TabsList>
 
          <TabsContent value="documents">
@@ -49,6 +49,9 @@ function CollectionTabs({
                isLoadingDocs={isLoadingDocs}
                displayedDocuments={displayedDocuments}
                isSearchActive={isSearchActive}
+               page={page}
+               totalPages={totalPages}
+               onPageChange={onPageChange}
             />
          </TabsContent>
          <TabsContent value="about">

@@ -1,4 +1,3 @@
-import { DocumentCard } from '@/components/documents/DocumentCard';
 import { useSession } from '@/lib/auth-client';
 import { trpc } from '@/lib/trpc';
 import { AppRouter } from '@server/trpc/router';
@@ -10,7 +9,6 @@ import SearchBar from '@/components/shared/SearchBar';
 import DeleteModal from '@/components/shared/DeleteModal';
 import EditModal from '@/components/shared/EditModal';
 import ActionsMenu from '@/components/shared/ActionsMenu';
-import { Link } from 'react-router-dom';
 import CollectionTabs from '@/components/collections/CollectionTabs';
 
 function CollectionDetails() {
@@ -30,6 +28,9 @@ function CollectionDetails() {
    const [search, setSearch] = useState('');
    const [debouncedSearch, setDebouncedSearch] = useState('');
 
+   const PAGE_SIZE = 9;
+   const [page, setPage] = useState(1);
+
    const utils = trpc.useUtils();
 
    useEffect(() => {
@@ -42,19 +43,23 @@ function CollectionDetails() {
          id: collectionId!,
       });
 
+   // reset page when search changes
+   useEffect(() => {
+      setPage(1);
+   }, [debouncedSearch]);
+
    const { data, isLoading: isLoadingDocs } = trpc.documents.list.useQuery(
       {
          collectionId: collectionId!,
          search: debouncedSearch || undefined,
-         page: 1,
-         limit: 100,
+         page,
+         limit: PAGE_SIZE,
       },
-      {
-         placeholderData: (prev) => prev,
-      },
+      { placeholderData: (prev) => prev },
    );
 
    const displayedDocuments = data?.documents;
+   const totalPages = data?.totalPages ?? 1;
 
    const isMyCollection = collection?.createdBy === user?.id;
 
@@ -130,6 +135,9 @@ function CollectionDetails() {
                isSearchActive={isSearchActive}
                displayedDocuments={displayedDocuments}
                description={collection.description}
+               page={page}
+               totalPages={totalPages}
+               onPageChange={setPage}
             />
          )}
 
