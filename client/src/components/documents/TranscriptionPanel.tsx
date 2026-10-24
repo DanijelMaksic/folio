@@ -118,18 +118,6 @@ function TranscriptionPanel({
                         </button>
                      </>
                   )}
-
-                  {isSubmitted && (
-                     <p className="text-sm text-muted-foreground">
-                        Submitted — awaiting review
-                     </p>
-                  )}
-
-                  {isApproved && (
-                     <p className="text-sm text-muted-foreground">
-                        Transcription approved
-                     </p>
-                  )}
                </div>
             </>
          )}
