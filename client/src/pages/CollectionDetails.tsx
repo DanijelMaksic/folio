@@ -129,6 +129,7 @@ function CollectionDetails() {
                isLoadingDocs={isLoadingDocs}
                isSearchActive={isSearchActive}
                displayedDocuments={displayedDocuments}
+               description={collection.description}
             />
          )}
 

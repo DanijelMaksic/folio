@@ -20,8 +20,10 @@ export interface DocumentTabsProps {
    search: string;
    status: StatusType;
    documentId: string | undefined;
+   currentPage: number;
    totalPages: number;
    description?: string | null;
+   onPageChange: (newNumber: number) => void;
 }
 
 function DocumentTabs({
@@ -31,16 +33,16 @@ function DocumentTabs({
    search,
    status,
    documentId,
-   totalPages,
+   currentPage,
    description,
+   totalPages,
+   onPageChange,
 }: DocumentTabsProps) {
    return (
       <Tabs defaultValue="pages">
          <TabsList>
-            <TabsTrigger value="pages" data-testid="pages-tab-btn">
-               Pages
-            </TabsTrigger>
-            <TabsTrigger value="about" data-testid="about-tab-btn">
+            <TabsTrigger value="pages">Pages</TabsTrigger>
+            <TabsTrigger value="about" data-testid="pages-tab-btn">
                About
             </TabsTrigger>
             <TabsTrigger value="statistics" data-testid="statistics-tab-btn">
@@ -56,7 +58,9 @@ function DocumentTabs({
                status={status}
                isLoadingPages={isLoadingPages}
                documentId={documentId}
+               currentPage={currentPage}
                totalPages={totalPages}
+               onPageChange={onPageChange}
             />
          </TabsContent>
          <TabsContent value="about">

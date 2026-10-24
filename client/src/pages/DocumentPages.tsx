@@ -186,6 +186,14 @@ function DocumentPages() {
       });
    };
 
+   const handlePageChange = (newPage: number) => {
+      setSearchParams((prev) => {
+         const next = new URLSearchParams(prev);
+         next.set('page', String(newPage));
+         return next;
+      });
+   };
+
    const hasActiveFilter = status !== 'all-pages' || !!search;
 
    if (isLoadingDocument) return <p>Loading...</p>;
@@ -251,6 +259,8 @@ function DocumentPages() {
                documentId={documentId}
                totalPages={totalPages}
                description={document.description}
+               onPageChange={handlePageChange}
+               currentPage={page}
             />
          )}
 

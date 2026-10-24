@@ -1,7 +1,6 @@
 import { DocumentTabsProps } from '@/components/documents/DocumentTabs';
 import PageCard from '@/components/documents/PageCard';
 import AppPagination from '@/components/shared/AppPagination';
-import { useSearchParams } from 'react-router-dom';
 
 function PagesTab({
    isReady,
@@ -11,19 +10,9 @@ function PagesTab({
    status,
    documentId,
    totalPages,
+   currentPage,
+   onPageChange,
 }: DocumentTabsProps) {
-   const [searchParams, setSearchParams] = useSearchParams();
-
-   const page = Math.max(Number(searchParams.get('page')) || 1, 1);
-
-   const handlePageChange = (newPage: number) => {
-      setSearchParams((prev) => {
-         const next = new URLSearchParams(prev);
-         next.set('page', String(newPage));
-         return next;
-      });
-   };
-
    return (
       <>
          {isReady && (
@@ -54,9 +43,9 @@ function PagesTab({
 
                {!!pages.length && (
                   <AppPagination
-                     currentPage={page}
+                     currentPage={currentPage}
                      totalPages={totalPages}
-                     onPageChange={handlePageChange}
+                     onPageChange={onPageChange}
                   />
                )}
             </>

@@ -12,6 +12,7 @@
 - In `DocumentCard.tsx` add completion %, but only if it's above 0%
 - In `TranscriptionPanel.tsx`, if panel is larger than screen height, set `sticky` on page image while scrolling, until the end of panel is reached
 - In `AboutTab.tsx`, for the owner or an editor, show "No description yet. Add one" with a link to the edit form, because that nudges them to fill it in
+- Add pagination to `CollectionDetails.tsx`, display if `docs.length > x`
 
 ## Things to fix
 
