@@ -12,7 +12,7 @@ interface ActionsMenuProps {
    show: boolean;
    onEdit: () => void;
    onDelete: () => void;
-   onAddPages: () => void;
+   onAddPages?: () => void;
    onSaveToCollection?: () => void;
    inCollection?: boolean;
    testId?: string;

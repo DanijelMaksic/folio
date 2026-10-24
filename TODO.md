@@ -2,7 +2,7 @@
 
 - Show avatar/name across the app
 - Statistics tab, shared between `DocumentDetails.tsx` and `CollectionDetails.tsx`
-- About tab
+- Enchance `AboutTab.tsx` with additional data: uploader, upload date, page count, collection, status
 - Categories/tags
 - Notes & Questions section
 - In `PageDetails.tsx` add page navigation (prev and next btns)
@@ -11,6 +11,7 @@
 - "Fully transcribed" label in `DocumentCard.tsx`, and maybe in `DocumentDetails.tsx` add "All pages as fully transcribed"
 - In `DocumentCard.tsx` add completion %, but only if it's above 0%
 - In `TranscriptionPanel.tsx`, if panel is larger than screen height, set `sticky` on page image while scrolling, until the end of panel is reached
+- In `AboutTab.tsx`, for the owner or an editor, show "No description yet. Add one" with a link to the edit form, because that nudges them to fill it in
 
 ## Things to fix
 
@@ -21,3 +22,4 @@
 
 - Remove `description` from `PageDetails.tsx`
 - In `TranscriptionPanel.tsx`, switch textarea with rich text editor
+- Move Pages related components to `pages` folder

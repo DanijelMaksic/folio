@@ -11,12 +11,11 @@ import ActionsMenu from '@/components/shared/ActionsMenu';
 import CollectionPickerModal from '@/components/documents/CollectionPickerModal';
 import { useViewerStore } from '@/store/useViewerStore';
 import { Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import AddPagesModal from '@/components/documents/AddPagesModal';
 import TranscriptionFilter from '@/components/documents/TranscriptionFilter';
-import PageCard from '@/components/documents/PageCard';
 import SearchBar from '@/components/shared/SearchBar';
 import AppPagination from '@/components/shared/AppPagination';
+import DocumentTabs from '@/components/documents/DocumentTabs';
 
 export type StatusType = 'all-pages' | 'transcribed' | 'not-transcribed';
 
@@ -58,14 +57,6 @@ function DocumentPages() {
    const page = Math.max(Number(searchParams.get('page')) || 1, 1);
    const search = searchParams.get('search') ?? '';
    const [inputValue, setInputValue] = useState(search);
-
-   const handlePageChange = (newPage: number) => {
-      setSearchParams((prev) => {
-         const next = new URLSearchParams(prev);
-         next.set('page', String(newPage));
-         return next;
-      });
-   };
 
    useEffect(() => {
       const t = setTimeout(() => {
@@ -206,14 +197,7 @@ function DocumentPages() {
    return (
       <div className="max-w-full mx-auto py-6 px-12 space-y-6">
          <div className="flex items-center justify-between gap-3">
-            <div>
-               <h1 className="text-2xl font-semibold">{document.title}</h1>
-               {document.description && (
-                  <p className="text-muted-foreground text-sm mt-1">
-                     {document.description}
-                  </p>
-               )}
-            </div>
+            <h1 className="text-2xl font-semibold">{document.title}</h1>
 
             <div className="flex items-center justify-center gap-3">
                {showControls && (
@@ -257,32 +241,17 @@ function DocumentPages() {
             </p>
          )}
 
-         {isReady && (
-            <>
-               {isLoadingPages ? (
-                  <p>Loading pages...</p>
-               ) : !pages.length ? (
-                  <p className="text-muted-foreground">
-                     {search && status !== 'all-pages'
-                        ? 'No pages match your search and filter.'
-                        : search
-                          ? `No results found for your search.`
-                          : status !== 'all-pages'
-                            ? 'No pages match this filter.'
-                            : 'This document is empty. Add a page to get started.'}
-                  </p>
-               ) : (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                     {pages.map((page) => (
-                        <PageCard
-                           page={page}
-                           documentId={documentId!}
-                           key={page.id}
-                        />
-                     ))}
-                  </div>
-               )}
-            </>
+         {document.id && (
+            <DocumentTabs
+               isReady={isReady}
+               pages={pages}
+               search={search}
+               status={status}
+               isLoadingPages={isLoadingPages}
+               documentId={documentId}
+               totalPages={totalPages}
+               description={document.description}
+            />
          )}
 
          {isEditOpen && (
@@ -338,14 +307,6 @@ function DocumentPages() {
                   setIsCollectionOpen(false);
                   setCollectionError('');
                }}
-            />
-         )}
-
-         {isReady && !!pages.length && (
-            <AppPagination
-               currentPage={page}
-               totalPages={totalPages}
-               onPageChange={handlePageChange}
             />
          )}
       </div>
