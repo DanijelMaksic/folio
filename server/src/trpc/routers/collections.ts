@@ -68,7 +68,7 @@ export const collectionsRouter = router({
                      WHERE d.collection_id = ${collections.id}
                      AND d.status = 'ready'
                      AND dp.page_number = 1
-                     ORDER BY d.created_at ASC
+                     ORDER BY d.created_at DESC
                      LIMIT 1
                   )`,
                })
