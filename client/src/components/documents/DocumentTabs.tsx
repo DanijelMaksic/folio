@@ -4,6 +4,7 @@ import PagesTab from '@/components/documents/PagesTab';
 import AboutTab from '@/components/documents/AboutTab';
 import StatisticsTab from '@/components/documents/StatisticsTab';
 import { ReactElement } from 'react';
+import { Document } from '@shared';
 
 interface Page {
    id: string;
@@ -23,7 +24,7 @@ export interface DocumentTabsProps {
    documentId: string | undefined;
    currentPage: number;
    totalPages: number;
-   description?: string | null;
+   document?: Document;
    onPageChange: (newNumber: number) => void;
    children: ReactElement;
 }
@@ -36,7 +37,7 @@ function DocumentTabs({
    status,
    documentId,
    currentPage,
-   description,
+   document,
    totalPages,
    onPageChange,
    children,
@@ -76,7 +77,7 @@ function DocumentTabs({
                />
             </TabsContent>
             <TabsContent value="about">
-               <AboutTab description={description} />
+               <AboutTab document={document} />
             </TabsContent>
             <TabsContent value="statistics">
                <StatisticsTab />

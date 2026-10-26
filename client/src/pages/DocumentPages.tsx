@@ -273,7 +273,7 @@ function DocumentPages() {
                   isLoadingPages={isLoadingPages}
                   documentId={documentId}
                   totalPages={totalPages}
-                  description={document.description}
+                  document={document}
                   onPageChange={handlePageChange}
                   currentPage={page}
                >
