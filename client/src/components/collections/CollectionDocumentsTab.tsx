@@ -10,6 +10,7 @@ function CollectionDocumentsTab({
    page,
    totalPages,
    onPageChange,
+   children,
 }: CollectionTabsProps) {
    return (
       <div className="space-y-4">

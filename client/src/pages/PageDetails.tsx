@@ -159,23 +159,14 @@ function PageDetails() {
 
          {page.id && (
             <PageTabs canTranscribe={canTranscribe} pageId={page.id}>
-               <div className="flex items-center justify-center gap-3">
-                  {(isMyPage || editor) && (
-                     <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setIsReplaceImageOpen(true)}
-                     >
-                        Change Image
-                     </Button>
-                  )}
-
-                  <ActionsMenu
-                     show={canTranscribe && (isMyPage || editor)}
-                     onEdit={handleEditOpen}
-                     onDelete={() => setIsDeleteOpen(true)}
-                  />
-               </div>
+               <ActionsMenu
+                  show={canTranscribe && (isMyPage || editor)}
+                  onReplaceImage={() => setIsReplaceImageOpen(true)}
+                  onEdit={handleEditOpen}
+                  onDelete={() => setIsDeleteOpen(true)}
+                  isMyPage={isMyPage}
+                  editor={editor}
+               />
             </PageTabs>
          )}
 

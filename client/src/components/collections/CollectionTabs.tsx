@@ -2,6 +2,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AboutTab from '@/components/documents/AboutTab';
 import StatisticsTab from '@/components/documents/StatisticsTab';
 import CollectionDocumentsTab from '@/components/collections/CollectionDocumentsTab';
+import { ReactElement } from 'react';
 
 interface DisplayedDocument {
    id: string;
@@ -25,6 +26,7 @@ export interface CollectionTabsProps {
    page: number;
    totalPages: number;
    onPageChange: (page: number) => void;
+   children: ReactElement;
 }
 
 function CollectionTabs({
@@ -35,14 +37,19 @@ function CollectionTabs({
    page,
    totalPages,
    onPageChange,
+   children,
 }: CollectionTabsProps) {
    return (
       <Tabs defaultValue="documents">
-         <TabsList>
-            <TabsTrigger value="documents">Documents</TabsTrigger>
-            <TabsTrigger value="about">About</TabsTrigger>
-            <TabsTrigger value="statistics">Statistics</TabsTrigger>
-         </TabsList>
+         <div className="flex justify-between items-center gap-3">
+            <TabsList>
+               <TabsTrigger value="documents">Documents</TabsTrigger>
+               <TabsTrigger value="about">About</TabsTrigger>
+               <TabsTrigger value="statistics">Statistics</TabsTrigger>
+            </TabsList>
+
+            {children}
+         </div>
 
          <TabsContent value="documents">
             <CollectionDocumentsTab
@@ -52,6 +59,7 @@ function CollectionTabs({
                page={page}
                totalPages={totalPages}
                onPageChange={onPageChange}
+               children={children}
             />
          </TabsContent>
          <TabsContent value="about">

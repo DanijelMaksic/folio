@@ -13,9 +13,12 @@ interface ActionsMenuProps {
    onEdit: () => void;
    onDelete: () => void;
    onAddPages?: () => void;
+   onReplaceImage?: () => void;
    onSaveToCollection?: () => void;
    inCollection?: boolean;
    testId?: string;
+   isMyPage?: boolean;
+   editor?: boolean;
 }
 
 function ActionsMenu({
@@ -23,8 +26,11 @@ function ActionsMenu({
    onEdit,
    onDelete,
    onAddPages,
+   onReplaceImage,
    onSaveToCollection,
    inCollection,
+   isMyPage,
+   editor,
 }: ActionsMenuProps) {
    if (!show) return null;
 
@@ -48,6 +54,15 @@ function ActionsMenu({
                   data-testid="add-pages-btn"
                >
                   Add Pages
+               </DropdownMenuItem>
+            )}
+
+            {(isMyPage || editor) && onReplaceImage && (
+               <DropdownMenuItem
+                  onClick={onReplaceImage}
+                  data-testid="replace-image-btn"
+               >
+                  Replace Image
                </DropdownMenuItem>
             )}
 

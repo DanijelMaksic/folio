@@ -625,7 +625,9 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Move "Add Pages" button to `ActionsMenu.tsx`
 
-- In `collections.list` procedure, fetch `coverImageUrl` by DESC instead of ASC, so `CollectionCard.tsx` displays only the image of first document added, to prevent cover image changing on adding a new document.
+- In `collections.list` procedure, fetch `coverImageUrl` by DESC instead of ASC, so `CollectionCard.tsx` displays only the image of first document added, to prevent cover image changing on adding a new document
+
+- Move "Change Image" button to `ActionsMenu.tsx`
 
 **Issues resolved:**
 

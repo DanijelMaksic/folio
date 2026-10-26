@@ -44,7 +44,7 @@ function DocumentTabs({
    return (
       <div className="">
          <Tabs defaultValue="pages">
-            <div className="flex justify-between items-center gap-3">
+            <div className="flex justify-between items-center gap-3 mt-1 mb-2">
                <TabsList>
                   <TabsTrigger value="pages">Pages</TabsTrigger>
                   <TabsTrigger value="about" data-testid="pages-tab-btn">

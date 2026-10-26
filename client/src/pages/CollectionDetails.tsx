@@ -109,25 +109,7 @@ function CollectionDetails() {
 
    return (
       <div className="max-w-4xl mx-auto py-6 px-12 space-y-3">
-         <div className="grid grid-cols-[2fr_1.6fr] gap-3">
-            <h1 className="text-2xl font-semibold">{collection.title}</h1>
-
-            <div className="flex items-center justify-end gap-3">
-               {showSearchBar ? (
-                  <SearchBar
-                     placeholder="Search documents..."
-                     value={search}
-                     onChange={setSearch}
-                  />
-               ) : null}
-
-               <ActionsMenu
-                  show={canTranscribe && (isMyCollection || editor)}
-                  onEdit={handleEditOpen}
-                  onDelete={() => setIsDeleteOpen(true)}
-               />
-            </div>
-         </div>
+         <h1 className="text-2xl font-semibold">{collection.title}</h1>
 
          {collection.id && (
             <CollectionTabs
@@ -138,7 +120,23 @@ function CollectionDetails() {
                page={page}
                totalPages={totalPages}
                onPageChange={setPage}
-            />
+            >
+               <div className="flex items-center justify-end gap-3 mt-1 mb-4">
+                  {showSearchBar ? (
+                     <SearchBar
+                        placeholder="Search documents..."
+                        value={search}
+                        onChange={setSearch}
+                     />
+                  ) : null}
+
+                  <ActionsMenu
+                     show={canTranscribe && (isMyCollection || editor)}
+                     onEdit={handleEditOpen}
+                     onDelete={() => setIsDeleteOpen(true)}
+                  />
+               </div>
+            </CollectionTabs>
          )}
 
          {isEditOpen && (

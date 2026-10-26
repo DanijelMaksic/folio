@@ -24,7 +24,7 @@ function PageTabs({
    return (
       <Tabs defaultValue="overview">
          {!approvedTranscription && (
-            <div className="flex justify-between items-center gap-3">
+            <div className="flex justify-between items-center gap-3 mt-1 mb-2">
                <TabsList className={hiddenStyle}>
                   <TabsTrigger value="overview">Overview</TabsTrigger>
                   <TabsTrigger
