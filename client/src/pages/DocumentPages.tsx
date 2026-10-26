@@ -247,37 +247,7 @@ function DocumentPages() {
             </BreadcrumbList>
          </Breadcrumb>
 
-         <div className="flex items-center justify-between gap-3 py-2">
-            <h1 className="text-2xl font-semibold">{document.title}</h1>
-
-            <div className="flex items-center justify-center gap-3">
-               {showControls && (
-                  <SearchBar
-                     placeholder="Search pages..."
-                     value={inputValue}
-                     onChange={setInputValue}
-                  />
-               )}
-
-               {showControls && (
-                  <TranscriptionFilter
-                     onSetStatus={handleSetStatus}
-                     status={status}
-                  />
-               )}
-
-               {(isMyDocument || editor) && isReady && (
-                  <ActionsMenu
-                     show={canTranscribe && (isMyDocument || editor)}
-                     onEdit={handleEditOpen}
-                     onDelete={() => setIsDeleteOpen(true)}
-                     onAddPages={() => setIsAddPagesOpen(true)}
-                     onSaveToCollection={handleCollectionOpen}
-                     inCollection={inCollection}
-                  />
-               )}
-            </div>
-         </div>
+         <h1 className="text-2xl font-semibold py-2">{document.title}</h1>
 
          {document.status === 'processing' && (
             <div className="flex items-center gap-3 text-muted-foreground py-12 justify-center">
@@ -292,20 +262,50 @@ function DocumentPages() {
             </p>
          )}
 
-         {document.id && (
-            <DocumentTabs
-               isReady={isReady}
-               pages={pages}
-               search={search}
-               status={status}
-               isLoadingPages={isLoadingPages}
-               documentId={documentId}
-               totalPages={totalPages}
-               description={document.description}
-               onPageChange={handlePageChange}
-               currentPage={page}
-            />
-         )}
+         <div>
+            {document.id && (
+               <DocumentTabs
+                  isReady={isReady}
+                  pages={pages}
+                  search={search}
+                  status={status}
+                  isLoadingPages={isLoadingPages}
+                  documentId={documentId}
+                  totalPages={totalPages}
+                  description={document.description}
+                  onPageChange={handlePageChange}
+                  currentPage={page}
+               >
+                  <div className="flex items-center justify-center gap-3">
+                     {showControls && (
+                        <SearchBar
+                           placeholder="Search pages..."
+                           value={inputValue}
+                           onChange={setInputValue}
+                        />
+                     )}
+
+                     {showControls && (
+                        <TranscriptionFilter
+                           onSetStatus={handleSetStatus}
+                           status={status}
+                        />
+                     )}
+
+                     {(isMyDocument || editor) && isReady && (
+                        <ActionsMenu
+                           show={canTranscribe && (isMyDocument || editor)}
+                           onEdit={handleEditOpen}
+                           onDelete={() => setIsDeleteOpen(true)}
+                           onAddPages={() => setIsAddPagesOpen(true)}
+                           onSaveToCollection={handleCollectionOpen}
+                           inCollection={inCollection}
+                        />
+                     )}
+                  </div>
+               </DocumentTabs>
+            )}
+         </div>
 
          {isEditOpen && (
             <EditModal

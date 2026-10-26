@@ -12,6 +12,7 @@ function PagesTab({
    totalPages,
    currentPage,
    onPageChange,
+   children,
 }: DocumentTabsProps) {
    return (
       <>

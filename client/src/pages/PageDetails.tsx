@@ -153,32 +153,30 @@ function PageDetails() {
             </BreadcrumbList>
          </Breadcrumb>
 
-         <div className="flex items-center justify-between gap-3 py-2">
-            <h1 className="text-2xl font-semibold" data-testid="page-title">
-               {page.title}
-            </h1>
-
-            <div className="flex items-center justify-center gap-3">
-               {(isMyPage || editor) && (
-                  <Button
-                     variant="outline"
-                     size="sm"
-                     onClick={() => setIsReplaceImageOpen(true)}
-                  >
-                     Change Image
-                  </Button>
-               )}
-
-               <ActionsMenu
-                  show={canTranscribe && (isMyPage || editor)}
-                  onEdit={handleEditOpen}
-                  onDelete={() => setIsDeleteOpen(true)}
-               />
-            </div>
-         </div>
+         <h1 className="text-2xl font-semibold py-2" data-testid="page-title">
+            {page.title}
+         </h1>
 
          {page.id && (
-            <PageTabs canTranscribe={canTranscribe} pageId={page.id} />
+            <PageTabs canTranscribe={canTranscribe} pageId={page.id}>
+               <div className="flex items-center justify-center gap-3">
+                  {(isMyPage || editor) && (
+                     <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsReplaceImageOpen(true)}
+                     >
+                        Change Image
+                     </Button>
+                  )}
+
+                  <ActionsMenu
+                     show={canTranscribe && (isMyPage || editor)}
+                     onEdit={handleEditOpen}
+                     onDelete={() => setIsDeleteOpen(true)}
+                  />
+               </div>
+            </PageTabs>
          )}
 
          <Outlet />
