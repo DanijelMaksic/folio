@@ -11,7 +11,16 @@ import ActionsMenu from '@/components/shared/ActionsMenu';
 import { useViewerStore } from '@/store/useViewerStore';
 import PageTabs from '@/components/documents/PageTabs';
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 import ReplaceImageModal from '@/components/documents/ReplaceImageModal';
+import {
+   Breadcrumb,
+   BreadcrumbItem,
+   BreadcrumbLink,
+   BreadcrumbList,
+   BreadcrumbPage,
+   BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 
 function PageDetails() {
    const [isEditOpen, setIsEditOpen] = useState(false);
@@ -45,6 +54,15 @@ function PageDetails() {
       documentId: documentId!,
       pageNumber: Number(pageNumber),
    });
+
+   const { data: collection } = trpc.collections.getById.useQuery(
+      {
+         id: document?.collectionId!,
+      },
+      {
+         enabled: !!document?.collectionId,
+      },
+   );
 
    const isMyPage = document?.uploadedBy === user?.id;
 
@@ -94,8 +112,48 @@ function PageDetails() {
    if (!page) return <p>Page not found</p>;
 
    return (
-      <div className="max-w-full mx-auto py-6 px-12 space-y-3">
-         <div className="flex items-center justify-between gap-3">
+      <div className="max-w-full mx-auto py-5 px-12">
+         <Breadcrumb>
+            <BreadcrumbList>
+               {collection && (
+                  <>
+                     {' '}
+                     <BreadcrumbItem>
+                        <BreadcrumbLink
+                           render={
+                              <Link
+                                 to={`${window.location.origin}/collections/${document?.collectionId}`}
+                              >
+                                 {collection?.title}
+                              </Link>
+                           }
+                        />
+                     </BreadcrumbItem>
+                     <BreadcrumbSeparator />
+                  </>
+               )}
+
+               <BreadcrumbItem>
+                  <BreadcrumbLink
+                     render={
+                        <Link
+                           to={`${window.location.origin}/documents/${document?.id}`}
+                        >
+                           {document?.title}
+                        </Link>
+                     }
+                  />
+               </BreadcrumbItem>
+
+               <BreadcrumbSeparator />
+
+               <BreadcrumbItem>
+                  <BreadcrumbPage>{page.title}</BreadcrumbPage>
+               </BreadcrumbItem>
+            </BreadcrumbList>
+         </Breadcrumb>
+
+         <div className="flex items-center justify-between gap-3 py-2">
             <h1 className="text-2xl font-semibold" data-testid="page-title">
                {page.title}
             </h1>

@@ -13,9 +13,17 @@ import { useViewerStore } from '@/store/useViewerStore';
 import { Loader2 } from 'lucide-react';
 import AddPagesModal from '@/components/documents/AddPagesModal';
 import TranscriptionFilter from '@/components/documents/TranscriptionFilter';
+import { Link } from 'react-router-dom';
 import SearchBar from '@/components/shared/SearchBar';
-import AppPagination from '@/components/shared/AppPagination';
 import DocumentTabs from '@/components/documents/DocumentTabs';
+import {
+   Breadcrumb,
+   BreadcrumbItem,
+   BreadcrumbLink,
+   BreadcrumbList,
+   BreadcrumbPage,
+   BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 
 export type StatusType = 'all-pages' | 'transcribed' | 'not-transcribed';
 
@@ -85,6 +93,15 @@ function DocumentPages() {
                query.state.data?.status === 'processing' ? 2000 : false,
          },
       );
+
+   const { data: collection } = trpc.collections.getById.useQuery(
+      {
+         id: document?.collectionId!,
+      },
+      {
+         enabled: !!document?.collectionId,
+      },
+   );
 
    const { data: pagesData, isLoading: isLoadingPages } =
       trpc.pages.getByDocument.useQuery(
@@ -203,8 +220,34 @@ function DocumentPages() {
    const showControls = isReady && (!!pages.length || hasActiveFilter);
 
    return (
-      <div className="max-w-full mx-auto py-6 px-12 space-y-6">
-         <div className="flex items-center justify-between gap-3">
+      <div className="max-w-full mx-auto py-5 px-12">
+         <Breadcrumb>
+            <BreadcrumbList>
+               {collection && (
+                  <>
+                     {' '}
+                     <BreadcrumbItem>
+                        <BreadcrumbLink
+                           render={
+                              <Link
+                                 to={`${window.location.origin}/collections/${document?.collectionId}`}
+                              >
+                                 {collection?.title}
+                              </Link>
+                           }
+                        />
+                     </BreadcrumbItem>
+                     <BreadcrumbSeparator />
+                  </>
+               )}
+
+               <BreadcrumbItem>
+                  <BreadcrumbPage>{document.title}</BreadcrumbPage>
+               </BreadcrumbItem>
+            </BreadcrumbList>
+         </Breadcrumb>
+
+         <div className="flex items-center justify-between gap-3 py-2">
             <h1 className="text-2xl font-semibold">{document.title}</h1>
 
             <div className="flex items-center justify-center gap-3">

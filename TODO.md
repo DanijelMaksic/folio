@@ -2,11 +2,10 @@
 
 - Show avatar/name across the app
 - Statistics tab, shared between `DocumentDetails.tsx` and `CollectionDetails.tsx`
-- Enchance `AboutTab.tsx` with additional data: uploader, upload date, page count, collection, status
+- Enchance `AboutTab.tsx` with additional data: uploader, upload date, page count, collection info, status
 - Categories/tags
 - Notes & Questions section
 - In `PageDetails.tsx` add page navigation (prev and next btns)
-- In `PageDetails.tsx` add breadcrumb: collection (optional) -> doc -> page
 - User page: user info, documents and collections, search bar
 - "Fully transcribed" label in `DocumentCard.tsx`, and maybe in `DocumentDetails.tsx` add "All pages as fully transcribed"
 - In `DocumentCard.tsx` add completion %, but only if it's above 0%
@@ -22,4 +21,3 @@
 
 - Remove `description` from `PageDetails.tsx`
 - In `TranscriptionPanel.tsx`, switch textarea with rich text editor
-- Move Pages related components to `pages` folder
