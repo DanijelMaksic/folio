@@ -26,7 +26,7 @@ export const collectionSchema = z.object({
    title: z.string(),
    description: z.string().nullable().optional(),
    createdBy: z.string(),
-   creatorName: z.string(),
+   creatorName: z.string().nullable().optional(),
    coverImageUrl: z.string().nullable().optional(),
 });
 

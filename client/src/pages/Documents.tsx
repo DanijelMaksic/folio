@@ -64,7 +64,7 @@ export default function Documents() {
 
    return (
       <div className="max-w-4xl mx-auto p-6">
-         <div className="grid grid-cols-[2fr_4.5fr_0.1fr] gap-5 mb-6">
+         <div className="grid grid-cols-[2fr_4.5fr_0.1fr] gap-5 mb-7.5">
             <h1
                data-testid="documents-label"
                className="text-2xl font-semibold"

@@ -220,11 +220,11 @@ function DocumentPages() {
    const showControls = isReady && (!!pages.length || hasActiveFilter);
 
    return (
-      <div className="max-w-full mx-auto py-5 px-12">
-         <Breadcrumb>
-            <BreadcrumbList>
-               {collection && (
-                  <>
+      <div className="max-w-full mx-auto pt-3 pb-12 px-12">
+         {collection && isReady && (
+            <div className="mt-2">
+               <Breadcrumb>
+                  <BreadcrumbList>
                      {' '}
                      <BreadcrumbItem>
                         <BreadcrumbLink
@@ -238,16 +238,17 @@ function DocumentPages() {
                         />
                      </BreadcrumbItem>
                      <BreadcrumbSeparator />
-                  </>
-               )}
+                     <BreadcrumbItem>
+                        <BreadcrumbPage>{document.title}</BreadcrumbPage>
+                     </BreadcrumbItem>
+                  </BreadcrumbList>
+               </Breadcrumb>
+            </div>
+         )}
 
-               <BreadcrumbItem>
-                  <BreadcrumbPage>{document.title}</BreadcrumbPage>
-               </BreadcrumbItem>
-            </BreadcrumbList>
-         </Breadcrumb>
-
-         <h1 className="text-2xl font-semibold py-2">{document.title}</h1>
+         {isReady && (
+            <h1 className="text-2xl font-semibold py-2">{document.title}</h1>
+         )}
 
          {document.status === 'processing' && (
             <div className="flex items-center gap-3 text-muted-foreground py-12 justify-center">
@@ -263,7 +264,7 @@ function DocumentPages() {
          )}
 
          <div>
-            {document.id && (
+            {document.id && isReady && (
                <DocumentTabs
                   isReady={isReady}
                   pages={pages}

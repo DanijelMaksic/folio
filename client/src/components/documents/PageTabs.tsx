@@ -40,6 +40,7 @@ function PageTabs({
                      Revision History
                   </TabsTrigger>
                </TabsList>
+
                {children}
             </div>
          )}

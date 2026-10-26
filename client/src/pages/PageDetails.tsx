@@ -10,7 +10,6 @@ import EditModal from '@/components/shared/EditModal';
 import ActionsMenu from '@/components/shared/ActionsMenu';
 import { useViewerStore } from '@/store/useViewerStore';
 import PageTabs from '@/components/documents/PageTabs';
-import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import ReplaceImageModal from '@/components/documents/ReplaceImageModal';
 import {
@@ -21,6 +20,14 @@ import {
    BreadcrumbPage,
    BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
+import {
+   Pagination,
+   PaginationContent,
+   PaginationItem,
+   PaginationNext,
+   PaginationPrevious,
+} from '@/components/ui/pagination';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 function PageDetails() {
    const [isEditOpen, setIsEditOpen] = useState(false);
@@ -112,46 +119,48 @@ function PageDetails() {
    if (!page) return <p>Page not found</p>;
 
    return (
-      <div className="max-w-full mx-auto py-5 px-12">
-         <Breadcrumb>
-            <BreadcrumbList>
-               {collection && (
-                  <>
-                     {' '}
-                     <BreadcrumbItem>
-                        <BreadcrumbLink
-                           render={
-                              <Link
-                                 to={`${window.location.origin}/collections/${document?.collectionId}`}
-                              >
-                                 {collection?.title}
-                              </Link>
-                           }
-                        />
-                     </BreadcrumbItem>
-                     <BreadcrumbSeparator />
-                  </>
-               )}
+      <div className="max-w-full mx-auto py-3 px-12">
+         <div className="mt-2">
+            <Breadcrumb>
+               <BreadcrumbList>
+                  {collection && (
+                     <>
+                        {' '}
+                        <BreadcrumbItem>
+                           <BreadcrumbLink
+                              render={
+                                 <Link
+                                    to={`${window.location.origin}/collections/${document?.collectionId}`}
+                                 >
+                                    {collection?.title}
+                                 </Link>
+                              }
+                           />
+                        </BreadcrumbItem>
+                        <BreadcrumbSeparator />
+                     </>
+                  )}
 
-               <BreadcrumbItem>
-                  <BreadcrumbLink
-                     render={
-                        <Link
-                           to={`${window.location.origin}/documents/${document?.id}`}
-                        >
-                           {document?.title}
-                        </Link>
-                     }
-                  />
-               </BreadcrumbItem>
+                  <BreadcrumbItem>
+                     <BreadcrumbLink
+                        render={
+                           <Link
+                              to={`${window.location.origin}/documents/${document?.id}`}
+                           >
+                              {document?.title}
+                           </Link>
+                        }
+                     />
+                  </BreadcrumbItem>
 
-               <BreadcrumbSeparator />
+                  <BreadcrumbSeparator />
 
-               <BreadcrumbItem>
-                  <BreadcrumbPage>{page.title}</BreadcrumbPage>
-               </BreadcrumbItem>
-            </BreadcrumbList>
-         </Breadcrumb>
+                  <BreadcrumbItem>
+                     <BreadcrumbPage>{page.title}</BreadcrumbPage>
+                  </BreadcrumbItem>
+               </BreadcrumbList>
+            </Breadcrumb>
+         </div>
 
          <h1 className="text-2xl font-semibold py-2" data-testid="page-title">
             {page.title}
@@ -159,14 +168,66 @@ function PageDetails() {
 
          {page.id && (
             <PageTabs canTranscribe={canTranscribe} pageId={page.id}>
-               <ActionsMenu
-                  show={canTranscribe && (isMyPage || editor)}
-                  onReplaceImage={() => setIsReplaceImageOpen(true)}
-                  onEdit={handleEditOpen}
-                  onDelete={() => setIsDeleteOpen(true)}
-                  isMyPage={isMyPage}
-                  editor={editor}
-               />
+               <div className="flex items-center justify-center gap-3">
+                  <Pagination className="border rounded-md border-gray-300 py-1 px-2">
+                     <PaginationContent>
+                        <PaginationItem className="flex items-center border-r border-gray-300 pr-2">
+                           <button
+                              onClick={(e) => {
+                                 e.preventDefault();
+                                 if (page.pageNumber > 1)
+                                    navigate(
+                                       `/documents/${documentId}/pages/${page.pageNumber - 1}`,
+                                    );
+                              }}
+                              aria-disabled={page.pageNumber === 1}
+                              className={
+                                 page.pageNumber === 1
+                                    ? 'pointer-events-none opacity-30'
+                                    : ''
+                              }
+                           >
+                              <ChevronLeft />
+                           </button>
+                        </PaginationItem>
+
+                        <span className="px-2">
+                           Page {page.pageNumber} of {+document?.pageCount!}
+                        </span>
+
+                        <PaginationItem className="flex items-center border-l border-gray-300 pl-2">
+                           <button
+                              onClick={(e) => {
+                                 e.preventDefault();
+                                 if (page.pageNumber < +document?.pageCount!)
+                                    navigate(
+                                       `/documents/${documentId}/pages/${page.pageNumber + 1}`,
+                                    );
+                              }}
+                              aria-disabled={
+                                 page.pageNumber === +document?.pageCount!
+                              }
+                              className={
+                                 page.pageNumber === +document?.pageCount!
+                                    ? 'pointer-events-none opacity-30'
+                                    : ''
+                              }
+                           >
+                              <ChevronRight />
+                           </button>
+                        </PaginationItem>
+                     </PaginationContent>
+                  </Pagination>
+
+                  <ActionsMenu
+                     show={canTranscribe && (isMyPage || editor)}
+                     onReplaceImage={() => setIsReplaceImageOpen(true)}
+                     onEdit={handleEditOpen}
+                     onDelete={() => setIsDeleteOpen(true)}
+                     isMyPage={isMyPage}
+                     editor={editor}
+                  />
+               </div>
             </PageTabs>
          )}
 

@@ -619,6 +619,8 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Added breadcrumb in `DocumentPages.tsx` and `PageDetails.tsx`: collection (optional) -> document -> page
 
+- Added page (prev, next page) pagination in `PageDetails.tsx`
+
 **Decisions:**
 
 - User with viewer role is redirected to `/documents` on sign in, while other roles are redirected to `/dashboard`
