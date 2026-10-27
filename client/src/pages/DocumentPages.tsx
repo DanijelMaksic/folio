@@ -39,12 +39,10 @@ function DocumentPages() {
    const [isAddPagesOpen, setIsAddPagesOpen] = useState(false);
    const [isCollectionOpen, setIsCollectionOpen] = useState(false);
 
-   const [editError, setEditError] = useState('');
    const [deleteError, setDeleteError] = useState('');
    const [collectionError, setCollectionError] = useState('');
+   const [serverError, setServerError] = useState('');
 
-   const [editTitle, setEditTitle] = useState('');
-   const [editDescription, setEditDescription] = useState('');
    const [selectedCollectionId, setSelectedCollectionId] = useState<
       string | null
    >(null);
@@ -131,9 +129,15 @@ function DocumentPages() {
       onSuccess: () => {
          utils.documents.getById.invalidate({ id: documentId! });
          setIsEditOpen(false);
+         setServerError('');
       },
-      onError: (err: TRPCClientErrorLike<AppRouter>) => {
-         setEditError(err.message);
+      onError: (err) => {
+         const issues = err.data?.zodError;
+         const firstIssue =
+            issues?.find((i) => i.path[0] === 'title') ??
+            issues?.find((i) => i.path[0] === 'description') ??
+            issues?.[0];
+         setServerError(firstIssue?.message ?? err.message);
       },
    });
 
@@ -160,23 +164,9 @@ function DocumentPages() {
       },
    });
 
-   const handleEditOpen = () => {
-      setEditTitle(document?.title ?? '');
-      setEditDescription(document?.description ?? '');
-      setIsEditOpen(true);
-   };
-
    const handleCollectionOpen = () => {
       setSelectedCollectionId(document?.collectionId ?? null);
       setIsCollectionOpen(true);
-   };
-
-   const handleEditSubmit = () => {
-      editDocument.mutate({
-         id: documentId!,
-         title: editTitle,
-         description: editDescription,
-      });
    };
 
    const handleDelete = () => {
@@ -296,7 +286,7 @@ function DocumentPages() {
                      {(isMyDocument || editor) && isReady && (
                         <ActionsMenu
                            show={canTranscribe && (isMyDocument || editor)}
-                           onEdit={handleEditOpen}
+                           onEdit={() => setIsEditOpen(true)}
                            onDelete={() => setIsDeleteOpen(true)}
                            onAddPages={() => setIsAddPagesOpen(true)}
                            onSaveToCollection={handleCollectionOpen}
@@ -311,16 +301,16 @@ function DocumentPages() {
          {isEditOpen && (
             <EditModal
                heading="Edit Document"
-               error={editError}
-               title={editTitle}
-               description={editDescription}
+               initialTitle={document.title}
+               initialDescription={document.description ?? ''}
                isPending={editDocument.isPending}
-               onTitleChange={setEditTitle}
-               onDescriptionChange={setEditDescription}
-               onEdit={handleEditSubmit}
+               serverError={serverError}
+               onEdit={(values) =>
+                  editDocument.mutate({ id: documentId!, ...values })
+               }
                onClose={() => {
                   setIsEditOpen(false);
-                  setEditError('');
+                  setServerError('');
                }}
             />
          )}

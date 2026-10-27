@@ -8,7 +8,6 @@ import { TRPCError } from '@trpc/server';
 import {
    isEditor,
    listDocumentsSchema,
-   searchDocumentsSchema,
    updateDocumentSchema,
    uploadDocumentSchema,
 } from '@folio/shared';

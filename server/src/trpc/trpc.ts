@@ -1,10 +1,27 @@
 import { initTRPC, TRPCError } from '@trpc/server';
 import type { Context } from './context.js';
+import { ZodError } from 'zod';
 
 // tRPC initialization file
 
 // <Context> gives us autocompletion and type-checking on ctx.user. Shape of Context: { req, res, db, user, session }
-const t = initTRPC.context<Context>().create();
+const t = initTRPC.context<Context>().create({
+   errorFormatter({ shape, error }) {
+      return {
+         ...shape,
+         data: {
+            ...shape.data,
+            zodError:
+               error.cause instanceof ZodError
+                  ? error.cause.issues.map((i) => ({
+                       path: i.path,
+                       message: i.message,
+                    }))
+                  : null,
+         },
+      };
+   },
+});
 
 export const router = t.router; // router builder
 export const publicProcedure = t.procedure;

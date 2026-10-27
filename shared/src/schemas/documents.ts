@@ -57,6 +57,17 @@ export const updateDocumentSchema = z.object({
    collectionId: z.string().nullable().optional(),
 });
 
+export const editFormSchema = z.object({
+   title: z
+      .string()
+      .min(1, 'Title is required')
+      .max(225, 'Title cannot be longer than 255 characters'),
+   description: z
+      .string()
+      .max(1000, 'Description cannot be longer than 1000 characters')
+      .optional(),
+});
+
 export const documentSchema = z.object({
    id: z.string(),
    title: z.string(),
@@ -74,4 +85,5 @@ export const documentSchema = z.object({
 export type UploadedDocumentInput = z.infer<typeof uploadDocumentSchema>;
 export type UpdateDocumentInput = z.infer<typeof updateDocumentSchema>;
 export type ListDocumentsInput = z.infer<typeof listDocumentsSchema>;
+export type EditFormInput = z.infer<typeof editFormSchema>;
 export type Document = z.infer<typeof documentSchema>;

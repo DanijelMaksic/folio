@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import {
    Dialog,
@@ -11,44 +11,39 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { EditFormInput, editFormSchema } from '@shared';
+import { zodResolver } from '@/lib/zod-resolver';
 
 interface EditModalProps {
    heading: string;
-   error?: string;
-   title: string;
-   description: string;
+   initialTitle: string;
+   initialDescription?: string;
    isPending: boolean;
-   onEdit: () => void;
+   serverError?: string;
+   onEdit: (values: EditFormInput) => void;
    onClose: () => void;
-   onTitleChange: (value: string) => void;
-   onDescriptionChange: (value: string) => void;
 }
 
 function EditModal({
    heading,
-   error,
-   title,
-   description,
+   initialTitle,
+   initialDescription = '',
    isPending,
+   serverError,
    onEdit,
    onClose,
-   onTitleChange,
-   onDescriptionChange,
 }: EditModalProps) {
-   // The parents render this modal conditionally and set the values before
-   // opening, so the props at mount time are the original values.
-   const [initial] = useState({ title, description });
-
-   const trimmedTitle = title.trim();
-   const hasChanges =
-      trimmedTitle !== initial.title.trim() ||
-      description.trim() !== initial.description.trim();
-   const canSave = hasChanges && trimmedTitle.length > 0 && !isPending;
-
-   function handleSubmit(e: React.SubmitEvent) {
-      e.preventDefault();
-      if (canSave) onEdit();
-   }
+   const {
+      register,
+      handleSubmit,
+      formState: { errors, isDirty },
+   } = useForm<EditFormInput>({
+      resolver: zodResolver(editFormSchema),
+      defaultValues: {
+         title: initialTitle,
+         description: initialDescription,
+      },
+   });
 
    return (
       <Dialog
@@ -67,18 +62,21 @@ function EditModal({
                </DialogDescription>
             </DialogHeader>
 
-            <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+            <form
+               onSubmit={handleSubmit(onEdit)}
+               className="space-y-4"
+               noValidate
+            >
                <div className="space-y-2">
                   <Label htmlFor="edit-title-field">Title</Label>
                   <Input
                      id="edit-title-field"
-                     value={title}
-                     onChange={(e) => onTitleChange(e.target.value)}
-                     aria-invalid={trimmedTitle.length === 0}
+                     aria-invalid={!!errors.title}
+                     {...register('title')}
                   />
-                  {trimmedTitle.length === 0 && (
+                  {errors.title && (
                      <p className="text-sm text-destructive">
-                        Title is required
+                        {errors.title.message}
                      </p>
                   )}
                </div>
@@ -87,12 +85,18 @@ function EditModal({
                   <Label htmlFor="edit-description-field">Description</Label>
                   <Textarea
                      id="edit-description-field"
-                     value={description}
-                     onChange={(e) => onDescriptionChange(e.target.value)}
+                     {...register('description')}
                   />
+                  {errors.description && (
+                     <p className="text-sm text-destructive">
+                        {errors.description.message}
+                     </p>
+                  )}
                </div>
 
-               {error && <p className="text-sm text-destructive">{error}</p>}
+               {serverError && (
+                  <p className="text-sm text-destructive">{serverError}</p>
+               )}
 
                <DialogFooter>
                   <Button
@@ -103,7 +107,7 @@ function EditModal({
                   >
                      Cancel
                   </Button>
-                  <Button type="submit" disabled={!canSave}>
+                  <Button type="submit" disabled={!isDirty || isPending}>
                      {isPending ? 'Saving...' : 'Save Changes'}
                   </Button>
                </DialogFooter>

@@ -621,6 +621,10 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Added page (prev, next page) pagination in `PageDetails.tsx`
 
+- In `AboutTab.tsx`, for the owner or an editor, added "No description yet. Write one now.", which opens edit form
+
+- Implement react-hook-form for displaying the error messages
+
 **Decisions:**
 
 - User with viewer role is redirected to `/documents` on sign in, while other roles are redirected to `/dashboard`

@@ -9,13 +9,14 @@
 - "Fully transcribed" label in `DocumentCard.tsx`, and maybe in `DocumentDetails.tsx` add "All pages as fully transcribed"
 - In `DocumentCard.tsx` add completion %, but only if it's above 0%
 - In `TranscriptionPanel.tsx`, if panel is larger than screen height, set `sticky` on page image while scrolling, until the end of panel is reached
-- In `AboutTab.tsx`, for the owner or an editor, show "No description yet. Add one" with a link to the edit form, because that nudges them to fill it in
 
 ## Things to fix
 
 - Upon approving/rejecting a transcription as editor, review queue page loses horiontal margin
 - In forms, fix how errors are displayed (currently, errors are like this: `[ { "origin": "string", "code": "too_big", "maximum": 1000, "inclusive": true, "path": [ "description" ], "message": "Description cannot be longer than 1000 characters" } ]`)
 - If too many images are selected, modal window becomes so large that the upload button can't be seen
+- On textarea elements, limit height after certian treshhold, to avoid infinite vertical height growth when inputing loads of text
+- On textarea elements, on zod errors for max chars, when char > 900 add counter to the error message
 
 ## Things to refactor
 

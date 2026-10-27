@@ -1,6 +1,27 @@
-import { DocumentTabsProps } from '@/components/documents/DocumentTabs';
 import PageCard from '@/components/documents/PageCard';
 import AppPagination from '@/components/shared/AppPagination';
+import { StatusType } from '@/pages/DocumentPages';
+
+interface Page {
+   id: string;
+   createdAt: string;
+   title: string;
+   pageNumber: number;
+   imageUrl: string;
+   approvedTranscriptionCount: number;
+}
+
+interface PagesTabProps {
+   isReady: boolean;
+   pages: Page[];
+   isLoadingPages: boolean;
+   search: string;
+   status: StatusType;
+   documentId: string | undefined;
+   currentPage: number;
+   totalPages: number;
+   onPageChange: (newNumber: number) => void;
+}
 
 function PagesTab({
    isReady,
@@ -12,8 +33,7 @@ function PagesTab({
    totalPages,
    currentPage,
    onPageChange,
-   children,
-}: DocumentTabsProps) {
+}: PagesTabProps) {
    return (
       <>
          {isReady && (

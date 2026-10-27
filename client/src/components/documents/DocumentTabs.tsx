@@ -24,7 +24,7 @@ export interface DocumentTabsProps {
    documentId: string | undefined;
    currentPage: number;
    totalPages: number;
-   document?: Document;
+   document: Document;
    onPageChange: (newNumber: number) => void;
    children: ReactElement;
 }
@@ -73,11 +73,10 @@ function DocumentTabs({
                   currentPage={currentPage}
                   totalPages={totalPages}
                   onPageChange={onPageChange}
-                  children={children}
                />
             </TabsContent>
             <TabsContent value="about">
-               <AboutTab document={document} />
+               {document && <AboutTab document={document} />}
             </TabsContent>
             <TabsContent value="statistics">
                <StatisticsTab />

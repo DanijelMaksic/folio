@@ -1,6 +1,7 @@
 import EditModal from '@/components/shared/EditModal';
 import { useSession } from '@/lib/auth-client';
 import { trpc } from '@/lib/trpc';
+import { parseErrorMessage } from '@/lib/utils';
 import { AppRouter } from '@server/trpc/router';
 import { Document, isEditor } from '@shared';
 import { TRPCClientErrorLike } from '@trpc/client';
@@ -24,7 +25,7 @@ function AboutTab({ document }: { document: Document }) {
          setIsEditOpen(false);
       },
       onError: (err: TRPCClientErrorLike<AppRouter>) => {
-         setEditError(err.message);
+         setEditError(parseErrorMessage(err.message));
       },
    });
 
