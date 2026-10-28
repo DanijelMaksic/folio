@@ -4,7 +4,7 @@ export const createCollectionSchema = z.object({
    title: z
       .string()
       .min(1, 'Title is required')
-      .max(225, 'Title cannot be longer than 255 characters'),
+      .max(225, 'Title cannot be longer than 225 characters'),
    description: z
       .string()
       .max(1000, 'Description cannot be longer than 1000 characters')

@@ -36,14 +36,19 @@ function EditModal({
    const {
       register,
       handleSubmit,
+      watch,
       formState: { errors, isDirty },
    } = useForm<EditFormInput>({
       resolver: zodResolver(editFormSchema),
+      mode: 'onChange',
       defaultValues: {
          title: initialTitle,
          description: initialDescription,
       },
    });
+
+   const titleLength = watch('title')?.length ?? 0;
+   const descriptionLength = watch('description')?.length ?? 0;
 
    return (
       <Dialog
@@ -74,11 +79,19 @@ function EditModal({
                      aria-invalid={!!errors.title}
                      {...register('title')}
                   />
-                  {errors.title && (
-                     <p className="text-sm text-destructive">
-                        {errors.title.message}
+                  <div className="flex justify-between text-sm">
+                     <p className="text-destructive">
+                        {errors?.title?.message}
                      </p>
-                  )}
+
+                     {titleLength > 200 && (
+                        <span
+                           className={`${titleLength! <= 225 ? 'text-muted-foreground' : 'text-destructive'} tabular-nums`}
+                        >
+                           {titleLength}/225
+                        </span>
+                     )}
+                  </div>
                </div>
 
                <div className="space-y-2">
@@ -87,11 +100,19 @@ function EditModal({
                      id="edit-description-field"
                      {...register('description')}
                   />
-                  {errors.description && (
-                     <p className="text-sm text-destructive">
-                        {errors.description.message}
+                  <div className="flex justify-between text-sm">
+                     <p className="text-destructive">
+                        {errors?.description?.message}
                      </p>
-                  )}
+
+                     {descriptionLength > 900 && (
+                        <span
+                           className={`${descriptionLength! <= 1000 ? 'text-muted-foreground' : 'text-destructive'} tabular-nums`}
+                        >
+                           {descriptionLength}/1000
+                        </span>
+                     )}
+                  </div>
                </div>
 
                {serverError && (
@@ -107,7 +128,15 @@ function EditModal({
                   >
                      Cancel
                   </Button>
-                  <Button type="submit" disabled={!isDirty || isPending}>
+                  <Button
+                     type="submit"
+                     disabled={
+                        !isDirty ||
+                        isPending ||
+                        descriptionLength! > 1000 ||
+                        titleLength > 250
+                     }
+                  >
                      {isPending ? 'Saving...' : 'Save Changes'}
                   </Button>
                </DialogFooter>

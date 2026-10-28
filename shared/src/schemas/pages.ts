@@ -20,7 +20,7 @@ export const updatePageSchema = z.object({
    title: z
       .string()
       .min(1, 'Title is required')
-      .max(225, 'Title cannot be longer than 255 characters')
+      .max(225, 'Title cannot be longer than 225 characters')
       .optional(),
    description: z
       .string()

@@ -1,6 +1,8 @@
 import { useRef, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { trpc } from '@/lib/trpc';
+import { zodResolver } from '@/lib/zod-resolver';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,28 +17,60 @@ import {
    AttachmentMedia,
    AttachmentTitle,
 } from '@/components/ui/attachment';
-import { TRPCClientErrorLike } from '@trpc/client';
-import type { AppRouter } from '@server/trpc/router';
 import { ImageIcon, Paperclip, FileText, X } from 'lucide-react';
-import { IMAGES_MAX_TOTAL_BYTES, PDF_MAX_BYTES } from '@shared';
+import {
+   EditFormInput,
+   editFormSchema,
+   IMAGES_MAX_TOTAL_BYTES,
+   PDF_MAX_BYTES,
+} from '@shared';
 
 interface SelectedFile {
    file: File;
    previewUrl: string | null; // object URL for images, null for PDF
 }
 
+const DESCRIPTION_MAX = 1000;
+
+const formatSize = (bytes: number) => {
+   if (bytes < 1024) return `${bytes} B`;
+   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
+
+const toBase64 = (file: File): Promise<string> =>
+   new Promise((res, rej) => {
+      const reader = new FileReader();
+      reader.onload = () => res(reader.result as string);
+      reader.onerror = rej;
+      reader.readAsDataURL(file);
+   });
+
 export default function UploadDocument() {
    const navigate = useNavigate();
-   const [title, setTitle] = useState('');
-   const [description, setDescription] = useState('');
    const [selectedFiles, setSelectedFiles] = useState<SelectedFile[]>([]);
    const [fileType, setFileType] = useState<'image' | 'pdf'>('image');
-   const [error, setError] = useState('');
+   const [fileError, setFileError] = useState('');
    const fileInputRef = useRef<HTMLInputElement>(null);
+
+   const {
+      register,
+      handleSubmit,
+      setError,
+      watch,
+      formState: { errors },
+   } = useForm<EditFormInput>({
+      resolver: zodResolver(editFormSchema),
+      mode: 'onChange',
+      defaultValues: { title: '', description: '' },
+   });
+
+   const titleLength = watch('title')?.length ?? 0;
+   const descriptionLength = watch('description')?.length ?? 0;
 
    const upload = trpc.documents.upload.useMutation({
       onSuccess: (document) => navigate(`/documents/${document?.id}`),
-      onError: (err: TRPCClientErrorLike<AppRouter>) => setError(err.message),
+      onError: (err) => setError('root', { message: err.message }),
    });
 
    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,12 +82,12 @@ export default function UploadDocument() {
 
       if (incoming[0].type === 'application/pdf') {
          if (incoming[0].size > PDF_MAX_BYTES) {
-            setError(
+            setFileError(
                `PDF is too large (${formatSize(incoming[0].size)}). Maximum size is ${formatSize(PDF_MAX_BYTES)}.`,
             );
             return;
          }
-         setError('');
+         setFileError('');
          setFileType('pdf');
          setSelectedFiles([{ file: incoming[0], previewUrl: null }]);
       } else {
@@ -73,20 +107,20 @@ export default function UploadDocument() {
          const tooBig = fresh.find((f) => f.size > IMAGES_MAX_TOTAL_BYTES);
 
          if (tooBig) {
-            setError(
+            setFileError(
                `"${tooBig.name}" is too large (${formatSize(tooBig.size)}). Images must be under ${formatSize(IMAGES_MAX_TOTAL_BYTES)}.`,
             );
             return;
          }
 
          if (currentTotal + addedTotal > IMAGES_MAX_TOTAL_BYTES) {
-            setError(
+            setFileError(
                `Images are too large together (limit ${formatSize(IMAGES_MAX_TOTAL_BYTES)}). Remove some or upload them in smaller batches.`,
             );
             return;
          }
 
-         setError('');
+         setFileError('');
          setFileType('image');
          setSelectedFiles([
             ...base,
@@ -99,7 +133,7 @@ export default function UploadDocument() {
    };
 
    const removeFile = (index: number) => {
-      setError('');
+      setFileError('');
       setSelectedFiles((prev) => {
          const updated = [...prev];
          const removed = updated.splice(index, 1)[0];
@@ -108,23 +142,8 @@ export default function UploadDocument() {
       });
    };
 
-   const toBase64 = (file: File): Promise<string> =>
-      new Promise((res, rej) => {
-         const reader = new FileReader();
-         reader.onload = () => res(reader.result as string);
-         reader.onerror = rej;
-         reader.readAsDataURL(file);
-      });
-
-   const formatSize = (bytes: number) => {
-      if (bytes < 1024) return `${bytes} B`;
-      if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-      return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-   };
-
-   const handleSubmit = async () => {
-      if (!title) return;
-      setError('');
+   const onSubmit = async ({ title, description }: EditFormInput) => {
+      setFileError('');
 
       try {
          if (selectedFiles.length === 0) {
@@ -139,33 +158,60 @@ export default function UploadDocument() {
             upload.mutate({ fileType: 'image', title, description, files });
          }
       } catch {
-         setError('Failed to read file(s). Please try again.');
+         setFileError('Failed to read file(s). Please try again.');
       }
    };
 
    const isPdf = fileType === 'pdf' && selectedFiles.length > 0;
-   const canAddMore = !isPdf; // once a PDF is selected, hide the add button
 
    return (
-      <div className="max-w-lg mx-auto p-6 space-y-4 border border-gray-200 rounded-md mt-12">
+      <form
+         onSubmit={handleSubmit(onSubmit)}
+         noValidate
+         className="max-w-lg mx-auto p-6 space-y-4 border border-gray-200 rounded-md mt-12"
+      >
          <h1 className="text-2xl font-semibold">Upload Document</h1>
 
          <div className="space-y-2">
             <Label htmlFor="title">Title</Label>
             <Input
                id="title"
-               value={title}
-               onChange={(e) => setTitle(e.target.value)}
+               aria-invalid={!!errors.title}
+               {...register('title')}
             />
+            <div className="flex justify-between text-sm">
+               <p className="text-destructive">{errors?.title?.message}</p>
+
+               {titleLength > 200 && (
+                  <span
+                     className={`${titleLength! <= 225 ? 'text-muted-foreground' : 'text-destructive'} tabular-nums`}
+                  >
+                     {titleLength}/225
+                  </span>
+               )}
+            </div>
          </div>
 
          <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
             <Textarea
                id="description"
-               value={description}
-               onChange={(e) => setDescription(e.target.value)}
+               aria-invalid={!!errors.description}
+               {...register('description')}
             />
+            <div className="flex justify-between text-sm">
+               <p className="text-destructive">
+                  {errors?.description?.message}
+               </p>
+
+               {descriptionLength > 900 && (
+                  <span
+                     className={`${descriptionLength! <= 1000 ? 'text-muted-foreground' : 'text-destructive'} tabular-nums`}
+                  >
+                     {descriptionLength}/1000
+                  </span>
+               )}
+            </div>
          </div>
 
          <div className="space-y-2">
@@ -220,39 +266,37 @@ export default function UploadDocument() {
                </AttachmentGroup>
             )}
 
-            {/* Add file button */}
-            {canAddMore && (
-               <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => fileInputRef.current?.click()}
-               >
-                  <Paperclip className="w-4 h-4 mr-2" />
-                  {selectedFiles.length === 0
-                     ? 'Attach file'
-                     : 'Add another image'}
-               </Button>
-            )}
+            <Button
+               type="button"
+               variant="outline"
+               size="sm"
+               onClick={() => fileInputRef.current?.click()}
+            >
+               <Paperclip className="w-4 h-4 mr-2" />
+               {isPdf
+                  ? 'Replace PDF'
+                  : selectedFiles.length === 0
+                    ? 'Attach file'
+                    : 'Add another image'}
+            </Button>
 
-            {isPdf && (
-               <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => fileInputRef.current?.click()}
-               >
-                  <Paperclip className="w-4 h-4 mr-2" />
-                  Replace PDF
-               </Button>
+            {fileError && (
+               <p className="text-sm text-destructive">{fileError}</p>
             )}
          </div>
 
-         {error && <p className="text-sm text-destructive">{error}</p>}
+         {errors.root && (
+            <p className="text-sm text-destructive">{errors.root.message}</p>
+         )}
 
-         <Button onClick={handleSubmit} disabled={upload.isPending || !title}>
+         <Button
+            type="submit"
+            disabled={
+               upload.isPending || titleLength > 225 || descriptionLength > 1000
+            }
+         >
             {upload.isPending ? 'Uploading...' : 'Upload'}
          </Button>
-      </div>
+      </form>
    );
 }

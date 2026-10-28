@@ -222,14 +222,21 @@ function DocumentPages() {
                               <Link
                                  to={`${window.location.origin}/collections/${document?.collectionId}`}
                               >
-                                 {collection?.title}
+                                 {collection?.title.length > 50
+                                    ? `${collection?.title.slice(0, 50)}...`
+                                    : collection?.title}
                               </Link>
                            }
                         />
                      </BreadcrumbItem>
                      <BreadcrumbSeparator />
                      <BreadcrumbItem>
-                        <BreadcrumbPage>{document.title}</BreadcrumbPage>
+                        <BreadcrumbPage>
+                           {' '}
+                           {document?.title.length > 50
+                              ? `${document?.title.slice(0, 50)}...`
+                              : document?.title}
+                        </BreadcrumbPage>
                      </BreadcrumbItem>
                   </BreadcrumbList>
                </Breadcrumb>

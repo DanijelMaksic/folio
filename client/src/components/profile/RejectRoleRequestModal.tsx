@@ -86,11 +86,13 @@ function RejectRoleRequestModal({
                      <span className="text-destructive">
                         {errors.reason?.message}
                      </span>
-                     <span
-                        className={`${reasonLength < 1000 ? 'text-muted-foreground' : 'text-destructive'} tabular-nums`}
-                     >
-                        {reasonLength}/500
-                     </span>
+                     {reasonLength > 400 && (
+                        <span
+                           className={`${reasonLength! <= 500 ? 'text-muted-foreground' : 'text-destructive'} tabular-nums`}
+                        >
+                           {reasonLength}/500
+                        </span>
+                     )}
                   </div>
                </div>
 

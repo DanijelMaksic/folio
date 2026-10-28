@@ -50,7 +50,7 @@ export type GlobalRole = (typeof GLOBAL_ROLES)[number];
 export const usernameSchema = z
    .string()
    .min(1, { message: 'Username is required' })
-   .max(32, { message: 'Username cannot be longer than 32 characters' })
+   .max(30, { message: 'Username cannot be longer than 30 characters' })
    .regex(
       /^[a-z0-9_]+$/,
       'Username can only contain lowercase letters, numbers, and underscores',
@@ -110,7 +110,7 @@ export const updateProfileSchema = z.object({
       .string()
       .trim()
       .min(1, 'Name is required')
-      .max(50, 'Name must be 50 characters or less'),
+      .max(40, 'Name must be 40 characters or less'),
    username: z
       .string()
       .trim()

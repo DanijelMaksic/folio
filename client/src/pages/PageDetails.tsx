@@ -120,7 +120,9 @@ function PageDetails() {
                                  <Link
                                     to={`${window.location.origin}/collections/${document?.collectionId}`}
                                  >
-                                    {collection?.title}
+                                    {collection?.title.length > 50
+                                       ? `${collection?.title.slice(0, 50)}...`
+                                       : collection?.title}
                                  </Link>
                               }
                            />
@@ -135,7 +137,9 @@ function PageDetails() {
                            <Link
                               to={`${window.location.origin}/documents/${document?.id}`}
                            >
-                              {document?.title}
+                              {document?.title.length! > 50
+                                 ? `${document?.title.slice(0, 50)}...`
+                                 : document?.title}
                            </Link>
                         }
                      />
@@ -144,7 +148,12 @@ function PageDetails() {
                   <BreadcrumbSeparator />
 
                   <BreadcrumbItem>
-                     <BreadcrumbPage>{page.title}</BreadcrumbPage>
+                     <BreadcrumbPage>
+                        {' '}
+                        {page?.title.length > 50
+                           ? `${page?.title.slice(0, 50)}...`
+                           : page?.title}
+                     </BreadcrumbPage>
                   </BreadcrumbItem>
                </BreadcrumbList>
             </Breadcrumb>

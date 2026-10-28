@@ -645,6 +645,8 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Fixed pixelated images on cards
 
+- Fixed how validation errors are displayed using react-hook-form
+
 - After signing in, if user clicked "back" in browser they would be navigated back to `/sign-in` page — fixed by adding `{replace: true}` to `navigate()` calls in `SignIn.tsx`
 
 ## Sprint 10 — Visual Design Revamp

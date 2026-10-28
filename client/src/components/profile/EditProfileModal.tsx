@@ -35,11 +35,15 @@ function EditProfileModal({
       handleSubmit,
       reset,
       setError,
+      watch,
       formState: { errors, isSubmitting, isDirty },
    } = useForm<EditProfileValues>({
       resolver: zodResolver(updateProfileSchema),
       defaultValues: { name: initialName, username: initialUsername },
    });
+
+   const nameLength = watch('name')?.length ?? 0;
+   const usernameLength = watch('username')?.length ?? 0;
 
    // Reset the form every time the modal opens
    useEffect(() => {
@@ -97,14 +101,17 @@ function EditProfileModal({
                      }
                      {...register('name')}
                   />
-                  {errors.name && (
-                     <p
-                        id="profile-name-error"
-                        className="text-sm text-destructive"
-                     >
-                        {errors.name.message}
-                     </p>
-                  )}
+                  <div className="flex justify-between text-sm">
+                     <p className="text-destructive">{errors?.name?.message}</p>
+
+                     {nameLength > 30 && (
+                        <span
+                           className={`${nameLength! <= 40 ? 'text-muted-foreground' : 'text-destructive'} tabular-nums`}
+                        >
+                           {nameLength}/40
+                        </span>
+                     )}
+                  </div>
                </div>
 
                <div className="space-y-2">
@@ -118,14 +125,19 @@ function EditProfileModal({
                      }
                      {...register('username')}
                   />
-                  {errors.username && (
-                     <p
-                        id="profile-username-error"
-                        className="text-sm text-destructive"
-                     >
-                        {errors.username.message}
+                  <div className="flex justify-between text-sm">
+                     <p className="text-destructive">
+                        {errors?.username?.message}
                      </p>
-                  )}
+
+                     {usernameLength > 25 && (
+                        <span
+                           className={`${usernameLength! <= 30 ? 'text-muted-foreground' : 'text-destructive'} tabular-nums`}
+                        >
+                           {usernameLength}/30
+                        </span>
+                     )}
+                  </div>
                </div>
 
                {errors.root && (

@@ -14,8 +14,6 @@ import {
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 
-const MAX_LENGTH = 1000;
-
 type RequestRoleValues = { message: string };
 
 interface RequestRoleModalProps {
@@ -90,7 +88,6 @@ function RequestRoleModal({
                   <Label htmlFor="role-request-message">Your request</Label>
                   <Textarea
                      id="role-request-message"
-                     maxLength={MAX_LENGTH}
                      rows={6}
                      placeholder="What would you like to work on, and what experience do you have with historical documents?"
                      aria-invalid={!!errors.message}
@@ -100,9 +97,13 @@ function RequestRoleModal({
                      <span className="text-destructive">
                         {errors.message?.message}
                      </span>
-                     <span className="text-muted-foreground tabular-nums">
-                        {messageLength}/{MAX_LENGTH}
-                     </span>
+                     {messageLength > 900 && (
+                        <span
+                           className={`${messageLength! <= 1000 ? 'text-muted-foreground' : 'text-destructive'} tabular-nums`}
+                        >
+                           {messageLength}/1000
+                        </span>
+                     )}
                   </div>
                </div>
 

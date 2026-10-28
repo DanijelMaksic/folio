@@ -42,11 +42,14 @@ function ChangePasswordModal({ open, onOpenChange }: ChangePasswordModalProps) {
       handleSubmit,
       reset,
       setError,
+      watch,
       formState: { errors, isSubmitting },
    } = useForm<ChangePasswordValues>({
       resolver: zodResolver(changePasswordSchema),
       defaultValues: emptyValues,
    });
+
+   const newPasswordLength = watch('newPassword')?.length ?? 0;
 
    // Reset the form every time the modal opens
    useEffect(() => {
@@ -133,21 +136,20 @@ function ChangePasswordModal({ open, onOpenChange }: ChangePasswordModalProps) {
                      aria-describedby="new-password-hint"
                      {...register('newPassword')}
                   />
-                  {errors.newPassword ? (
-                     <p
-                        id="new-password-hint"
-                        className="text-sm text-destructive"
-                     >
-                        {errors.newPassword.message}
+
+                  <div className="flex justify-between text-sm">
+                     <p className="text-destructive" id="new-password-hint">
+                        {errors?.newPassword?.message}
                      </p>
-                  ) : (
-                     <p
-                        id="new-password-hint"
-                        className="text-sm text-muted-foreground"
-                     >
-                        At least 8 characters, with a letter and a number.
-                     </p>
-                  )}
+
+                     {newPasswordLength > 100 && (
+                        <span
+                           className={`${newPasswordLength! <= 128 ? 'text-muted-foreground' : 'text-destructive'} tabular-nums`}
+                        >
+                           {newPasswordLength}/128
+                        </span>
+                     )}
+                  </div>
                </div>
 
                <div className="space-y-2">

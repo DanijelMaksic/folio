@@ -81,14 +81,15 @@ function ReviewPanel({
                {...register('reason')}
             />
             <div className="flex justify-between text-sm">
-               <span className="text-destructive">
-                  {errors.reason?.message}
-               </span>
-               <span
-                  className={`${reasonLength < 1000 ? 'text-muted-foreground' : 'text-destructive'} tabular-nums`}
-               >
-                  {reasonLength}/1000
-               </span>
+               <p className="text-destructive">{errors?.reason?.message}</p>
+
+               {reasonLength > 900 && (
+                  <span
+                     className={`${reasonLength! <= 1000 ? 'text-muted-foreground' : 'text-destructive'} tabular-nums`}
+                  >
+                     {reasonLength}/1000
+                  </span>
+               )}
             </div>
             <Button type="submit" variant="destructive" disabled={busy}>
                {rejectMutation.isPending ? 'Rejecting...' : 'Reject'}

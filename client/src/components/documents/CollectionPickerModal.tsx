@@ -102,7 +102,9 @@ function CollectionPickerModal({
                                     : ''
                               }`}
                            >
-                              {collection.title}
+                              {collection?.title.length > 35
+                                 ? `${collection?.title.slice(0, 35)}...`
+                                 : collection?.title}
                            </button>
                         ))}
                      </div>

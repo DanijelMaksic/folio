@@ -36,7 +36,9 @@ export function DocumentCard({ document }: { document: Document }) {
                className="text-gray-50 text-xl font-medium font-title leading-9.5 2xl:leading-9 lg:leading-8 md:leading-10"
                style={{ textShadow: '2px 2px 12px rgba(0, 0, 0, 1)' }}
             >
-               {title}
+               {document?.title.length > 50
+                  ? `${document?.title.slice(0, 50)}...`
+                  : document?.title}
             </h2>
          </div>
       </Link>

@@ -33,7 +33,13 @@ function QueueItem({ item }: { item: QueueItemProps }) {
       <Card key={item.id}>
          <CardHeader>
             <CardTitle className="text-lg">
-               {item.documentTitle} - {page?.title}
+               {item.documentTitle.length > 40
+                  ? `${item.documentTitle.slice(0, 40)}...`
+                  : item.documentTitle}{' '}
+               -{' '}
+               {page?.title.length! > 40
+                  ? `${page?.title.slice(0, 40)}...`
+                  : page?.title}
             </CardTitle>
          </CardHeader>
          <CardContent className="flex items-center justify-between">
