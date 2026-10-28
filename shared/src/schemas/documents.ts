@@ -82,8 +82,17 @@ export const documentSchema = z.object({
    coverImageUrl: z.string().nullable().optional(),
 });
 
+export const rejectFormSchema = z.object({
+   reason: z
+      .string()
+      .trim()
+      .min(1, 'Rejection reason is required')
+      .max(1000, 'Reason must be 1000 characters or less'),
+});
+
 export type UploadedDocumentInput = z.infer<typeof uploadDocumentSchema>;
 export type UpdateDocumentInput = z.infer<typeof updateDocumentSchema>;
 export type ListDocumentsInput = z.infer<typeof listDocumentsSchema>;
 export type EditFormInput = z.infer<typeof editFormSchema>;
+export type RejectFormInput = z.infer<typeof rejectFormSchema>;
 export type Document = z.infer<typeof documentSchema>;

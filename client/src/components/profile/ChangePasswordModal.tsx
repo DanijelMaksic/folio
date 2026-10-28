@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { changePasswordSchema } from '@folio/shared';
+import { zodResolver } from '@/lib/zod-resolver';
 import { changePassword } from '@/lib/auth-client';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -14,8 +16,17 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-type FieldName = 'currentPassword' | 'newPassword' | 'confirmPassword';
-type FieldErrors = Partial<Record<FieldName, string>>;
+type ChangePasswordValues = {
+   currentPassword: string;
+   newPassword: string;
+   confirmPassword: string;
+};
+
+const emptyValues: ChangePasswordValues = {
+   currentPassword: '',
+   newPassword: '',
+   confirmPassword: '',
+};
 
 interface ChangePasswordModalProps {
    open: boolean;
@@ -23,66 +34,44 @@ interface ChangePasswordModalProps {
 }
 
 function ChangePasswordModal({ open, onOpenChange }: ChangePasswordModalProps) {
-   const [currentPassword, setCurrentPassword] = useState('');
-   const [newPassword, setNewPassword] = useState('');
-   const [confirmPassword, setConfirmPassword] = useState('');
+   // Not part of the form: the schema would strip it from the parsed values
    const [revokeOtherSessions, setRevokeOtherSessions] = useState(true);
-   const [errors, setErrors] = useState<FieldErrors>({});
-   const [formError, setFormError] = useState<string | null>(null);
-   const [saving, setSaving] = useState(false);
+
+   const {
+      register,
+      handleSubmit,
+      reset,
+      setError,
+      formState: { errors, isSubmitting },
+   } = useForm<ChangePasswordValues>({
+      resolver: zodResolver(changePasswordSchema),
+      defaultValues: emptyValues,
+   });
 
    // Reset the form every time the modal opens
    useEffect(() => {
       if (open) {
-         setCurrentPassword('');
-         setNewPassword('');
-         setConfirmPassword('');
+         reset(emptyValues);
          setRevokeOtherSessions(true);
-         setErrors({});
-         setFormError(null);
       }
-   }, [open]);
+   }, [open, reset]);
 
-   const canSubmit =
-      !saving &&
-      currentPassword.length > 0 &&
-      newPassword.length > 0 &&
-      confirmPassword.length > 0;
-
-   async function handleSubmit(e: React.SubmitEvent) {
-      e.preventDefault();
-      setFormError(null);
-
-      const result = changePasswordSchema.safeParse({
-         currentPassword,
-         newPassword,
-         confirmPassword,
-      });
-
-      if (!result.success) {
-         const fieldErrors: FieldErrors = {};
-         for (const issue of result.error.issues) {
-            const key = issue.path[0] as FieldName;
-            if (!fieldErrors[key]) fieldErrors[key] = issue.message;
-         }
-         setErrors(fieldErrors);
-         return;
-      }
-      setErrors({});
-
-      setSaving(true);
+   async function onSubmit(values: ChangePasswordValues) {
       const { error } = await changePassword({
-         currentPassword: result.data.currentPassword,
-         newPassword: result.data.newPassword,
+         currentPassword: values.currentPassword,
+         newPassword: values.newPassword,
          revokeOtherSessions,
       });
-      setSaving(false);
 
       if (error) {
          if (error.code === 'INVALID_PASSWORD') {
-            setErrors({ currentPassword: 'Current password is incorrect' });
+            setError('currentPassword', {
+               message: 'Current password is incorrect',
+            });
          } else {
-            setFormError(error.message ?? 'Could not change password');
+            setError('root', {
+               message: error.message ?? 'Could not change password',
+            });
          }
          return;
       }
@@ -91,7 +80,10 @@ function ChangePasswordModal({ open, onOpenChange }: ChangePasswordModalProps) {
    }
 
    return (
-      <Dialog open={open} onOpenChange={saving ? undefined : onOpenChange}>
+      <Dialog
+         open={open}
+         onOpenChange={isSubmitting ? undefined : onOpenChange}
+      >
          <DialogContent className="sm:max-w-md">
             <DialogHeader>
                <DialogTitle className="text-lg font-semibold">
@@ -102,28 +94,31 @@ function ChangePasswordModal({ open, onOpenChange }: ChangePasswordModalProps) {
                </DialogDescription>
             </DialogHeader>
 
-            <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+            <form
+               onSubmit={handleSubmit(onSubmit)}
+               className="space-y-4"
+               noValidate
+            >
                <div className="space-y-2">
                   <Label htmlFor="current-password">Current password</Label>
                   <Input
                      id="current-password"
                      type="password"
-                     value={currentPassword}
-                     onChange={(e) => setCurrentPassword(e.target.value)}
+                     autoComplete="current-password"
                      aria-invalid={!!errors.currentPassword}
                      aria-describedby={
                         errors.currentPassword
                            ? 'current-password-error'
                            : undefined
                      }
-                     autoComplete="current-password"
+                     {...register('currentPassword')}
                   />
                   {errors.currentPassword && (
                      <p
                         id="current-password-error"
                         className="text-sm text-destructive"
                      >
-                        {errors.currentPassword}
+                        {errors.currentPassword.message}
                      </p>
                   )}
                </div>
@@ -133,18 +128,17 @@ function ChangePasswordModal({ open, onOpenChange }: ChangePasswordModalProps) {
                   <Input
                      id="new-password"
                      type="password"
-                     value={newPassword}
-                     onChange={(e) => setNewPassword(e.target.value)}
+                     autoComplete="new-password"
                      aria-invalid={!!errors.newPassword}
                      aria-describedby="new-password-hint"
-                     autoComplete="new-password"
+                     {...register('newPassword')}
                   />
                   {errors.newPassword ? (
                      <p
                         id="new-password-hint"
                         className="text-sm text-destructive"
                      >
-                        {errors.newPassword}
+                        {errors.newPassword.message}
                      </p>
                   ) : (
                      <p
@@ -161,22 +155,21 @@ function ChangePasswordModal({ open, onOpenChange }: ChangePasswordModalProps) {
                   <Input
                      id="confirm-password"
                      type="password"
-                     value={confirmPassword}
-                     onChange={(e) => setConfirmPassword(e.target.value)}
+                     autoComplete="new-password"
                      aria-invalid={!!errors.confirmPassword}
                      aria-describedby={
                         errors.confirmPassword
                            ? 'confirm-password-error'
                            : undefined
                      }
-                     autoComplete="new-password"
+                     {...register('confirmPassword')}
                   />
                   {errors.confirmPassword && (
                      <p
                         id="confirm-password-error"
                         className="text-sm text-destructive"
                      >
-                        {errors.confirmPassword}
+                        {errors.confirmPassword.message}
                      </p>
                   )}
                </div>
@@ -194,8 +187,10 @@ function ChangePasswordModal({ open, onOpenChange }: ChangePasswordModalProps) {
                   </Label>
                </div>
 
-               {formError && (
-                  <p className="text-sm text-destructive">{formError}</p>
+               {errors.root && (
+                  <p className="text-sm text-destructive">
+                     {errors.root.message}
+                  </p>
                )}
 
                <DialogFooter>
@@ -203,12 +198,12 @@ function ChangePasswordModal({ open, onOpenChange }: ChangePasswordModalProps) {
                      type="button"
                      variant="outline"
                      onClick={() => onOpenChange(false)}
-                     disabled={saving}
+                     disabled={isSubmitting}
                   >
                      Cancel
                   </Button>
-                  <Button type="submit" disabled={!canSubmit}>
-                     {saving ? 'Saving...' : 'Change password'}
+                  <Button type="submit" disabled={isSubmitting}>
+                     {isSubmitting ? 'Saving...' : 'Change password'}
                   </Button>
                </DialogFooter>
             </form>

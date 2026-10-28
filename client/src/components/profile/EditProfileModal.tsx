@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 import { updateProfileSchema } from '@folio/shared';
+import { zodResolver } from '@/lib/zod-resolver';
 import { updateUser } from '@/lib/auth-client';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,7 +15,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-type FieldErrors = Partial<Record<'name' | 'username', string>>;
+type EditProfileValues = { name: string; username: string };
 
 interface EditProfileModalProps {
    open: boolean;
@@ -28,58 +30,36 @@ function EditProfileModal({
    initialName,
    initialUsername,
 }: EditProfileModalProps) {
-   const [name, setName] = useState(initialName);
-   const [username, setUsername] = useState(initialUsername);
-   const [errors, setErrors] = useState<FieldErrors>({});
-   const [formError, setFormError] = useState<string | null>(null);
-   const [saving, setSaving] = useState(false);
+   const {
+      register,
+      handleSubmit,
+      reset,
+      setError,
+      formState: { errors, isSubmitting, isDirty },
+   } = useForm<EditProfileValues>({
+      resolver: zodResolver(updateProfileSchema),
+      defaultValues: { name: initialName, username: initialUsername },
+   });
 
    // Reset the form every time the modal opens
    useEffect(() => {
-      if (open) {
-         setName(initialName);
-         setUsername(initialUsername);
-         setErrors({});
-         setFormError(null);
-      }
-   }, [open, initialName, initialUsername]);
+      if (open) reset({ name: initialName, username: initialUsername });
+   }, [open, initialName, initialUsername, reset]);
 
-   const hasChanges =
-      name.trim() !== initialName || username.trim() !== initialUsername;
-
-   async function handleSubmit(e: React.SubmitEvent) {
-      e.preventDefault();
-      setFormError(null);
-
-      const result = updateProfileSchema.safeParse({ name, username });
-      if (!result.success) {
-         const fieldErrors: FieldErrors = {};
-         for (const issue of result.error.issues) {
-            const key = issue.path[0] as keyof FieldErrors;
-            if (!fieldErrors[key]) fieldErrors[key] = issue.message;
-         }
-         setErrors(fieldErrors);
-         return;
-      }
-      setErrors({});
-
+   async function onSubmit(values: EditProfileValues) {
       // Only send what actually changed
-      const changes: Partial<typeof result.data> = {};
-      if (result.data.name !== initialName) changes.name = result.data.name;
-      if (result.data.username !== initialUsername)
-         changes.username = result.data.username;
+      const changes: Partial<EditProfileValues> = {};
+      if (values.name !== initialName) changes.name = values.name;
+      if (values.username !== initialUsername)
+         changes.username = values.username;
 
-      setSaving(true);
       const { error } = await updateUser(changes);
-      setSaving(false);
 
       if (error) {
          const message = error.message ?? 'Could not update profile';
-         if (/username/i.test(message)) {
-            setErrors({ username: message });
-         } else {
-            setFormError(message);
-         }
+         setError(/username/i.test(message) ? 'username' : 'root', {
+            message,
+         });
          return;
       }
 
@@ -87,7 +67,10 @@ function EditProfileModal({
    }
 
    return (
-      <Dialog open={open} onOpenChange={saving ? undefined : onOpenChange}>
+      <Dialog
+         open={open}
+         onOpenChange={isSubmitting ? undefined : onOpenChange}
+      >
          <DialogContent className="sm:max-w-md">
             <DialogHeader>
                <DialogTitle className="text-lg font-semibold">
@@ -98,25 +81,28 @@ function EditProfileModal({
                </DialogDescription>
             </DialogHeader>
 
-            <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+            <form
+               onSubmit={handleSubmit(onSubmit)}
+               className="space-y-4"
+               noValidate
+            >
                <div className="space-y-2">
                   <Label htmlFor="profile-name">Name</Label>
                   <Input
                      id="profile-name"
-                     value={name}
-                     onChange={(e) => setName(e.target.value)}
+                     autoComplete="name"
                      aria-invalid={!!errors.name}
                      aria-describedby={
                         errors.name ? 'profile-name-error' : undefined
                      }
-                     autoComplete="name"
+                     {...register('name')}
                   />
                   {errors.name && (
                      <p
                         id="profile-name-error"
                         className="text-sm text-destructive"
                      >
-                        {errors.name}
+                        {errors.name.message}
                      </p>
                   )}
                </div>
@@ -125,26 +111,27 @@ function EditProfileModal({
                   <Label htmlFor="profile-username">Username</Label>
                   <Input
                      id="profile-username"
-                     value={username}
-                     onChange={(e) => setUsername(e.target.value)}
+                     autoComplete="username"
                      aria-invalid={!!errors.username}
                      aria-describedby={
                         errors.username ? 'profile-username-error' : undefined
                      }
-                     autoComplete="username"
+                     {...register('username')}
                   />
                   {errors.username && (
                      <p
                         id="profile-username-error"
                         className="text-sm text-destructive"
                      >
-                        {errors.username}
+                        {errors.username.message}
                      </p>
                   )}
                </div>
 
-               {formError && (
-                  <p className="text-sm text-destructive">{formError}</p>
+               {errors.root && (
+                  <p className="text-sm text-destructive">
+                     {errors.root.message}
+                  </p>
                )}
 
                <DialogFooter>
@@ -152,12 +139,12 @@ function EditProfileModal({
                      type="button"
                      variant="outline"
                      onClick={() => onOpenChange(false)}
-                     disabled={saving}
+                     disabled={isSubmitting}
                   >
                      Cancel
                   </Button>
-                  <Button type="submit" disabled={saving || !hasChanges}>
-                     {saving ? 'Saving...' : 'Save changes'}
+                  <Button type="submit" disabled={isSubmitting || !isDirty}>
+                     {isSubmitting ? 'Saving...' : 'Save changes'}
                   </Button>
                </DialogFooter>
             </form>

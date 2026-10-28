@@ -1,40 +1,56 @@
+import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
+import { z } from 'zod';
+import {
+   RejectFormInput,
+   rejectFormSchema,
+   SubmittedTranscription,
+} from '@shared';
+import { zodResolver } from '@/lib/zod-resolver';
+import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { trpc } from '@/lib/trpc';
-import { SubmittedTranscription } from '@shared';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 function ReviewPanel({
    submittedTranscription,
 }: {
    submittedTranscription: SubmittedTranscription;
 }) {
-   const [rejectionReason, setRejectionReason] = useState('');
    const navigate = useNavigate();
 
+   const {
+      register,
+      handleSubmit,
+      setError,
+      watch,
+      formState: { errors },
+   } = useForm<RejectFormInput>({
+      resolver: zodResolver(rejectFormSchema),
+      defaultValues: { reason: '' },
+   });
+
+   const reasonLength = watch('reason').length;
+
    const approveMutation = trpc.transcriptions.approve.useMutation({
-      onSuccess: () => {
-         navigate('/review');
-      },
+      onSuccess: () => navigate('/review'),
+      onError: (err) => setError('root', { message: err.message }),
    });
 
    const rejectMutation = trpc.transcriptions.reject.useMutation({
-      onSuccess: () => {
-         navigate('/review');
-      },
+      onSuccess: () => navigate('/review'),
+      onError: (err) => setError('reason', { message: err.message }),
    });
 
+   const busy = approveMutation.isPending || rejectMutation.isPending;
+
    function handleApprove() {
-      if (!submittedTranscription) return;
       approveMutation.mutate({ transcriptionId: submittedTranscription.id });
    }
 
-   function handleReject() {
-      if (!submittedTranscription) return;
+   function onReject({ reason }: RejectFormInput) {
       rejectMutation.mutate({
          transcriptionId: submittedTranscription.id,
-         reason: rejectionReason,
+         reason,
       });
    }
 
@@ -46,23 +62,38 @@ function ReviewPanel({
             {submittedTranscription.content}
          </div>
 
-         <Button onClick={handleApprove} disabled={approveMutation.isPending}>
-            Approve
+         <Button onClick={handleApprove} disabled={busy}>
+            {approveMutation.isPending ? 'Approving...' : 'Approve'}
          </Button>
-         <div className="space-y-2">
+         {errors.root && (
+            <p className="text-sm text-destructive">{errors.root.message}</p>
+         )}
+
+         <form
+            onSubmit={handleSubmit(onReject)}
+            className="space-y-2"
+            noValidate
+         >
             <Textarea
                placeholder="Rejection reason..."
-               value={rejectionReason}
-               onChange={(e) => setRejectionReason(e.target.value)}
+               rows={4}
+               aria-invalid={!!errors.reason}
+               {...register('reason')}
             />
-            <Button
-               variant="destructive"
-               onClick={handleReject}
-               disabled={rejectMutation.isPending || !rejectionReason.trim()}
-            >
-               Reject
+            <div className="flex justify-between text-sm">
+               <span className="text-destructive">
+                  {errors.reason?.message}
+               </span>
+               <span
+                  className={`${reasonLength < 1000 ? 'text-muted-foreground' : 'text-destructive'} tabular-nums`}
+               >
+                  {reasonLength}/1000
+               </span>
+            </div>
+            <Button type="submit" variant="destructive" disabled={busy}>
+               {rejectMutation.isPending ? 'Rejecting...' : 'Reject'}
             </Button>
-         </div>
+         </form>
       </div>
    );
 }

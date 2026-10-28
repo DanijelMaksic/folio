@@ -1,4 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@/lib/zod-resolver';
 import { Button } from '@/components/ui/button';
 import {
    Dialog,
@@ -10,8 +13,7 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-
-const MAX_LENGTH = 500;
+import { rejectRoleRequestFormSchema, RejectRoleRequestInput } from '@shared';
 
 interface RejectRoleRequestModalProps {
    open: boolean;
@@ -30,15 +32,25 @@ function RejectRoleRequestModal({
    onConfirm,
    onClose,
 }: RejectRoleRequestModalProps) {
-   const [reason, setReason] = useState('');
+   const {
+      register,
+      handleSubmit,
+      reset,
+      watch,
+      formState: { errors },
+   } = useForm<RejectRoleRequestInput>({
+      resolver: zodResolver(rejectRoleRequestFormSchema),
+      defaultValues: { reason: '' },
+   });
+
+   const reasonLength = watch('reason').length;
 
    useEffect(() => {
-      if (open) setReason('');
-   }, [open]);
+      if (open) reset({ reason: '' });
+   }, [open, reset]);
 
-   function handleSubmit(e: React.SubmitEvent) {
-      e.preventDefault();
-      if (!isPending) onConfirm(reason.trim());
+   function onSubmit({ reason }: RejectRoleRequestInput) {
+      if (!isPending) onConfirm(reason);
    }
 
    return (
@@ -57,19 +69,29 @@ function RejectRoleRequestModal({
                </DialogDescription>
             </DialogHeader>
 
-            <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+            <form
+               onSubmit={handleSubmit(onSubmit)}
+               className="space-y-4"
+               noValidate
+            >
                <div className="space-y-2">
                   <Label htmlFor="reject-reason">Reason (optional)</Label>
                   <Textarea
                      id="reject-reason"
-                     value={reason}
-                     onChange={(e) => setReason(e.target.value)}
-                     maxLength={MAX_LENGTH}
                      rows={4}
+                     aria-invalid={!!errors.reason}
+                     {...register('reason')}
                   />
-                  <p className="text-right text-sm text-muted-foreground tabular-nums">
-                     {reason.length}/{MAX_LENGTH}
-                  </p>
+                  <div className="flex justify-between text-sm">
+                     <span className="text-destructive">
+                        {errors.reason?.message}
+                     </span>
+                     <span
+                        className={`${reasonLength < 1000 ? 'text-muted-foreground' : 'text-destructive'} tabular-nums`}
+                     >
+                        {reasonLength}/500
+                     </span>
+                  </div>
                </div>
 
                {error && <p className="text-sm text-destructive">{error}</p>}

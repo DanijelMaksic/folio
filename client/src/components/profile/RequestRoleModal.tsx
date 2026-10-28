@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 import { requestRoleSchema } from '@folio/shared';
+import { zodResolver } from '@/lib/zod-resolver';
 import { Button } from '@/components/ui/button';
 import {
    Dialog,
@@ -14,6 +16,8 @@ import { Textarea } from '@/components/ui/textarea';
 
 const MAX_LENGTH = 1000;
 
+type RequestRoleValues = { message: string };
+
 interface RequestRoleModalProps {
    open: boolean;
    onOpenChange: (open: boolean) => void;
@@ -27,42 +31,43 @@ function RequestRoleModal({
    targetRole,
    onSubmit,
 }: RequestRoleModalProps) {
-   const [message, setMessage] = useState('');
-   const [error, setError] = useState<string | null>(null);
-   const [saving, setSaving] = useState(false);
+   const {
+      register,
+      handleSubmit,
+      reset,
+      setError,
+      watch,
+      formState: { errors, isSubmitting },
+   } = useForm<RequestRoleValues>({
+      resolver: zodResolver(requestRoleSchema),
+      defaultValues: { message: '' },
+   });
+
+   const messageLength = watch('message').length;
 
    useEffect(() => {
-      if (open) {
-         setMessage('');
-         setError(null);
-      }
-   }, [open]);
+      if (open) reset({ message: '' });
+   }, [open, reset]);
 
-   async function handleSubmit(e: React.SubmitEvent) {
-      e.preventDefault();
-      setError(null);
-
-      const result = requestRoleSchema.safeParse({ message });
-      if (!result.success) {
-         setError(result.error.issues[0].message);
-         return;
-      }
-
-      setSaving(true);
+   async function submit(values: RequestRoleValues) {
       try {
-         await onSubmit(result.data.message);
+         await onSubmit(values.message);
          onOpenChange(false);
       } catch (err) {
-         setError(
-            err instanceof Error ? err.message : 'Could not send your request',
-         );
-      } finally {
-         setSaving(false);
+         setError('message', {
+            message:
+               err instanceof Error
+                  ? err.message
+                  : 'Could not send your request',
+         });
       }
    }
 
    return (
-      <Dialog open={open} onOpenChange={saving ? undefined : onOpenChange}>
+      <Dialog
+         open={open}
+         onOpenChange={isSubmitting ? undefined : onOpenChange}
+      >
          <DialogContent className="sm:max-w-lg">
             <DialogHeader>
                <DialogTitle className="text-lg font-semibold">
@@ -76,22 +81,27 @@ function RequestRoleModal({
                </DialogDescription>
             </DialogHeader>
 
-            <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+            <form
+               onSubmit={handleSubmit(submit)}
+               className="space-y-4"
+               noValidate
+            >
                <div className="space-y-2">
                   <Label htmlFor="role-request-message">Your request</Label>
                   <Textarea
                      id="role-request-message"
-                     value={message}
-                     onChange={(e) => setMessage(e.target.value)}
                      maxLength={MAX_LENGTH}
                      rows={6}
                      placeholder="What would you like to work on, and what experience do you have with historical documents?"
-                     aria-invalid={!!error}
+                     aria-invalid={!!errors.message}
+                     {...register('message')}
                   />
                   <div className="flex justify-between text-sm">
-                     <span className="text-destructive">{error}</span>
+                     <span className="text-destructive">
+                        {errors.message?.message}
+                     </span>
                      <span className="text-muted-foreground tabular-nums">
-                        {message.length}/{MAX_LENGTH}
+                        {messageLength}/{MAX_LENGTH}
                      </span>
                   </div>
                </div>
@@ -101,15 +111,12 @@ function RequestRoleModal({
                      type="button"
                      variant="outline"
                      onClick={() => onOpenChange(false)}
-                     disabled={saving}
+                     disabled={isSubmitting}
                   >
                      Cancel
                   </Button>
-                  <Button
-                     type="submit"
-                     disabled={saving || message.trim().length === 0}
-                  >
-                     {saving ? 'Sending...' : 'Send request'}
+                  <Button type="submit" disabled={isSubmitting}>
+                     {isSubmitting ? 'Sending...' : 'Send request'}
                   </Button>
                </DialogFooter>
             </form>

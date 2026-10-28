@@ -49,7 +49,7 @@ export type GlobalRole = (typeof GLOBAL_ROLES)[number];
 
 export const usernameSchema = z
    .string()
-   .min(3, { message: 'Username must be at least 3 characters' })
+   .min(1, { message: 'Username is required' })
    .max(32, { message: 'Username cannot be longer than 32 characters' })
    .regex(
       /^[a-z0-9_]+$/,
@@ -62,9 +62,18 @@ export const usernameSchema = z
 
 export const signUpSchema = z.object({
    username: usernameSchema,
-   email: z.email('Must be a valid email address'),
+   name: z
+      .string()
+      .trim()
+      .min(1, 'Full name is required')
+      .max(100, 'Full name must be 100 characters or less'),
+   email: z
+      .string()
+      .min(1, 'Email is required')
+      .pipe(z.email('Enter a valid email address')),
    password: z
       .string()
+      .min(1, 'Password is required')
       .min(8, 'Password must be at least 8 characters')
       .max(128, 'Password must be 128 characters or less')
       .regex(/[a-zA-Z]/, 'Password must contain at least one letter')
@@ -72,8 +81,10 @@ export const signUpSchema = z.object({
 });
 
 export const signInSchema = z.object({
-   username: usernameSchema,
-   email: z.email('Must be a valid email address'),
+   email: z
+      .string('Email is required')
+      .min(1)
+      .pipe(z.email('Enter a valid email address')),
    password: z.string().min(1, 'Password is required'),
 });
 
@@ -176,6 +187,14 @@ export const roleRequestSchema = z.object({
    reviewedAt: z.string().nullable(),
 });
 
+export const rejectRoleRequestFormSchema = z.object({
+   reason: z.string().trim().max(500, 'Reason must be 500 characters or less'),
+});
+
+export const deleteProfileFormSchema = z.object({
+   password: z.string().min(1, 'Password is required'),
+});
+
 export const adminRoleRequestSchema = roleRequestSchema.extend({
    userId: z.string(),
    username: z.string().nullable(),
@@ -200,7 +219,11 @@ export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>;
 export type User = z.infer<typeof userSchema>;
 export type UserRoleInput = z.infer<typeof userRoleSchema>;
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
+export type DeleteProfileFormInput = z.infer<typeof deleteProfileFormSchema>;
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
 export type ContributionStats = z.infer<typeof contributionStatsSchema>;
 export type RoleRequest = z.infer<typeof roleRequestSchema>;
+export type RejectRoleRequestInput = z.infer<
+   typeof rejectRoleRequestFormSchema
+>;
 export type AdminRoleRequestOutput = z.infer<typeof adminRoleRequestSchema>;
