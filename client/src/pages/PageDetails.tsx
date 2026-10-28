@@ -24,8 +24,6 @@ import {
    Pagination,
    PaginationContent,
    PaginationItem,
-   PaginationNext,
-   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -34,11 +32,9 @@ function PageDetails() {
    const [isDeleteOpen, setIsDeleteOpen] = useState(false);
    const [isReplaceImageOpen, setIsReplaceImageOpen] = useState(false);
 
-   const [editError, setEditError] = useState('');
+   const [serverError, setServerError] = useState('');
    const [deleteError, setDeleteError] = useState('');
 
-   const [editTitle, setEditTitle] = useState('');
-   const [editDescription, setEditDescription] = useState('');
    const { resetViewerState } = useViewerStore();
 
    const { id: documentId, pageNumber } = useParams<{
@@ -80,9 +76,15 @@ function PageDetails() {
             pageNumber: Number(pageNumber),
          });
          setIsEditOpen(false);
+         setServerError('');
       },
-      onError: (err: TRPCClientErrorLike<AppRouter>) => {
-         setEditError(err.message);
+      onError: (err) => {
+         const issues = err.data?.zodError;
+         const firstIssue =
+            issues?.find((i) => i.path[0] === 'title') ??
+            issues?.find((i) => i.path[0] === 'description') ??
+            issues?.[0];
+         setServerError(firstIssue?.message ?? err.message);
       },
    });
 
@@ -95,20 +97,6 @@ function PageDetails() {
          setDeleteError(err.message);
       },
    });
-
-   const handleEditOpen = () => {
-      setEditTitle(page?.title ?? '');
-      setEditDescription(page?.description ?? '');
-      setIsEditOpen(true);
-   };
-
-   const handleEditSubmit = () => {
-      editPage.mutate({
-         id: page?.id!,
-         title: editTitle,
-         description: editDescription,
-      });
-   };
 
    const handleDelete = async () => {
       deletePage.mutate({ pageId: page?.id as string });
@@ -222,7 +210,7 @@ function PageDetails() {
                   <ActionsMenu
                      show={canTranscribe && (isMyPage || editor)}
                      onReplaceImage={() => setIsReplaceImageOpen(true)}
-                     onEdit={handleEditOpen}
+                     onEdit={() => setIsEditOpen(true)}
                      onDelete={() => setIsDeleteOpen(true)}
                      isMyPage={isMyPage}
                      editor={editor}
@@ -236,16 +224,14 @@ function PageDetails() {
          {isEditOpen && (
             <EditModal
                heading="Edit Page"
-               error={editError}
-               title={editTitle}
-               description={editDescription}
+               serverError={serverError}
+               initialTitle={page.title}
+               initialDescription={page.description ?? ''}
                isPending={editPage.isPending}
-               onTitleChange={setEditTitle}
-               onDescriptionChange={setEditDescription}
-               onEdit={handleEditSubmit}
+               onEdit={(values) => editPage.mutate({ id: page.id!, ...values })}
                onClose={() => {
                   setIsEditOpen(false);
-                  setEditError('');
+                  setServerError('');
                }}
             />
          )}

@@ -12,12 +12,10 @@ import ActionsMenu from '@/components/shared/ActionsMenu';
 import CollectionTabs from '@/components/collections/CollectionTabs';
 
 function CollectionDetails() {
-   const [editError, setEditError] = useState('');
+   const [serverError, setServerError] = useState('');
    const [deleteError, setDeleteError] = useState('');
    const [isEditOpen, setIsEditOpen] = useState(false);
    const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-   const [editTitle, setEditTitle] = useState('');
-   const [editDescription, setEditDescription] = useState('');
 
    const { id: collectionId } = useParams<{ id: string }>();
    const { data: session } = useSession();
@@ -67,9 +65,15 @@ function CollectionDetails() {
       onSuccess: () => {
          utils.collections.getById.invalidate({ id: collectionId! });
          setIsEditOpen(false);
+         setServerError('');
       },
-      onError: (err: TRPCClientErrorLike<AppRouter>) => {
-         setEditError(err.message);
+      onError: (err) => {
+         const issues = err.data?.zodError;
+         const firstIssue =
+            issues?.find((i) => i.path[0] === 'title') ??
+            issues?.find((i) => i.path[0] === 'description') ??
+            issues?.[0];
+         setServerError(firstIssue?.message ?? err.message);
       },
    });
 
@@ -81,20 +85,6 @@ function CollectionDetails() {
          setDeleteError(err.message);
       },
    });
-
-   const handleEditOpen = () => {
-      setEditTitle(collection?.title ?? '');
-      setEditDescription(collection?.description ?? '');
-      setIsEditOpen(true);
-   };
-
-   const handleEditSubmit = () => {
-      editCollection.mutate({
-         id: collectionId!,
-         title: editTitle,
-         description: editDescription,
-      });
-   };
 
    const handleDelete = async () => {
       deleteCollection.mutate({ id: collectionId as string });
@@ -116,7 +106,7 @@ function CollectionDetails() {
                isLoadingDocs={isLoadingDocs}
                isSearchActive={isSearchActive}
                displayedDocuments={displayedDocuments}
-               description={collection.description}
+               collection={collection}
                page={page}
                totalPages={totalPages}
                onPageChange={setPage}
@@ -132,7 +122,7 @@ function CollectionDetails() {
 
                   <ActionsMenu
                      show={canTranscribe && (isMyCollection || editor)}
-                     onEdit={handleEditOpen}
+                     onEdit={() => setIsEditOpen(true)}
                      onDelete={() => setIsDeleteOpen(true)}
                   />
                </div>
@@ -142,16 +132,16 @@ function CollectionDetails() {
          {isEditOpen && (
             <EditModal
                heading="Edit Collection"
-               error={editError}
-               title={editTitle}
-               description={editDescription}
                isPending={editCollection.isPending}
-               onTitleChange={setEditTitle}
-               onDescriptionChange={setEditDescription}
-               onEdit={handleEditSubmit}
+               initialTitle={collection.title}
+               initialDescription={collection.description ?? ''}
+               serverError={serverError}
+               onEdit={(values) =>
+                  editCollection.mutate({ id: collectionId!, ...values })
+               }
                onClose={() => {
                   setIsEditOpen(false);
-                  setEditError('');
+                  setServerError('');
                }}
             />
          )}

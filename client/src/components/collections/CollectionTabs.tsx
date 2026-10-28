@@ -1,8 +1,9 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import AboutTab from '@/components/documents/AboutTab';
+import AboutTab from '@/components/collections/AboutTab';
 import StatisticsTab from '@/components/documents/StatisticsTab';
 import CollectionDocumentsTab from '@/components/collections/CollectionDocumentsTab';
 import { ReactElement } from 'react';
+import { Collection } from '@shared';
 
 interface DisplayedDocument {
    id: string;
@@ -22,8 +23,8 @@ export interface CollectionTabsProps {
    isLoadingDocs: boolean;
    displayedDocuments: DisplayedDocument[] | undefined;
    isSearchActive: boolean;
-   description?: string | null;
    page: number;
+   collection: Collection;
    totalPages: number;
    onPageChange: (page: number) => void;
    children: ReactElement;
@@ -33,7 +34,7 @@ function CollectionTabs({
    isLoadingDocs,
    displayedDocuments,
    isSearchActive,
-   description,
+   collection,
    page,
    totalPages,
    onPageChange,
@@ -60,10 +61,11 @@ function CollectionTabs({
                totalPages={totalPages}
                onPageChange={onPageChange}
                children={children}
+               collection={collection}
             />
          </TabsContent>
          <TabsContent value="about">
-            <AboutTab description={description} />
+            <AboutTab collection={collection} />
          </TabsContent>
          <TabsContent value="statistics">
             <StatisticsTab />
