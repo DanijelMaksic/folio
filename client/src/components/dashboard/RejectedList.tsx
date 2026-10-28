@@ -13,11 +13,25 @@ export function RejectedList({ items }: Props) {
                   data-testid="rejected-item"
                   className="block p-4 hover:bg-muted"
                >
-                  <p className="text-sm font-medium">
-                     {item.documentTitle} · Page {item.pageNumber}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                     {item.rejectionReason || 'No reason provided'}
+                  <div className="text-sm font-medium flex items-center justify-between gap-3">
+                     <span>
+                        {item.documentTitle} · Page {item.pageNumber}
+                     </span>
+                     <span className="text-destructive">
+                        Transcription rejected
+                     </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-2">
+                     {item.rejectionReason ? (
+                        <div>
+                           <span className="font-medium">
+                              Rejection reason:
+                           </span>{' '}
+                           {item.rejectionReason}
+                        </div>
+                     ) : (
+                        'No reason provided'
+                     )}
                   </p>
                </Link>
             </li>

@@ -50,9 +50,6 @@ export default function Dashboard() {
                   Here's what's happening in your workspace.
                </p>
             </div>
-            <Button>
-               <Link to="/documents/upload">Upload document</Link>
-            </Button>
          </header>
 
          {overview.isError && (

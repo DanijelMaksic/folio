@@ -24,8 +24,8 @@ function PageCard({ page, documentId }: { page: Page; documentId: string }) {
          <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs px-2 py-1 flex items-center justify-between">
             <span>
                {' '}
-               {page?.title.length > 120
-                  ? `${page?.title.slice(0, 120)}...`
+               {page?.title.length > 100
+                  ? `${page?.title.slice(0, 100)}...`
                   : page?.title}
             </span>
             {page.approvedTranscriptionCount > 0 && (

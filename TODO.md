@@ -18,7 +18,7 @@
 - On textarea elements, limit height after certian treshhold, to avoid infinite vertical height growth when inputing loads of text
 - On textarea elements, on zod errors for max chars, when char > 900 add counter to the error message
 - On textarea elements, if user spams one character, it breaks the element
-- In dashboard, update "needs your attention" block to include better view of rejected transcription reason
+- In `PageDetails.tsx`, if there is approved transcription, actions are hidden along with the tabs
 
 ## Things to refactor
 
