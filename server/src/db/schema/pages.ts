@@ -11,7 +11,6 @@ export const pages = pgTable(
          onDelete: 'cascade',
       }),
       title: text().notNull(),
-      description: text(),
       pageNumber: integer().notNull(),
       imageUrl: text().notNull(),
       cloudinaryPublicId: text().notNull(),

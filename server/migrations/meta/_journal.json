@@ -43,6 +43,13 @@
       "when": 1791301063179,
       "tag": "0005_tranquil_leo",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793274844933,
+      "tag": "0006_curious_lord_hawal",
+      "breakpoints": true
     }
   ]
 }

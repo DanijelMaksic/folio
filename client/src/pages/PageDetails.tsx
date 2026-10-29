@@ -80,10 +80,7 @@ function PageDetails() {
       },
       onError: (err) => {
          const issues = err.data?.zodError;
-         const firstIssue =
-            issues?.find((i) => i.path[0] === 'title') ??
-            issues?.find((i) => i.path[0] === 'description') ??
-            issues?.[0];
+         const firstIssue = issues?.find((i) => i.path[0] === 'title');
          setServerError(firstIssue?.message ?? err.message);
       },
    });
@@ -235,8 +232,8 @@ function PageDetails() {
                heading="Edit Page"
                serverError={serverError}
                initialTitle={page.title}
-               initialDescription={page.description ?? ''}
                isPending={editPage.isPending}
+               hasDescription={false}
                onEdit={(values) => editPage.mutate({ id: page.id!, ...values })}
                onClose={() => {
                   setIsEditOpen(false);

@@ -136,6 +136,7 @@ function CollectionDetails() {
                initialTitle={collection.title}
                initialDescription={collection.description ?? ''}
                serverError={serverError}
+               hasDescription={true}
                onEdit={(values) =>
                   editCollection.mutate({ id: collectionId!, ...values })
                }

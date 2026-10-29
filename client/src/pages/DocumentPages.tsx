@@ -312,6 +312,7 @@ function DocumentPages() {
                initialDescription={document.description ?? ''}
                isPending={editDocument.isPending}
                serverError={serverError}
+               hasDescription={true}
                onEdit={(values) =>
                   editDocument.mutate({ id: documentId!, ...values })
                }

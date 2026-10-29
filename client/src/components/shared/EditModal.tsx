@@ -20,6 +20,7 @@ interface EditModalProps {
    initialDescription?: string;
    isPending: boolean;
    serverError?: string;
+   hasDescription: boolean;
    onEdit: (values: EditFormInput) => void;
    onClose: () => void;
 }
@@ -32,6 +33,7 @@ function EditModal({
    serverError,
    onEdit,
    onClose,
+   hasDescription,
 }: EditModalProps) {
    const {
       register,
@@ -94,26 +96,28 @@ function EditModal({
                   </div>
                </div>
 
-               <div className="space-y-2">
-                  <Label htmlFor="edit-description-field">Description</Label>
-                  <Textarea
-                     id="edit-description-field"
-                     {...register('description')}
-                  />
-                  <div className="flex justify-between text-sm">
-                     <p className="text-destructive">
-                        {errors?.description?.message}
-                     </p>
+               {hasDescription && (
+                  <div className="space-y-2">
+                     <Label htmlFor="edit-description-field">Description</Label>
+                     <Textarea
+                        id="edit-description-field"
+                        {...register('description')}
+                     />
+                     <div className="flex justify-between text-sm">
+                        <p className="text-destructive">
+                           {errors?.description?.message}
+                        </p>
 
-                     {descriptionLength > 900 && (
-                        <span
-                           className={`${descriptionLength! <= 1000 ? 'text-muted-foreground' : 'text-destructive'} tabular-nums`}
-                        >
-                           {descriptionLength}/1000
-                        </span>
-                     )}
+                        {descriptionLength > 900 && (
+                           <span
+                              className={`${descriptionLength! <= 1000 ? 'text-muted-foreground' : 'text-destructive'} tabular-nums`}
+                           >
+                              {descriptionLength}/1000
+                           </span>
+                        )}
+                     </div>
                   </div>
-               </div>
+               )}
 
                {serverError && (
                   <p className="text-sm text-destructive">{serverError}</p>

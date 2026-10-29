@@ -32,22 +32,27 @@ function AboutTab({ document }: { document: Document }) {
       },
    });
 
+   const canEdit = isOwner || isEditor(session?.user.globalRole);
+
    return (
       <div>
          {description ? (
             description
-         ) : !isOwner || isEditor(session?.user.globalRole) ? (
-            'No description provided.'
-         ) : (
+         ) : canEdit ? (
             <div className="text-muted-foreground">
                No description yet.{' '}
                <button
+                  type="button"
                   onClick={() => setIsEditOpen(true)}
                   className="text-primary underline underline-offset-4 hover:opacity-80 transition-opacity"
                >
                   Write one now.
                </button>
             </div>
+         ) : (
+            <span className="text-muted-foreground">
+               No description provided.
+            </span>
          )}
 
          {isEditOpen && (
@@ -57,6 +62,7 @@ function AboutTab({ document }: { document: Document }) {
                initialTitle={document.title}
                initialDescription={document.description ?? ''}
                isPending={editDocument.isPending}
+               hasDescription={true}
                onEdit={(values) =>
                   editDocument.mutate({ id: documentId!, ...values })
                }

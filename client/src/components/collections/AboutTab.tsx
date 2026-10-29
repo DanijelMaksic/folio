@@ -57,6 +57,7 @@ function AboutTab({ collection }: { collection: Collection }) {
                initialTitle={collection.title}
                initialDescription={collection.description ?? ''}
                isPending={editCollection.isPending}
+               hasDescription={true}
                onEdit={(values) =>
                   editCollection.mutate({ id: collectionId!, ...values })
                }
