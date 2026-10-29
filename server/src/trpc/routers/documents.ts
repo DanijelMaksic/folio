@@ -16,6 +16,7 @@ import { db } from '@/db/index.js';
 import { pdfQueue } from '@/lib/queue.js';
 import { escapeLike } from '@/lib/search.js';
 import { documentVisibility } from '@/lib/document-visibility.js';
+import { getDocumentProgress } from '@/lib/transcription-progress.js';
 
 export const documentsRouter = router({
    upload: protectedProcedure
@@ -264,6 +265,22 @@ export const documentsRouter = router({
          if (!document) throw new TRPCError({ code: 'NOT_FOUND' });
 
          return document;
+      }),
+
+   getStats: publicProcedure
+      .input(z.object({ id: z.string() }))
+      .query(async ({ ctx, input }) => {
+         // Reuse the same visibility rule as getById
+         const [document] = await db
+            .select({ id: documents.id })
+            .from(documents)
+            .where(
+               and(eq(documents.id, input.id), documentVisibility(ctx.user)),
+            );
+
+         if (!document) throw new TRPCError({ code: 'NOT_FOUND' });
+
+         return getDocumentProgress(input.id);
       }),
 
    update: protectedProcedure

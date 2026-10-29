@@ -1,6 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AboutTab from '@/components/collections/AboutTab';
-import StatisticsTab from '@/components/documents/StatisticsTab';
+import StatisticsTab from '@/components/collections/StatisticsTab';
 import CollectionDocumentsTab from '@/components/collections/CollectionDocumentsTab';
 import { ReactElement } from 'react';
 import { Collection } from '@shared';
@@ -68,7 +68,7 @@ function CollectionTabs({
             <AboutTab collection={collection} />
          </TabsContent>
          <TabsContent value="statistics">
-            <StatisticsTab />
+            <StatisticsTab collectionId={collection.id} />
          </TabsContent>
       </Tabs>
    );

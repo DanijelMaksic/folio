@@ -627,6 +627,8 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - In `PageDetails.tsx`, hide "transcribe" and "revisions" tabs along with page settings for non-authenticated users and users with `viewer` role
 
+- Statistics tab for `DocumentDetails.tsx` and `CollectionDetails.tsx`
+
 **Decisions:**
 
 - User with viewer role is redirected to `/documents` on sign in, while other roles are redirected to `/dashboard`

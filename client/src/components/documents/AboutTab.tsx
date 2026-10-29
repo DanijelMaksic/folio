@@ -1,15 +1,18 @@
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import EditModal from '@/components/shared/EditModal';
+import { Button } from '@/components/ui/button';
 import { useSession } from '@/lib/auth-client';
 import { trpc } from '@/lib/trpc';
 import { Document, isEditor } from '@shared';
-import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+
+const displayName = (name?: string | null) => name ?? 'Deleted user';
 
 function AboutTab({ document }: { document: Document }) {
    const { description } = document;
    const { data: session } = useSession();
    const isOwner = session?.user.id === document.uploadedBy;
-   const { id: documentId } = useParams<{ id: string }>();
+   const canEdit = isOwner || isEditor(session?.user.globalRole);
 
    const [isEditOpen, setIsEditOpen] = useState(false);
    const [serverError, setServerError] = useState('');
@@ -32,14 +35,24 @@ function AboutTab({ document }: { document: Document }) {
       },
    });
 
-   const canEdit = isOwner || isEditor(session?.user.globalRole);
+   const { data: collection } = trpc.collections.getById.useQuery(
+      { id: document.collectionId! },
+      { enabled: !!document.collectionId },
+   );
 
-   return (
-      <div>
-         {description ? (
-            description
+   const { data: stats } = trpc.documents.getStats.useQuery({
+      id: document.id,
+   });
+
+   const details: { label: string; value: React.ReactNode }[] = [
+      {
+         label: 'Description',
+         value: description ? (
+            <div className="space-y-2">
+               <p className="whitespace-pre-wrap">{description}</p>
+            </div>
          ) : canEdit ? (
-            <div className="text-muted-foreground">
+            <span className="text-muted-foreground">
                No description yet.{' '}
                <button
                   type="button"
@@ -48,12 +61,54 @@ function AboutTab({ document }: { document: Document }) {
                >
                   Write one now.
                </button>
-            </div>
+            </span>
          ) : (
             <span className="text-muted-foreground">
                No description provided.
             </span>
-         )}
+         ),
+      },
+      { label: 'Uploaded by', value: displayName(document.uploaderName) },
+      {
+         label: 'Upload date',
+         value: new Date(document.createdAt).toLocaleDateString(undefined, {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+         }),
+      },
+      { label: 'Pages', value: stats ? stats.totalPages : '—' },
+      {
+         label: 'Collection',
+         value: document.collectionId ? (
+            <Link
+               to={`/collections/${document.collectionId}`}
+               className="text-primary underline underline-offset-4 hover:opacity-80"
+            >
+               {collection?.title ?? 'View collection'}
+            </Link>
+         ) : (
+            <span className="text-muted-foreground">Not in a collection</span>
+         ),
+      },
+      {
+         label: 'Transcribed',
+         value: stats
+            ? `${stats.percent}% (${stats.transcribedPages} of ${stats.totalPages} pages)`
+            : '—',
+      },
+   ];
+
+   return (
+      <div className="space-y-6">
+         <dl className="grid grid-cols-[max-content_1fr] gap-x-6 gap-y-3 text-sm">
+            {details.map(({ label, value }) => (
+               <div key={label} className="contents">
+                  <dt className="text-muted-foreground">{label}</dt>
+                  <dd>{value}</dd>
+               </div>
+            ))}
+         </dl>
 
          {isEditOpen && (
             <EditModal
@@ -61,10 +116,10 @@ function AboutTab({ document }: { document: Document }) {
                serverError={serverError}
                initialTitle={document.title}
                initialDescription={document.description ?? ''}
-               isPending={editDocument.isPending}
                hasDescription={true}
+               isPending={editDocument.isPending}
                onEdit={(values) =>
-                  editDocument.mutate({ id: documentId!, ...values })
+                  editDocument.mutate({ id: document.id, ...values })
                }
                onClose={() => {
                   setIsEditOpen(false);

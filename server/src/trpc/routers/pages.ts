@@ -4,6 +4,7 @@ import { pages } from '@/db/schema/pages.js';
 import { transcriptions } from '@/db/schema/transcriptions.js';
 import cloudinary from '@/lib/cloudinary.js';
 import { escapeLike } from '@/lib/search.js';
+import { approvedExists } from '@/lib/transcription-progress.js';
 import { protectedProcedure, publicProcedure, router } from '@/trpc/trpc.js';
 import {
    addPagesSchema,
@@ -24,12 +25,6 @@ export const pagesRouter = router({
       .input(getByDocumentSchema)
       .query(async ({ ctx, input }) => {
          const offset = (input.page - 1) * input.limit;
-
-         const approvedExists = sql`EXISTS (
-             SELECT 1 FROM ${transcriptions}
-             WHERE ${transcriptions.pageId} = ${pages.id}
-             AND ${transcriptions.status} = 'approved'
-             )`;
 
          const term = input.search?.trim();
          const pattern = term ? `%${escapeLike(term)}%` : undefined;

@@ -1,8 +1,6 @@
 ## Things to add
 
 - Show avatar/name across the app
-- Statistics tab, shared between `DocumentDetails.tsx` and `CollectionDetails.tsx`
-- Enchance `AboutTab.tsx` with additional data: uploader, upload date, page count, collection info, status
 - Categories/tags
 - Notes & Questions section
 - User page: user info, documents and collections, search bar

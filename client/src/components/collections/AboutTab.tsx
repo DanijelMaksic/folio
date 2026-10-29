@@ -1,15 +1,17 @@
+import { useState } from 'react';
 import EditModal from '@/components/shared/EditModal';
+import { Button } from '@/components/ui/button';
 import { useSession } from '@/lib/auth-client';
 import { trpc } from '@/lib/trpc';
 import { Collection, isEditor } from '@shared';
-import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+
+const displayName = (name?: string | null) => name ?? 'Deleted user';
 
 function AboutTab({ collection }: { collection: Collection }) {
    const { description } = collection;
    const { data: session } = useSession();
    const isOwner = session?.user.id === collection.createdBy;
-   const { id: collectionId } = useParams<{ id: string }>();
+   const canEdit = isOwner || isEditor(session?.user.globalRole);
 
    const [isEditOpen, setIsEditOpen] = useState(false);
    const [serverError, setServerError] = useState('');
@@ -19,6 +21,7 @@ function AboutTab({ collection }: { collection: Collection }) {
    const editCollection = trpc.collections.update.useMutation({
       onSuccess: () => {
          utils.collections.getById.invalidate({ id: collection.id });
+         utils.collections.list.invalidate();
          setIsEditOpen(false);
          setServerError('');
       },
@@ -32,23 +35,51 @@ function AboutTab({ collection }: { collection: Collection }) {
       },
    });
 
-   return (
-      <div>
-         {description ? (
-            description
-         ) : !isOwner || isEditor(session?.user.globalRole) ? (
-            'No description provided.'
-         ) : (
-            <div className="text-muted-foreground">
+   const details: { label: string; value: React.ReactNode }[] = [
+      {
+         label: 'Description',
+         value: description ? (
+            <div className="space-y-2">
+               <p className="whitespace-pre-wrap">{description}</p>
+            </div>
+         ) : canEdit ? (
+            <span className="text-muted-foreground">
                No description yet.{' '}
                <button
+                  type="button"
                   onClick={() => setIsEditOpen(true)}
                   className="text-primary underline underline-offset-4 hover:opacity-80 transition-opacity"
                >
                   Write one now.
                </button>
-            </div>
-         )}
+            </span>
+         ) : (
+            <span className="text-muted-foreground">
+               No description provided.
+            </span>
+         ),
+      },
+      { label: 'Created by', value: displayName(collection.creatorName) },
+      {
+         label: 'Created',
+         value: new Date(collection.createdAt).toLocaleDateString(undefined, {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+         }),
+      },
+   ];
+
+   return (
+      <div className="space-y-6">
+         <dl className="grid grid-cols-[max-content_1fr] gap-x-6 gap-y-3 text-sm">
+            {details.map(({ label, value }) => (
+               <div key={label} className="contents">
+                  <dt className="text-muted-foreground">{label}</dt>
+                  <dd>{value}</dd>
+               </div>
+            ))}
+         </dl>
 
          {isEditOpen && (
             <EditModal
@@ -59,7 +90,7 @@ function AboutTab({ collection }: { collection: Collection }) {
                isPending={editCollection.isPending}
                hasDescription={true}
                onEdit={(values) =>
-                  editCollection.mutate({ id: collectionId!, ...values })
+                  editCollection.mutate({ id: collection.id, ...values })
                }
                onClose={() => {
                   setIsEditOpen(false);

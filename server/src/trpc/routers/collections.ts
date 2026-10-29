@@ -13,6 +13,7 @@ import { TRPCError } from '@trpc/server';
 import { and, count, desc, eq, ilike, or, sql } from 'drizzle-orm';
 import z from 'zod';
 import { escapeLike } from '@/lib/search.js';
+import { getCollectionProgress } from '@/lib/transcription-progress.js';
 
 export const collectionsRouter = router({
    create: protectedProcedure
@@ -109,6 +110,19 @@ export const collectionsRouter = router({
             throw new TRPCError({ code: 'NOT_FOUND' });
          }
          return collection;
+      }),
+
+   getStats: publicProcedure
+      .input(z.object({ id: z.string() }))
+      .query(async ({ input }) => {
+         const [collection] = await db
+            .select({ id: collections.id })
+            .from(collections)
+            .where(eq(collections.id, input.id));
+
+         if (!collection) throw new TRPCError({ code: 'NOT_FOUND' });
+
+         return getCollectionProgress(input.id);
       }),
 
    getCurrentUserCollections: protectedProcedure

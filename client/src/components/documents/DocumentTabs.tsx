@@ -79,7 +79,7 @@ function DocumentTabs({
                {document && <AboutTab document={document} />}
             </TabsContent>
             <TabsContent value="statistics">
-               <StatisticsTab />
+               <StatisticsTab documentId={document.id} />
             </TabsContent>
          </Tabs>
       </div>
