@@ -164,7 +164,7 @@ function PageDetails() {
          </h1>
 
          {page.id && (
-            <PageTabs canTranscribe={canTranscribe} pageId={page.id}>
+            <PageTabs canTranscribe={canTranscribe}>
                <div className="flex items-center justify-center gap-3">
                   <Pagination className="border rounded-md border-gray-300 py-1 px-2">
                      <PaginationContent>

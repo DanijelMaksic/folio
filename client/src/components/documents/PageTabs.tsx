@@ -2,36 +2,33 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import TranscribeTab from '@/components/documents/TranscribeTab';
 import RevisionHistoryTab from '@/components/documents/RevisionHistoryTab';
 import OverviewTab from '@/components/documents/OverviewTab';
-import { trpc } from '@/lib/trpc';
 import { ReactElement } from 'react';
 
 function PageTabs({
    canTranscribe,
-   pageId,
    children,
 }: {
    canTranscribe: boolean;
-   pageId: string;
    children: ReactElement;
 }) {
-   const { data: approvedTranscription } =
-      trpc.transcriptions.getApprovedByPage.useQuery({
-         pageId,
-      });
-
    const hiddenStyle = `${!canTranscribe && 'hidden'}`;
 
    return (
       <Tabs defaultValue="overview">
          <div className="flex justify-between items-center gap-3 mt-1 mb-2">
-            <TabsList className={hiddenStyle}>
+            <TabsList>
                <TabsTrigger value="overview">Overview</TabsTrigger>
-               <TabsTrigger value="transcribe" data-testid="transcribe-tab-btn">
+               <TabsTrigger
+                  value="transcribe"
+                  data-testid="transcribe-tab-btn"
+                  className={hiddenStyle}
+               >
                   Transcribe
                </TabsTrigger>
                <TabsTrigger
                   value="revision-history"
                   data-testid="revision-tab-btn"
+                  className={hiddenStyle}
                >
                   Revision History
                </TabsTrigger>
