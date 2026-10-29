@@ -13,8 +13,6 @@ function TranscriptionPanel({
    const [transcriptionContent, setTranscriptionContent] = useState('');
 
    const isSubmitted = transcription?.status === 'submitted';
-   const isApproved = transcription?.status === 'approved';
-   const isLocked = isSubmitted || isApproved;
 
    const utils = trpc.useUtils();
 
@@ -88,11 +86,11 @@ function TranscriptionPanel({
                   value={transcriptionContent}
                   data-testid="transcription-content"
                   onChange={(e) => setTranscriptionContent(e.target.value)}
-                  disabled={isLocked}
+                  disabled={isSubmitted}
                   placeholder="Type your transcription here..."
                />
                <div className="flex gap-2 items-center">
-                  {!isLocked && (
+                  {!isSubmitted && (
                      <>
                         <button
                            className="px-3 py-1 text-sm border rounded hover:bg-muted disabled:opacity-50"

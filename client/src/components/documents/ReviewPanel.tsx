@@ -1,6 +1,5 @@
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { z } from 'zod';
 import {
    RejectFormInput,
    rejectFormSchema,
@@ -13,8 +12,10 @@ import { Textarea } from '@/components/ui/textarea';
 
 function ReviewPanel({
    submittedTranscription,
+   pageId,
 }: {
    submittedTranscription: SubmittedTranscription;
+   pageId: string;
 }) {
    const navigate = useNavigate();
 
@@ -44,7 +45,10 @@ function ReviewPanel({
    const busy = approveMutation.isPending || rejectMutation.isPending;
 
    function handleApprove() {
-      approveMutation.mutate({ transcriptionId: submittedTranscription.id });
+      approveMutation.mutate({
+         transcriptionId: submittedTranscription.id,
+         pageId: pageId,
+      });
    }
 
    function onReject({ reason }: RejectFormInput) {

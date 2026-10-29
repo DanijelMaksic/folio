@@ -23,27 +23,22 @@ function PageTabs({
 
    return (
       <Tabs defaultValue="overview">
-         {!approvedTranscription && (
-            <div className="flex justify-between items-center gap-3 mt-1 mb-2">
-               <TabsList className={hiddenStyle}>
-                  <TabsTrigger value="overview">Overview</TabsTrigger>
-                  <TabsTrigger
-                     value="transcribe"
-                     data-testid="transcribe-tab-btn"
-                  >
-                     Transcribe
-                  </TabsTrigger>
-                  <TabsTrigger
-                     value="revision-history"
-                     data-testid="revision-tab-btn"
-                  >
-                     Revision History
-                  </TabsTrigger>
-               </TabsList>
+         <div className="flex justify-between items-center gap-3 mt-1 mb-2">
+            <TabsList className={hiddenStyle}>
+               <TabsTrigger value="overview">Overview</TabsTrigger>
+               <TabsTrigger value="transcribe" data-testid="transcribe-tab-btn">
+                  Transcribe
+               </TabsTrigger>
+               <TabsTrigger
+                  value="revision-history"
+                  data-testid="revision-tab-btn"
+               >
+                  Revision History
+               </TabsTrigger>
+            </TabsList>
 
-               {children}
-            </div>
-         )}
+            {children}
+         </div>
 
          <TabsContent value="overview">
             <OverviewTab />

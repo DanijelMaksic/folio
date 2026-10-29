@@ -89,13 +89,6 @@ export const transcriptionsRouter = router({
          if (existing.userId !== ctx.user.id)
             throw new TRPCError({ code: 'FORBIDDEN' });
 
-         if (existing.status !== 'draft' && existing.status !== 'rejected') {
-            throw new TRPCError({
-               code: 'FORBIDDEN',
-               message: 'Cannot edit a submitted or reviewed transcription',
-            });
-         }
-
          // Update the transcription
          const [updated] = await db
             .update(transcriptions)
@@ -125,14 +118,6 @@ export const transcriptionsRouter = router({
          if (!existing) throw new TRPCError({ code: 'NOT_FOUND' });
          if (existing.userId !== ctx.user.id)
             throw new TRPCError({ code: 'FORBIDDEN' });
-
-         if (existing.status !== 'draft' && existing.status !== 'rejected') {
-            throw new TRPCError({
-               code: 'FORBIDDEN',
-               message:
-                  'Cannot submit a transcription that is already submitted or reviewed',
-            });
-         }
 
          // A user cannot submit an empty transcription
          if (!input.content.trim()) {
@@ -254,6 +239,29 @@ export const transcriptionsRouter = router({
             });
          }
 
+         // Remove old approved transcription
+         const [existing] = await db
+            .select()
+            .from(transcriptions)
+            .where(
+               and(
+                  eq(transcriptions.pageId, input.pageId),
+                  eq(transcriptions.status, 'approved'),
+               ),
+            );
+
+         if (existing)
+            await db
+               .update(transcriptions)
+               .set({ status: 'draft' })
+               .where(
+                  and(
+                     eq(transcriptions.pageId, input.pageId),
+                     eq(transcriptions.status, 'approved'),
+                  ),
+               );
+
+         // Update the table with a new approved transcription
          await db
             .update(transcriptions)
             .set({ status: 'approved', updatedAt: new Date() })

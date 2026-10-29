@@ -36,6 +36,7 @@ export const submittedByPageSchema = z.object({
 
 export const approveSchema = z.object({
    transcriptionId: z.string(),
+   pageId: z.string(),
 });
 
 export const rejectSchema = z.object({

@@ -635,6 +635,8 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Move "Change Image" button to `ActionsMenu.tsx`
 
+- Decided to enable writing and submitting a transcription even if there is already an approved transcription. It's up to the editor+ to decide if new submitted transcription will replace the old approved transcription.
+
 **Issues resolved:**
 
 - Fixed a bug where if user hits submit before save when transcribing, revisions tab shows nothing and transcription is not submitted

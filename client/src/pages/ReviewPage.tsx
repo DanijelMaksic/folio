@@ -52,11 +52,12 @@ function ReviewPage() {
          <div className="grid grid-cols-2 gap-4">
             <PageViewer page={page} />
 
-            {isEditor(session?.user?.globalRole) ? (
+            {isEditor(session?.user?.globalRole) && page ? (
                documentId &&
                submittedTranscription && (
                   <ReviewPanel
                      submittedTranscription={submittedTranscription}
+                     pageId={page.id}
                   />
                )
             ) : (
