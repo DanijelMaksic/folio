@@ -26,6 +26,7 @@ import {
    PaginationItem,
 } from '@/components/ui/pagination';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import NotesAndQuestions from '@/components/documents/NotesAndQuestions';
 
 function PageDetails() {
    const [isEditOpen, setIsEditOpen] = useState(false);
@@ -225,7 +226,7 @@ function PageDetails() {
             </PageTabs>
          )}
 
-         <Outlet />
+         <NotesAndQuestions />
 
          {isEditOpen && (
             <EditModal
