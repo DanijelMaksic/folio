@@ -3,6 +3,7 @@ import { z } from 'zod';
 export const createCollectionSchema = z.object({
    title: z
       .string()
+      .trim()
       .min(1, 'Title is required')
       .max(225, 'Title cannot be longer than 225 characters'),
    description: z

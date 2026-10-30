@@ -9,6 +9,7 @@ export const uploadDocumentSchema = z
    .object({
       title: z
          .string()
+         .trim()
          .min(1, 'Title is required')
          .max(225, 'Title cannot be longer than 225 characters'),
       description: z
@@ -47,6 +48,7 @@ export const updateDocumentSchema = z.object({
    id: z.string(),
    title: z
       .string()
+      .trim()
       .min(1, 'Title is required')
       .max(225, 'Title cannot be longer than 225 characters')
       .optional(),
@@ -60,6 +62,7 @@ export const updateDocumentSchema = z.object({
 export const editFormSchema = z.object({
    title: z
       .string()
+      .trim()
       .min(1, 'Title is required')
       .max(225, 'Title cannot be longer than 225 characters'),
    description: z

@@ -2,10 +2,12 @@
 
 - Show avatar/name across the app
 - Categories/tags
+- Sorting
 - User page: user info, documents and collections, search bar
 - "Fully transcribed" label in `DocumentCard.tsx`, and maybe in `DocumentDetails.tsx` add "All pages as fully transcribed"
 - In `DocumentCard.tsx` add completion %, but only if it's above 0%
 - In `TranscriptionPanel.tsx`, if panel is larger than screen height, set `sticky` on page image while scrolling, until the end of panel is reached
+- Role downgrade
 
 ## Things to fix
 

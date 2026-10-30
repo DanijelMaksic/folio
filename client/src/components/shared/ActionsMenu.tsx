@@ -10,8 +10,8 @@ import { EllipsisVertical } from 'lucide-react';
 
 interface ActionsMenuProps {
    show: boolean;
-   onEdit: () => void;
-   onDelete: () => void;
+   onEdit?: () => void;
+   onDelete?: () => void;
    onAddPages?: () => void;
    onReplaceImage?: () => void;
    onSaveToCollection?: () => void;
@@ -76,17 +76,24 @@ function ActionsMenu({
                   </DropdownMenuItem>
                )}
 
-               <DropdownMenuItem onClick={onEdit} data-testid="edit-modal-btn">
-                  Edit
-               </DropdownMenuItem>
+               {onEdit && (
+                  <DropdownMenuItem
+                     onClick={onEdit}
+                     data-testid="edit-modal-btn"
+                  >
+                     Edit
+                  </DropdownMenuItem>
+               )}
 
-               <DropdownMenuItem
-                  className="text-red-600 focus:bg-red-100 focus:text-red-700 transition-all"
-                  data-testid="delete-modal-btn"
-                  onClick={onDelete}
-               >
-                  Delete
-               </DropdownMenuItem>
+               {onDelete && (
+                  <DropdownMenuItem
+                     className="text-red-600 focus:bg-red-100 focus:text-red-700 transition-all"
+                     data-testid="delete-modal-btn"
+                     onClick={onDelete}
+                  >
+                     Delete
+                  </DropdownMenuItem>
+               )}
             </DropdownMenuGroup>
          </DropdownMenuContent>
       </DropdownMenu>

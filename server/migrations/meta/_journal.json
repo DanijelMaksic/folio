@@ -50,6 +50,13 @@
       "when": 1793274844933,
       "tag": "0006_curious_lord_hawal",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793358225491,
+      "tag": "0007_busy_forge",
+      "breakpoints": true
     }
   ]
 }

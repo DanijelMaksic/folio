@@ -226,7 +226,7 @@ function PageDetails() {
             </PageTabs>
          )}
 
-         <NotesAndQuestions />
+         <NotesAndQuestions pageId={page.id} />
 
          {isEditOpen && (
             <EditModal

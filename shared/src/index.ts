@@ -4,3 +4,4 @@ export * from './schemas/transcriptions.js';
 export * from './schemas/collections.js';
 export * from './schemas/pages.js';
 export * from './schemas/dashboard.js';
+export * from './schemas/notes.js';
