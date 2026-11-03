@@ -161,19 +161,20 @@ function NotesAndQuestions({ pageId }: { pageId: string }) {
                   {data?.notes.length}
                </span>
             </div>
-
-            <select
-               value={sort}
-               onChange={(e) => {
-                  setSort(e.target.value as 'newest' | 'oldest');
-                  setPage(1);
-               }}
-               className={`rounded-md border bg-background px-3 py-1.5 text-sm ${!data?.notes.length && 'text-muted-foreground'}`}
-               disabled={!data?.notes.length}
-            >
-               <option value="newest">Newest</option>
-               <option value="oldest">Oldest</option>
-            </select>
+            {data?.notes && (
+               <select
+                  value={sort}
+                  onChange={(e) => {
+                     setSort(e.target.value as 'newest' | 'oldest');
+                     setPage(1);
+                  }}
+                  className={`rounded-md border bg-background px-3 py-1.5 text-sm ${data.notes.length <= 1 && 'text-muted-foreground'}`}
+                  disabled={data.notes.length <= 1}
+               >
+                  <option value="newest">Newest</option>
+                  <option value="oldest">Oldest</option>
+               </select>
+            )}
          </div>
 
          <div className="flex flex-col gap-3 my-8 w-full">
