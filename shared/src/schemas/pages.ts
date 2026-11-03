@@ -43,6 +43,7 @@ export const getByDocumentSchema = z.object({
    status: z
       .enum(['all-pages', 'transcribed', 'not-transcribed'])
       .default('all-pages'),
+   sort: z.enum(['asc', 'desc']).default('asc'),
 });
 
 export const getByPageNumberSchema = z.object({

@@ -47,6 +47,10 @@ export const rejectSchema = z.object({
       .max(1000, 'Reason cannot be longer than 1000 characters'),
 });
 
+export const listQueueSchema = z
+   .object({ sort: z.enum(['oldest', 'newest']).default('oldest') })
+   .default({ sort: 'oldest' });
+
 export const queueItemSchema = z.object({
    id: z.string(),
    pageId: z.string(),

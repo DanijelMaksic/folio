@@ -4,10 +4,13 @@ import { isContributor } from '@shared';
 import { Button } from '@/components/ui/button';
 import { useSession } from '@/lib/auth-client';
 import { DocumentCard } from '@/components/documents/DocumentCard.js';
-import { Plus } from 'lucide-react';
+import { ArrowUpDown, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import SearchBar from '@/components/shared/SearchBar';
 import AppPagination from '@/components/shared/AppPagination';
+
+export type DocumentSort = 'newest' | 'oldest' | 'title-asc' | 'title-desc';
+const SORTS: DocumentSort[] = ['newest', 'oldest', 'title-asc', 'title-desc'];
 
 export default function Documents() {
    const navigate = useNavigate();
@@ -20,10 +23,24 @@ export default function Documents() {
    const search = searchParams.get('search') ?? '';
    const [inputValue, setInputValue] = useState(search);
 
+   const rawSort = searchParams.get('sort') as DocumentSort | null;
+   const sort: DocumentSort =
+      rawSort && SORTS.includes(rawSort) ? rawSort : 'newest';
+
    const handlePageChange = (newPage: number) => {
       setSearchParams((prev) => {
          const next = new URLSearchParams(prev);
          next.set('page', String(newPage));
+         return next;
+      });
+   };
+
+   const handleSetSort = (newSort: DocumentSort) => {
+      setSearchParams((prev) => {
+         const next = new URLSearchParams(prev);
+         if (newSort === 'newest') next.delete('sort');
+         else next.set('sort', newSort);
+         next.set('page', '1');
          return next;
       });
    };
@@ -52,6 +69,7 @@ export default function Documents() {
          page,
          limit: 20,
          search: search || undefined,
+         sort,
       },
       {
          placeholderData: (prev) => prev,
@@ -64,7 +82,7 @@ export default function Documents() {
 
    return (
       <div className="max-w-4xl mx-auto p-6">
-         <div className="grid grid-cols-[2fr_4.5fr_0.1fr] gap-5 mb-7.5">
+         <div className="flex items-center justify-between gap-3 mb-7.5">
             <h1
                data-testid="documents-label"
                className="text-2xl font-semibold"
@@ -77,6 +95,25 @@ export default function Documents() {
                value={inputValue}
                onChange={setInputValue}
             />
+
+            <div className="flex items-center gap-2 border rounded-md">
+               <span className="pl-3">
+                  <ArrowUpDown className="text-gray-500" />
+               </span>
+
+               <select
+                  value={sort}
+                  onChange={(e) =>
+                     handleSetSort(e.target.value as DocumentSort)
+                  }
+                  className="rounded-md border bg-background px-3 py-1.5 text-sm"
+               >
+                  <option value="newest">Newest</option>
+                  <option value="oldest">Oldest</option>
+                  <option value="title-asc">Title A–Z</option>
+                  <option value="title-desc">Title Z–A</option>
+               </select>
+            </div>
 
             {canTranscribe ? (
                <Button onClick={() => navigate('/documents/upload')}>

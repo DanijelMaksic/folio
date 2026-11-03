@@ -37,6 +37,16 @@ export const listDocumentsSchema = z.object({
    status: z
       .enum(['all-documents', 'transcribed', 'not-transcribed'])
       .optional(),
+   sort: z
+      .enum([
+         'newest',
+         'oldest',
+         'title-asc',
+         'title-desc',
+         'most-pages',
+         'most-transcribed',
+      ])
+      .default('newest'),
 });
 
 export const searchDocumentsSchema = z.object({

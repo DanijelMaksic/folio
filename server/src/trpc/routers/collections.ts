@@ -10,7 +10,7 @@ import {
    updateCollectionSchema,
 } from '@folio/shared';
 import { TRPCError } from '@trpc/server';
-import { and, count, desc, eq, ilike, or, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, ilike, or, sql } from 'drizzle-orm';
 import z from 'zod';
 import { escapeLike } from '@/lib/search.js';
 import { getCollectionProgress } from '@/lib/transcription-progress.js';
@@ -46,6 +46,29 @@ export const collectionsRouter = router({
          const term = input.search?.trim();
          const pattern = term ? `%${escapeLike(term)}%` : undefined;
 
+         const documentCountSql = sql<number>`(
+          SELECT COUNT(*) FROM documents d
+          WHERE d.collection_id = ${collections.id} AND d.status = 'ready'
+         )`;
+
+         const orderBy = {
+            newest: [desc(collections.createdAt), desc(collections.id)],
+            oldest: [asc(collections.createdAt), asc(collections.id)],
+            'title-asc': [
+               asc(sql`lower(${collections.title})`),
+               asc(collections.id),
+            ],
+            'title-desc': [
+               desc(sql`lower(${collections.title})`),
+               asc(collections.id),
+            ],
+            'most-documents': [
+               desc(documentCountSql),
+               desc(collections.createdAt),
+               desc(collections.id),
+            ],
+         }[input.sort];
+
          const where = pattern
             ? or(
                  ilike(collections.title, pattern),
@@ -63,6 +86,7 @@ export const collectionsRouter = router({
                   description: collections.description,
                   createdBy: collections.createdBy,
                   creatorName: user.name,
+                  createdAt: collections.createdAt,
                   coverImageUrl: sql<string | null>`(
                      SELECT dp.image_url FROM document_pages dp
                      INNER JOIN documents d ON d.id = dp.document_id
@@ -78,7 +102,7 @@ export const collectionsRouter = router({
                .where(where)
                .limit(input.limit)
                .offset(offset)
-               .orderBy(desc(collections.createdAt)),
+               .orderBy(...orderBy),
 
             db
                .select({ total: count() })

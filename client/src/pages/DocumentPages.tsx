@@ -10,7 +10,7 @@ import EditModal from '@/components/shared/EditModal';
 import ActionsMenu from '@/components/shared/ActionsMenu';
 import CollectionPickerModal from '@/components/documents/CollectionPickerModal';
 import { useViewerStore } from '@/store/useViewerStore';
-import { Loader2 } from 'lucide-react';
+import { ArrowUpDown, Loader2 } from 'lucide-react';
 import AddPagesModal from '@/components/documents/AddPagesModal';
 import TranscriptionFilter from '@/components/documents/TranscriptionFilter';
 import { Link } from 'react-router-dom';
@@ -24,6 +24,8 @@ import {
    BreadcrumbPage,
    BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
+
+export type SortType = 'asc' | 'desc';
 
 export type StatusType = 'all-pages' | 'transcribed' | 'not-transcribed';
 
@@ -53,6 +55,9 @@ function DocumentPages() {
    const { data: session } = useSession();
    const user = session?.user;
    const navigate = useNavigate();
+
+   const rawSort = searchParams.get('sort');
+   const sort: SortType = rawSort === 'desc' ? 'desc' : 'asc';
 
    const utils = trpc.useUtils();
 
@@ -109,6 +114,7 @@ function DocumentPages() {
             limit: 20,
             search: search || undefined,
             status,
+            sort,
          },
          {
             enabled: document?.status === 'ready',
@@ -201,6 +207,19 @@ function DocumentPages() {
       });
    };
 
+   const handleSetSort = (newSort: SortType) => {
+      setSearchParams((prev) => {
+         const next = new URLSearchParams(prev);
+         if (newSort === 'asc') {
+            next.delete('sort');
+         } else {
+            next.set('sort', newSort);
+         }
+         next.set('page', '1');
+         return next;
+      });
+   };
+
    const hasActiveFilter = status !== 'all-pages' || !!search;
 
    if (isLoadingDocument) return <p>Loading...</p>;
@@ -274,7 +293,7 @@ function DocumentPages() {
                   onPageChange={handlePageChange}
                   currentPage={page}
                >
-                  <div className="flex items-center justify-center gap-3">
+                  <div className="flex items-center justify-center gap-6">
                      {showControls && (
                         <SearchBar
                            placeholder="Search pages..."
@@ -284,10 +303,32 @@ function DocumentPages() {
                      )}
 
                      {showControls && (
-                        <TranscriptionFilter
-                           onSetStatus={handleSetStatus}
-                           status={status}
-                        />
+                        <>
+                           <TranscriptionFilter
+                              onSetStatus={handleSetStatus}
+                              status={status}
+                           />
+
+                           <div className="flex items-center gap-2 border rounded-md">
+                              <span className="pl-3">
+                                 <ArrowUpDown className="text-gray-500" />
+                              </span>
+
+                              <select
+                                 value={sort}
+                                 onChange={(e) =>
+                                    handleSetSort(e.target.value as SortType)
+                                 }
+                                 disabled={pages.length <= 1}
+                                 className={`rounded-md border bg-background px-3 py-2 text-sm ${pages.length <= 1 ? 'text-muted-foreground font-semibold' : ''}`}
+                              >
+                                 <option value="asc">Page order (asc)</option>
+                                 <option value="desc">
+                                    Reverse order (desc)
+                                 </option>
+                              </select>
+                           </div>
+                        </>
                      )}
 
                      {(isMyDocument || editor) && isReady && (

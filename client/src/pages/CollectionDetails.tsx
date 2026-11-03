@@ -10,12 +10,22 @@ import DeleteModal from '@/components/shared/DeleteModal';
 import EditModal from '@/components/shared/EditModal';
 import ActionsMenu from '@/components/shared/ActionsMenu';
 import CollectionTabs from '@/components/collections/CollectionTabs';
+import { ArrowUpDown, SortAsc } from 'lucide-react';
+
+type DocumentSort =
+   | 'newest'
+   | 'oldest'
+   | 'title-asc'
+   | 'title-desc'
+   | 'most-pages'
+   | 'most-transcribed';
 
 function CollectionDetails() {
    const [serverError, setServerError] = useState('');
    const [deleteError, setDeleteError] = useState('');
    const [isEditOpen, setIsEditOpen] = useState(false);
    const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+   const [sort, setSort] = useState<DocumentSort>('newest');
 
    const { id: collectionId } = useParams<{ id: string }>();
    const { data: session } = useSession();
@@ -52,6 +62,7 @@ function CollectionDetails() {
          search: debouncedSearch || undefined,
          page,
          limit: PAGE_SIZE,
+         sort,
       },
       { placeholderData: (prev) => prev },
    );
@@ -113,11 +124,37 @@ function CollectionDetails() {
             >
                <div className="flex items-center justify-end gap-3 mt-1 mb-4">
                   {showSearchBar ? (
-                     <SearchBar
-                        placeholder="Search documents..."
-                        value={search}
-                        onChange={setSearch}
-                     />
+                     <>
+                        <SearchBar
+                           placeholder="Search documents..."
+                           value={search}
+                           onChange={setSearch}
+                        />
+
+                        <div className="flex items-center gap-2 border rounded-md">
+                           <span className="pl-3">
+                              <ArrowUpDown className="text-gray-500" />
+                           </span>
+
+                           <select
+                              value={sort}
+                              onChange={(e) => {
+                                 setSort(e.target.value as DocumentSort);
+                                 setPage(1);
+                              }}
+                              className="rounded-md border bg-background px-3 py-2 text-sm"
+                           >
+                              <option value="newest">Newest</option>
+                              <option value="oldest">Oldest</option>
+                              <option value="title-asc">Title A–Z</option>
+                              <option value="title-desc">Title Z–A</option>
+                              <option value="most-pages">Most pages</option>
+                              <option value="most-transcribed">
+                                 Most transcribed
+                              </option>
+                           </select>
+                        </div>
+                     </>
                   ) : null}
 
                   <ActionsMenu

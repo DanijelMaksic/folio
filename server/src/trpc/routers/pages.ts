@@ -16,7 +16,7 @@ import {
    updatePageSchema,
 } from '@folio/shared';
 import { TRPCError } from '@trpc/server';
-import { and, asc, count, eq, gt, ilike, or, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gt, ilike, or, sql } from 'drizzle-orm';
 import z from 'zod';
 
 export const pagesRouter = router({
@@ -25,6 +25,10 @@ export const pagesRouter = router({
       .input(getByDocumentSchema)
       .query(async ({ ctx, input }) => {
          const offset = (input.page - 1) * input.limit;
+
+         const { sort } = input;
+         const order =
+            sort === 'asc' ? asc(pages.pageNumber) : desc(pages.pageNumber);
 
          const term = input.search?.trim();
          const pattern = term ? `%${escapeLike(term)}%` : undefined;
@@ -72,7 +76,7 @@ export const pagesRouter = router({
                   pages.title,
                   pages.createdAt,
                )
-               .orderBy(asc(pages.pageNumber))
+               .orderBy(order)
                .limit(input.limit)
                .offset(offset),
 

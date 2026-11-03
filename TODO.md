@@ -2,7 +2,6 @@
 
 - Show avatar/name across the app
 - Categories/tags
-- Sorting
 - User page: user info, documents and collections, search bar
 - "Fully transcribed" label in `DocumentCard.tsx`, and maybe in `DocumentDetails.tsx` add "All pages as fully transcribed"
 - In `DocumentCard.tsx` add completion %, but only if it's above 0%
@@ -19,8 +18,8 @@
 - On textarea elements, if user spams one character, it breaks the element
 - On document upload, grey out whole upload form when `isPending` is true
 - On `PageDetails.tsx`, if page pagination is user, doc viewer saved zoom breaks
+- When editor signs in, they are taken to '/'
 
 ## Things to refactor
 
-- Remove `description` from `PageDetails.tsx`
 - In `TranscriptionPanel.tsx`, switch textarea with rich text editor

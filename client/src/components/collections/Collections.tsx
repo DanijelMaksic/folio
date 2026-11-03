@@ -6,9 +6,24 @@ import { isContributor } from '@shared';
 import { Button } from '@/components/ui/button';
 import { useSession } from '@/lib/auth-client';
 import { CollectionCard } from '@/components/collections/CollectionCard';
-import { Plus } from 'lucide-react';
+import { ArrowUpDown, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import SearchBar from '@/components/shared/SearchBar';
+
+export type CollectionSort =
+   | 'newest'
+   | 'oldest'
+   | 'title-asc'
+   | 'title-desc'
+   | 'most-documents';
+
+const SORTS: CollectionSort[] = [
+   'newest',
+   'oldest',
+   'title-asc',
+   'title-desc',
+   'most-documents',
+];
 
 export default function Collections() {
    const navigate = useNavigate();
@@ -21,10 +36,24 @@ export default function Collections() {
    const search = searchParams.get('search') ?? '';
    const [inputValue, setInputValue] = useState(search);
 
+   const rawSort = searchParams.get('sort') as CollectionSort | null;
+   const sort: CollectionSort =
+      rawSort && SORTS.includes(rawSort) ? rawSort : 'newest';
+
    const handlePageChange = (newPage: number) => {
       setSearchParams((prev) => {
          const next = new URLSearchParams(prev);
          next.set('page', String(newPage));
+         return next;
+      });
+   };
+
+   const handleSetSort = (newSort: CollectionSort) => {
+      setSearchParams((prev) => {
+         const next = new URLSearchParams(prev);
+         if (newSort === 'newest') next.delete('sort');
+         else next.set('sort', newSort);
+         next.set('page', '1');
          return next;
       });
    };
@@ -54,6 +83,7 @@ export default function Collections() {
          page,
          limit: 20,
          search: search || undefined,
+         sort,
       },
       {
          placeholderData: (prev) => prev,
@@ -75,7 +105,25 @@ export default function Collections() {
                onChange={setInputValue}
             />
 
-            <span></span>
+            <div className="flex items-center gap-2 border rounded-md">
+               <span className="pl-3">
+                  <ArrowUpDown className="text-gray-500" />
+               </span>
+
+               <select
+                  value={sort}
+                  onChange={(e) =>
+                     handleSetSort(e.target.value as CollectionSort)
+                  }
+                  className="rounded-md border bg-background px-3 py-1.5 text-sm"
+               >
+                  <option value="newest">Newest</option>
+                  <option value="oldest">Oldest</option>
+                  <option value="title-asc">Title A–Z</option>
+                  <option value="title-desc">Title Z–A</option>
+                  <option value="most-documents">Most documents</option>
+               </select>
+            </div>
 
             {canTranscribe ? (
                <Button onClick={() => navigate('/collections/create')}>

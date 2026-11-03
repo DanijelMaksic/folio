@@ -13,7 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useSession } from '@/lib/auth-client';
 import { trpc } from '@/lib/trpc';
 import { zodResolver } from '@/lib/zod-resolver';
-import { User2 } from 'lucide-react';
+import { ArrowUpDown, User2 } from 'lucide-react';
 import SignInModal from '@/components/documents/SignInModal';
 
 const PAGE_SIZE = 10;
@@ -161,19 +161,25 @@ function NotesAndQuestions({ pageId }: { pageId: string }) {
                   {data?.notes.length}
                </span>
             </div>
+
             {data?.notes && (
-               <select
-                  value={sort}
-                  onChange={(e) => {
-                     setSort(e.target.value as 'newest' | 'oldest');
-                     setPage(1);
-                  }}
-                  className={`rounded-md border bg-background px-3 py-1.5 text-sm ${data.notes.length <= 1 && 'text-muted-foreground'}`}
-                  disabled={data.notes.length <= 1}
-               >
-                  <option value="newest">Newest</option>
-                  <option value="oldest">Oldest</option>
-               </select>
+               <div className="flex items-center gap-1 border rounded-md">
+                  <span className="pl-2">
+                     <ArrowUpDown className="text-gray-500" />
+                  </span>
+                  <select
+                     value={sort}
+                     onChange={(e) => {
+                        setSort(e.target.value as 'newest' | 'oldest');
+                        setPage(1);
+                     }}
+                     className={`rounded-md border bg-background px-3 py-1.5 text-sm ${data.notes.length <= 1 && 'text-muted-foreground'}`}
+                     disabled={data.notes.length <= 1}
+                  >
+                     <option value="newest">Newest</option>
+                     <option value="oldest">Oldest</option>
+                  </select>
+               </div>
             )}
          </div>
 

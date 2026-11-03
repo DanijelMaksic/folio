@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { protectedProcedure, publicProcedure, router } from '@/trpc/trpc.js';
 import { documents, pages, transcriptions } from '@/db/schema/index.js';
 import { user } from '@/db/schema/index.js';
-import { and, count, desc, eq, ilike, or, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, ilike, or, sql } from 'drizzle-orm';
 import cloudinary from '@/lib/cloudinary.js';
 import { TRPCError } from '@trpc/server';
 import {
@@ -148,6 +148,42 @@ export const documentsRouter = router({
          const term = input.search?.trim();
          const pattern = term ? `%${escapeLike(term)}%` : undefined;
 
+         const pageCountSql = sql<number>`(
+          SELECT COUNT(*) FROM ${pages} WHERE ${pages.documentId} = ${documents.id}
+         )`;
+
+         const transcribedCountSql = sql<number>`(
+          SELECT COUNT(*) FROM ${pages} p
+          WHERE p.document_id = ${documents.id}
+          AND EXISTS (
+          SELECT 1 FROM ${transcriptions} t
+          WHERE t.page_id = p.id AND t.status = 'approved'
+            )
+         )`;
+
+         const orderBy = {
+            newest: [desc(documents.createdAt), desc(documents.id)],
+            oldest: [asc(documents.createdAt), asc(documents.id)],
+            'title-asc': [
+               asc(sql`lower(${documents.title})`),
+               asc(documents.id),
+            ],
+            'title-desc': [
+               desc(sql`lower(${documents.title})`),
+               asc(documents.id),
+            ],
+            'most-pages': [
+               desc(pageCountSql),
+               desc(documents.createdAt),
+               desc(documents.id),
+            ],
+            'most-transcribed': [
+               desc(transcribedCountSql),
+               desc(documents.createdAt),
+               desc(documents.id),
+            ],
+         }[input.sort];
+
          const contentMatch =
             term && term.length >= 3
                ? sql`EXISTS (
@@ -172,15 +208,6 @@ export const documentsRouter = router({
          // processing/failed ones (so they can follow progress or delete)
          const currentUser = ctx.user;
 
-         const visibility = !currentUser
-            ? eq(documents.status, 'ready')
-            : isEditor(currentUser.globalRole)
-              ? undefined // no restriction
-              : or(
-                   eq(documents.status, 'ready'),
-                   eq(documents.uploadedBy, currentUser.id),
-                );
-
          const where = and(
             documentVisibility(ctx.user),
             searchFilter,
@@ -202,22 +229,22 @@ export const documentsRouter = router({
                   updatedAt: documents.updatedAt,
                   uploaderName: user.name,
                   coverImageUrl: sql<string | null>`(
-              SELECT image_url FROM document_pages
-              WHERE document_id = ${documents.id}
-              AND page_number = 1
-              LIMIT 1
-            )`,
+                   SELECT image_url FROM document_pages
+                   WHERE document_id = ${documents.id}
+                   AND page_number = 1
+                   LIMIT 1
+                  )`,
                   pageCount: sql<number>`(
-              SELECT COUNT(*) FROM document_pages
-              WHERE document_id = ${documents.id}
-            )`,
+                   SELECT COUNT(*) FROM document_pages
+                   WHERE document_id = ${documents.id}
+                  )`,
                })
                .from(documents)
                .leftJoin(user, eq(user.id, documents.uploadedBy))
                .where(where)
                .limit(input.limit)
                .offset(offset)
-               .orderBy(desc(documents.createdAt)),
+               .orderBy(...orderBy),
 
             db
                .select({ total: count() })

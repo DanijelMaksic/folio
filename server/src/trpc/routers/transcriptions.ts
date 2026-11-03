@@ -9,12 +9,13 @@ import {
    approveSchema,
    isContributor,
    isEditor,
+   listQueueSchema,
    rejectSchema,
    submittedByPageSchema,
    transcriptionContentSchema,
 } from '@folio/shared';
 import { TRPCError } from '@trpc/server';
-import { and, desc, eq } from 'drizzle-orm';
+import { and, asc, desc, eq } from 'drizzle-orm';
 import z from 'zod';
 import { sendApprovalEmail, sendRejectionEmail } from '@/lib/email.js';
 import { documents } from '@/db/schema/documents.js';
@@ -176,35 +177,42 @@ export const transcriptionsRouter = router({
             .orderBy(desc(transcriptionRevisions.savedAt));
       }),
 
-   listQueue: protectedProcedure.query(async ({ ctx }) => {
-      if (!isEditor(ctx.user.globalRole)) {
-         throw new TRPCError({
-            code: 'FORBIDDEN',
-            message: 'Editor role required',
-         });
-      }
+   listQueue: protectedProcedure
+      .input(listQueueSchema)
+      .query(async ({ ctx, input }) => {
+         if (!isEditor(ctx.user.globalRole)) {
+            throw new TRPCError({
+               code: 'FORBIDDEN',
+               message: 'Editor role required',
+            });
+         }
 
-      const queue = await db
-         .select({
-            id: transcriptions.id,
-            pageId: transcriptions.pageId,
-            userId: user.id,
-            pageNumber: pages.pageNumber,
-            documentId: documents.id,
-            documentTitle: documents.title,
-            contributorUsername: user.username,
-            status: transcriptions.status,
-            updatedAt: transcriptions.updatedAt,
-         })
-         .from(transcriptions)
-         .innerJoin(pages, eq(pages.id, transcriptions.pageId))
-         .innerJoin(documents, eq(documents.id, pages.documentId))
-         .innerJoin(user, eq(user.id, transcriptions.userId))
-         .where(eq(transcriptions.status, 'submitted'))
-         .orderBy(desc(transcriptions.updatedAt));
+         const order =
+            input.sort === 'oldest'
+               ? [asc(transcriptions.updatedAt), asc(transcriptions.id)]
+               : [desc(transcriptions.updatedAt), desc(transcriptions.id)];
 
-      return queue;
-   }),
+         const queue = await db
+            .select({
+               id: transcriptions.id,
+               pageId: transcriptions.pageId,
+               userId: user.id,
+               pageNumber: pages.pageNumber,
+               documentId: documents.id,
+               documentTitle: documents.title,
+               contributorUsername: user.username,
+               status: transcriptions.status,
+               updatedAt: transcriptions.updatedAt,
+            })
+            .from(transcriptions)
+            .innerJoin(pages, eq(pages.id, transcriptions.pageId))
+            .innerJoin(documents, eq(documents.id, pages.documentId))
+            .innerJoin(user, eq(user.id, transcriptions.userId))
+            .where(eq(transcriptions.status, 'submitted'))
+            .orderBy(...order);
+
+         return queue;
+      }),
 
    approve: protectedProcedure
       .input(approveSchema)
