@@ -1,4 +1,4 @@
-import { count, desc, eq } from 'drizzle-orm';
+import { asc, count, desc, eq } from 'drizzle-orm';
 import { TRPCError } from '@trpc/server';
 import { isContributor, isEditor } from '@folio/shared';
 import {
@@ -17,8 +17,10 @@ export const notesRouter = router({
    listByPage: publicProcedure
       .input(listNotesSchema)
       .query(async ({ input }) => {
-         const { pageId, page, limit } = input;
+         const { pageId, page, limit, sort } = input;
          const where = eq(notes.pageId, pageId);
+         const order =
+            sort === 'newest' ? desc(notes.createdAt) : asc(notes.createdAt);
 
          const [results, [{ total }]] = await Promise.all([
             db
@@ -35,7 +37,7 @@ export const notesRouter = router({
                .from(notes)
                .leftJoin(user, eq(user.id, notes.userId))
                .where(where)
-               .orderBy(desc(notes.createdAt))
+               .orderBy(order, desc(notes.id))
                .limit(limit)
                .offset((page - 1) * limit),
             db.select({ total: count() }).from(notes).where(where),

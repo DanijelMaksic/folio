@@ -631,6 +631,8 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Implement Notes & Questions section in `PageDetails.tsx`, where contributor+ users can add/edit/delete comments
 
+- Add sorting by date
+
 **Decisions:**
 
 - User with viewer role is redirected to `/documents` on sign in, while other roles are redirected to `/dashboard`

@@ -19,12 +19,22 @@ const PAGE_SIZE = 10;
 function NotesAndQuestions({ pageId }: { pageId: string }) {
    const { data: session } = useSession();
    const [page, setPage] = useState(1);
+   const [expanded, setExpanded] = useState(false);
+
    const utils = trpc.useUtils();
+
+   const [sort, setSort] = useState<'newest' | 'oldest'>('newest');
+
+   function closeForm() {
+      reset({ content: '' });
+      setExpanded(false);
+   }
 
    const { data, isPending } = trpc.notes.listByPage.useQuery({
       pageId,
       page,
       limit: PAGE_SIZE,
+      sort,
    });
 
    const {
@@ -36,21 +46,20 @@ function NotesAndQuestions({ pageId }: { pageId: string }) {
       formState: { errors },
    } = useForm<NoteFormInput>({
       resolver: zodResolver(noteFormSchema),
-      mode: 'onChange',
       defaultValues: { content: '' },
    });
 
-   const length = watch('content')?.length ?? 0;
+   const content = watch('content') ?? '';
+   const noteLength = content.length;
 
    const create = trpc.notes.create.useMutation({
       onSuccess: () => {
-         reset({ content: '' });
+         closeForm();
          setPage(1);
          utils.notes.listByPage.invalidate({ pageId });
       },
       onError: (err) => setError('root', { message: err.message }),
    });
-
    const canPost = isContributor(session?.user.globalRole);
 
    return (
@@ -65,29 +74,66 @@ function NotesAndQuestions({ pageId }: { pageId: string }) {
                onSubmit={handleSubmit(({ content }) =>
                   create.mutate({ pageId, content }),
                )}
-               className="mt-8 space-y-2"
+               className="mt-8 mb-4 border rounded-md"
             >
                <Textarea
-                  rows={3}
+                  rows={expanded ? 3 : 1}
                   placeholder="Write a note or question..."
                   aria-invalid={!!errors.content}
+                  onFocus={() => setExpanded(true)}
                   {...register('content')}
                />
-               <div className="flex justify-between text-sm">
-                  <span className="text-destructive">
-                     {errors.content?.message ?? errors.root?.message}
-                  </span>
-                  <span
-                     className={`${length <= NOTE_MAX_LENGTH ? 'text-muted-foreground' : 'text-destructive'} tabular-nums`}
-                  >
-                     {length}/{NOTE_MAX_LENGTH}
-                  </span>
-               </div>
-               <Button type="submit" disabled={create.isPending}>
-                  {create.isPending ? 'Posting...' : 'Post'}
-               </Button>
+
+               {expanded && (
+                  <div className="flex justify-between gap-2 my-3 mx-4">
+                     <div className="flex flex-col">
+                        {noteLength > 900 && (
+                           <span
+                              className={`${noteLength <= NOTE_MAX_LENGTH ? 'text-muted-foreground' : 'text-destructive'} tabular-nums`}
+                           >
+                              {noteLength}/{NOTE_MAX_LENGTH}
+                           </span>
+                        )}
+
+                        <span className="text-destructive">
+                           {errors.content?.message ?? errors.root?.message}
+                        </span>
+                     </div>
+
+                     <div className="flex justify-end gap-2">
+                        <Button
+                           type="button"
+                           variant="outline"
+                           disabled={create.isPending}
+                           onClick={closeForm}
+                        >
+                           Close
+                        </Button>
+                        <Button
+                           type="submit"
+                           disabled={
+                              create.isPending || noteLength > NOTE_MAX_LENGTH
+                           }
+                        >
+                           {create.isPending ? 'Posting...' : 'Post'}
+                        </Button>{' '}
+                     </div>
+                  </div>
+               )}
             </form>
          )}
+
+         <select
+            value={sort}
+            onChange={(e) => {
+               setSort(e.target.value as 'newest' | 'oldest');
+               setPage(1);
+            }}
+            className="rounded-md border bg-background px-2 py-1 text-sm"
+         >
+            <option value="newest">Newest</option>
+            <option value="oldest">Oldest</option>
+         </select>
 
          <div className="flex flex-col gap-3 my-8 w-full">
             {isPending ? (
