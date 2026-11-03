@@ -13,6 +13,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { useSession } from '@/lib/auth-client';
 import { trpc } from '@/lib/trpc';
 import { zodResolver } from '@/lib/zod-resolver';
+import { User2 } from 'lucide-react';
+import SignInModal from '@/components/documents/SignInModal';
 
 const PAGE_SIZE = 10;
 
@@ -20,6 +22,7 @@ function NotesAndQuestions({ pageId }: { pageId: string }) {
    const { data: session } = useSession();
    const [page, setPage] = useState(1);
    const [expanded, setExpanded] = useState(false);
+   const [modalOpen, setModalOpen] = useState(false);
 
    const utils = trpc.useUtils();
 
@@ -68,72 +71,110 @@ function NotesAndQuestions({ pageId }: { pageId: string }) {
             Notes & Questions
          </h2>
 
-         {canPost && (
-            <form
-               noValidate
-               onSubmit={handleSubmit(({ content }) =>
-                  create.mutate({ pageId, content }),
-               )}
-               className="mt-8 mb-4 border rounded-md"
-            >
-               <Textarea
-                  rows={expanded ? 3 : 1}
-                  placeholder="Write a note or question..."
-                  aria-invalid={!!errors.content}
-                  onFocus={() => setExpanded(true)}
-                  {...register('content')}
-               />
-
-               {expanded && (
-                  <div className="flex justify-between gap-2 my-3 mx-4">
-                     <div className="flex flex-col">
-                        {noteLength > 900 && (
-                           <span
-                              className={`${noteLength <= NOTE_MAX_LENGTH ? 'text-muted-foreground' : 'text-destructive'} tabular-nums`}
-                           >
-                              {noteLength}/{NOTE_MAX_LENGTH}
-                           </span>
-                        )}
-
-                        <span className="text-destructive">
-                           {errors.content?.message ?? errors.root?.message}
-                        </span>
-                     </div>
-
-                     <div className="flex justify-end gap-2">
-                        <Button
-                           type="button"
-                           variant="outline"
-                           disabled={create.isPending}
-                           onClick={closeForm}
-                        >
-                           Close
-                        </Button>
-                        <Button
-                           type="submit"
-                           disabled={
-                              create.isPending || noteLength > NOTE_MAX_LENGTH
-                           }
-                        >
-                           {create.isPending ? 'Posting...' : 'Post'}
-                        </Button>{' '}
-                     </div>
+         {canPost ? (
+            <div className="flex items-center justify-between gap-3">
+               {session?.user?.image ? (
+                  <img
+                     src={session.user.image}
+                     alt={`${session.user?.name || session.user.username}'s avatar`}
+                     className="group relative size-12 overflow-hidden rounded-full focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none border-2 self-start mt-8"
+                  />
+               ) : (
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-full border bg-muted text-sm font-medium uppercase self-start mt-8">
+                     {session?.user.name[0]}
                   </div>
                )}
-            </form>
+
+               <form
+                  noValidate
+                  onSubmit={handleSubmit(({ content }) =>
+                     create.mutate({ pageId, content }),
+                  )}
+                  className="my-8 border rounded-md flex-1"
+               >
+                  <Textarea
+                     rows={expanded ? 3 : 1}
+                     placeholder="Write a note or question..."
+                     aria-invalid={!!errors.content}
+                     onFocus={() => setExpanded(true)}
+                     {...register('content')}
+                  />
+
+                  {expanded && (
+                     <div className="flex justify-between gap-2 my-3 mx-4">
+                        <div className="flex flex-col">
+                           {noteLength > 900 && (
+                              <span
+                                 className={`${noteLength <= NOTE_MAX_LENGTH ? 'text-muted-foreground' : 'text-destructive'} tabular-nums`}
+                              >
+                                 {noteLength}/{NOTE_MAX_LENGTH}
+                              </span>
+                           )}
+
+                           <span className="text-destructive">
+                              {errors.content?.message ?? errors.root?.message}
+                           </span>
+                        </div>
+
+                        <div className="flex justify-end gap-2">
+                           <Button
+                              type="button"
+                              variant="outline"
+                              disabled={create.isPending}
+                              onClick={closeForm}
+                           >
+                              Close
+                           </Button>
+                           <Button
+                              type="submit"
+                              disabled={
+                                 create.isPending ||
+                                 noteLength > NOTE_MAX_LENGTH
+                              }
+                           >
+                              {create.isPending ? 'Posting...' : 'Post'}
+                           </Button>{' '}
+                        </div>
+                     </div>
+                  )}
+               </form>
+            </div>
+         ) : (
+            <div className="flex items-center justify-between gap-3">
+               <div className="flex size-10 shrink-0 items-center justify-center rounded-full border bg-muted text-sm font-medium uppercase self-start mt-8">
+                  <User2 className="text-gray-500" />
+               </div>
+
+               <div className="my-8 border rounded-md flex-1">
+                  <Textarea
+                     placeholder="Write a note or question..."
+                     onClick={() => setModalOpen(true)}
+                  />
+               </div>
+            </div>
          )}
 
-         <select
-            value={sort}
-            onChange={(e) => {
-               setSort(e.target.value as 'newest' | 'oldest');
-               setPage(1);
-            }}
-            className="rounded-md border bg-background px-2 py-1 text-sm"
-         >
-            <option value="newest">Newest</option>
-            <option value="oldest">Oldest</option>
-         </select>
+         <div className="flex items-center justify-between gap-3 border-b pb-3">
+            <div className="flex items-center gap-2">
+               <h4 className="text-xl">All notes</h4>
+               <span className="bg-gray-100 rounded-md px-2.5 py-0.5">
+                  {data?.notes.length}
+               </span>
+            </div>
+
+            <select
+               value={sort}
+               onChange={(e) => {
+                  setSort(e.target.value as 'newest' | 'oldest');
+                  setPage(1);
+               }}
+               className={`rounded-md border bg-background px-3 py-1.5 text-sm ${!data?.notes.length && 'text-muted-foreground'}`}
+               disabled={!data?.notes.length}
+            >
+               <option value="newest">Newest</option>
+               <option value="oldest">Oldest</option>
+            </select>
+         </div>
 
          <div className="flex flex-col gap-3 my-8 w-full">
             {isPending ? (
@@ -152,6 +193,8 @@ function NotesAndQuestions({ pageId }: { pageId: string }) {
             totalPages={data?.totalPages ?? 1}
             onPageChange={setPage}
          />
+
+         {modalOpen && <SignInModal onClose={() => setModalOpen(false)} />}
       </div>
    );
 }

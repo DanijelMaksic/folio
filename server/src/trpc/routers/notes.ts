@@ -33,6 +33,7 @@ export const notesRouter = router({
                   updatedAt: notes.updatedAt,
                   authorName: user.name,
                   authorUsername: user.username,
+                  authorAvatar: user.image,
                })
                .from(notes)
                .leftJoin(user, eq(user.id, notes.userId))

@@ -70,6 +70,7 @@ function Note({ note }: { note: NoteData }) {
    });
 
    const role = session?.user.globalRole;
+   const avatar = note.authorAvatar;
    const isAuthor = !!note.userId && note.userId === session?.user.id;
    const canEdit = isAuthor && isContributor(role);
    const canDelete = isAuthor || isEditor(role);
@@ -85,9 +86,17 @@ function Note({ note }: { note: NoteData }) {
 
    return (
       <div className="flex gap-3">
-         <div className="flex size-10 shrink-0 items-center justify-center rounded-full border bg-muted text-sm font-medium uppercase">
-            {name[0]}
-         </div>
+         {avatar ? (
+            <img
+               src={avatar}
+               alt={`${session?.user?.name || session?.user.username}'s avatar`}
+               className="group relative size-12 overflow-hidden rounded-full focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none border-2"
+            />
+         ) : (
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-full border bg-muted text-sm font-medium uppercase">
+               {name[0]}
+            </div>
+         )}
 
          <div className="border rounded-md bg-gray-50 flex-1 py-3 px-6">
             <div className="flex items-center gap-3 text-sm mb-1">
