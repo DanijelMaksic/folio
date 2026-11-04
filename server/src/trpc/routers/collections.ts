@@ -69,7 +69,7 @@ export const collectionsRouter = router({
             ],
          }[input.sort];
 
-         const where = pattern
+         const searchWhere = pattern
             ? or(
                  ilike(collections.title, pattern),
                  ilike(collections.description, pattern),
@@ -77,6 +77,11 @@ export const collectionsRouter = router({
                  ilike(user.name, pattern),
               )
             : undefined;
+
+         const where = and(
+            input.userId ? eq(collections.createdBy, input.userId) : undefined,
+            searchWhere,
+         );
 
          const [results, [{ total }]] = await Promise.all([
             db

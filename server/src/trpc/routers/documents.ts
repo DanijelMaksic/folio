@@ -206,7 +206,6 @@ export const documentsRouter = router({
               )
             : undefined;
          // processing/failed ones (so they can follow progress or delete)
-         const currentUser = ctx.user;
 
          const where = and(
             documentVisibility(ctx.user),
@@ -214,6 +213,7 @@ export const documentsRouter = router({
             input.collectionId
                ? eq(documents.collectionId, input.collectionId)
                : undefined,
+            input.userId ? eq(documents.uploadedBy, input.userId) : undefined,
          );
 
          const [results, [{ total }]] = await Promise.all([

@@ -1,6 +1,5 @@
 ## Things to add
 
-- User page: user info, documents and collections, search bar
 - Show avatar/name across the app
 - "Fully transcribed" label in `DocumentCard.tsx`, and maybe in `DocumentPages.tsx` add "All pages as fully transcribed"
 - In `DocumentCard.tsx` add completion %, but only if it's above 0%
@@ -17,6 +16,7 @@
 - On document upload, grey out whole upload form when `isPending` is true
 - On `PageDetails.tsx`, if page pagination is user, doc viewer saved zoom breaks
 - When editor signs in, they are taken to `/` instead to `/dashboard`
+- Normalize the username input: The simplest way is in the shared schema, so it can’t be forgotten: `username: z.string().trim().min(1).toLowerCase()`. Otherwise use `input.username.toLowerCase()` in the router. Also CONFIRM that BetterAuth’s displayUsername is not what you show in the UI, because the public page should display it if you use it. `globalRole` stays in `getPublicProfile`.
 
 ## Things to refactor
 

@@ -19,6 +19,7 @@ export const listCollectionsSchema = z.object({
    sort: z
       .enum(['newest', 'oldest', 'title-asc', 'title-desc', 'most-documents'])
       .default('newest'),
+   userId: z.string().optional(),
 });
 
 export const updateCollectionSchema = createCollectionSchema

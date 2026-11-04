@@ -1,6 +1,6 @@
-import { asc, count, desc, eq } from 'drizzle-orm';
+import { and, asc, count, desc, eq, ilike } from 'drizzle-orm';
 import { TRPCError } from '@trpc/server';
-import { isContributor, isEditor } from '@folio/shared';
+import { isContributor, isEditor, listUserNotesSchema } from '@folio/shared';
 import {
    createNoteSchema,
    deleteNoteSchema,
@@ -12,6 +12,9 @@ import { pages } from '@/db/schema/pages.js';
 import { user } from '@/db/schema/auth.js';
 import { protectedProcedure, publicProcedure, router } from '@/trpc/trpc.js';
 import { notes } from '@/db/schema/notes.js';
+import { documents } from '@/db/schema/documents.js';
+import { escapeLike } from '@/lib/search.js';
+import { documentVisibility } from '@/lib/document-visibility.js';
 
 export const notesRouter = router({
    listByPage: publicProcedure
@@ -125,5 +128,55 @@ export const notesRouter = router({
          if (!deleted) throw new TRPCError({ code: 'NOT_FOUND' });
 
          return { id: deleted.id };
+      }),
+
+   listByUser: publicProcedure
+      .input(listUserNotesSchema)
+      .query(async ({ ctx, input }) => {
+         const { userId, search, page, limit, sort } = input;
+         const term = search?.trim();
+         const pattern = term ? `%${escapeLike(term)}%` : undefined;
+
+         const where = and(
+            eq(notes.userId, userId),
+            documentVisibility(ctx.user),
+            pattern ? ilike(notes.content, pattern) : undefined,
+         );
+         const order =
+            sort === 'newest' ? desc(notes.createdAt) : asc(notes.createdAt);
+
+         const [results, [{ total }]] = await Promise.all([
+            db
+               .select({
+                  id: notes.id,
+                  content: notes.content,
+                  createdAt: notes.createdAt,
+                  updatedAt: notes.updatedAt,
+                  pageId: pages.id,
+                  pageNumber: pages.pageNumber,
+                  pageTitle: pages.title,
+                  documentId: documents.id,
+                  documentTitle: documents.title,
+               })
+               .from(notes)
+               .innerJoin(pages, eq(pages.id, notes.pageId))
+               .innerJoin(documents, eq(documents.id, pages.documentId))
+               .where(where)
+               .orderBy(order, desc(notes.id))
+               .limit(limit)
+               .offset((page - 1) * limit),
+            db
+               .select({ total: count() })
+               .from(notes)
+               .innerJoin(pages, eq(pages.id, notes.pageId))
+               .innerJoin(documents, eq(documents.id, pages.documentId))
+               .where(where),
+         ]);
+
+         return {
+            notes: results,
+            totalCount: total,
+            totalPages: Math.max(1, Math.ceil(total / limit)),
+         };
       }),
 });

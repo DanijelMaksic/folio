@@ -47,6 +47,7 @@ export const listDocumentsSchema = z.object({
          'most-transcribed',
       ])
       .default('newest'),
+   userId: z.string().optional(),
 });
 
 export const searchDocumentsSchema = z.object({

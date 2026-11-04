@@ -633,6 +633,8 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Added sorting in every component that lists data
 
+- Added user page, which displays user information, list of documents, collections and notes.
+
 **Decisions:**
 
 - User with viewer role is redirected to `/documents` on sign in, while other roles are redirected to `/dashboard`
