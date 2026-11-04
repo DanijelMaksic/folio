@@ -647,6 +647,8 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Removed `description` field from `pages` drizzle and zod schemas, and adapted `EditModal.tsx` to exclude `description` on `PageDetails.tsx`
 
+- In `TranscriptionPanel.tsx`, if panel is larger than screen height, `sticky` is set on page image while scrolling, until the end of panel is reached
+
 **Issues resolved:**
 
 - Fixed a bug where if user hits submit before save when transcribing, revisions tab shows nothing and transcription is not submitted
