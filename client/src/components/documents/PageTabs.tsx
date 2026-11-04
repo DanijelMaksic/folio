@@ -7,14 +7,22 @@ import { ReactElement } from 'react';
 function PageTabs({
    canTranscribe,
    children,
+   tab,
+   onTabChange,
 }: {
    canTranscribe: boolean;
    children: ReactElement;
+   tab: string;
+   onTabChange: (tab: string) => void;
 }) {
-   const hiddenStyle = `${!canTranscribe && 'hidden'}`;
+   const hiddenStyle = `${canTranscribe ? '' : 'hidden'}`;
 
    return (
-      <Tabs defaultValue="overview">
+      <Tabs
+         defaultValue="overview"
+         value={tab}
+         onValueChange={(value) => onTabChange(String(value))}
+      >
          <div className="flex justify-between items-center gap-3 mt-1 mb-2">
             <TabsList>
                <TabsTrigger value="overview">Overview</TabsTrigger>

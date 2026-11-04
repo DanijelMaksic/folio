@@ -32,6 +32,7 @@ function PageDetails() {
    const [isEditOpen, setIsEditOpen] = useState(false);
    const [isDeleteOpen, setIsDeleteOpen] = useState(false);
    const [isReplaceImageOpen, setIsReplaceImageOpen] = useState(false);
+   const [tab, setTab] = useState('overview');
 
    const [serverError, setServerError] = useState('');
    const [deleteError, setDeleteError] = useState('');
@@ -162,7 +163,11 @@ function PageDetails() {
          </h1>
 
          {page.id && (
-            <PageTabs canTranscribe={canTranscribe}>
+            <PageTabs
+               canTranscribe={canTranscribe}
+               tab={tab}
+               onTabChange={setTab}
+            >
                <div className="flex items-center justify-center gap-3">
                   <Pagination className="border rounded-md border-gray-300 py-1 px-2">
                      <PaginationContent>
@@ -226,7 +231,7 @@ function PageDetails() {
             </PageTabs>
          )}
 
-         <NotesAndQuestions pageId={page.id} />
+         {tab !== 'revision-history' && <NotesAndQuestions pageId={page.id} />}
 
          {isEditOpen && (
             <EditModal
