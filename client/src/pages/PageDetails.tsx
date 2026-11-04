@@ -106,7 +106,7 @@ function PageDetails() {
    if (!page) return <p>Page not found</p>;
 
    return (
-      <div className="max-w-full mx-auto py-3 px-12">
+      <div className="max-w-full mx-auto py-3 px-20">
          <div className="mt-2">
             <Breadcrumb>
                <BreadcrumbList>

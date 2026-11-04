@@ -229,7 +229,7 @@ function DocumentPages() {
    const showControls = isReady && (!!pages.length || hasActiveFilter);
 
    return (
-      <div className="max-w-full mx-auto pt-3 pb-12 px-12">
+      <div className="max-w-full mx-auto pt-3 pb-12 px-20">
          {collection && isReady && (
             <div className="mt-2">
                <Breadcrumb>
@@ -293,7 +293,7 @@ function DocumentPages() {
                   onPageChange={handlePageChange}
                   currentPage={page}
                >
-                  <div className="flex items-center justify-center gap-6">
+                  <div className="flex items-center justify-center gap-3">
                      {showControls && (
                         <SearchBar
                            placeholder="Search pages..."
