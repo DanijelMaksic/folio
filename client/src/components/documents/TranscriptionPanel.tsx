@@ -51,7 +51,7 @@ function TranscriptionPanel({
    }
 
    return (
-      <div className="space-y-3 border rounded-md p-4">
+      <div className="space-y-3 border rounded-md p-4 h-full">
          <div className="flex gap-6 justify-between items-center">
             <h2 className="text-lg font-medium">Transcription</h2>
 

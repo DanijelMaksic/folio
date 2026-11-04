@@ -19,7 +19,6 @@
 - On document upload, grey out whole upload form when `isPending` is true
 - On `PageDetails.tsx`, if page pagination is user, doc viewer saved zoom breaks
 - When editor signs in, they are taken to '/'
-- Use `LoaclStorage` to save transcription draft between sessions
 
 ## Things to refactor
 

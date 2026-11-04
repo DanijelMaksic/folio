@@ -51,7 +51,9 @@ function OverviewTab() {
                         </p>
                      )}
                </div>
-               <p className="text-[1rem]">{approvedTranscription.content}</p>
+               <p className="text-[1rem] whitespace-pre-wrap">
+                  {approvedTranscription.content}
+               </p>
             </div>
          ) : (
             <TranscriptionPlaceholder type={placeholderType} />
