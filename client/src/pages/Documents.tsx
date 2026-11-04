@@ -96,35 +96,37 @@ export default function Documents() {
                onChange={setInputValue}
             />
 
-            <div className="flex items-center gap-2 border rounded-md">
-               <span className="pl-3">
-                  <ArrowUpDown className="text-gray-500" />
-               </span>
+            <div className="flex items-center gap-3">
+               <div className="flex items-center gap-3 border rounded-md">
+                  <span className="pl-3">
+                     <ArrowUpDown className="text-gray-500" />
+                  </span>
 
-               <select
-                  value={sort}
-                  onChange={(e) =>
-                     handleSetSort(e.target.value as DocumentSort)
-                  }
-                  className="rounded-md border bg-background px-3 py-1.5 text-sm"
-               >
-                  <option value="newest">Newest</option>
-                  <option value="oldest">Oldest</option>
-                  <option value="title-asc">Title A–Z</option>
-                  <option value="title-desc">Title Z–A</option>
-               </select>
+                  <select
+                     value={sort}
+                     onChange={(e) =>
+                        handleSetSort(e.target.value as DocumentSort)
+                     }
+                     className="rounded-md border bg-background px-3 py-2 text-sm"
+                  >
+                     <option value="newest">Newest</option>
+                     <option value="oldest">Oldest</option>
+                     <option value="title-asc">Title A–Z</option>
+                     <option value="title-desc">Title Z–A</option>
+                  </select>
+               </div>
+
+               {canTranscribe ? (
+                  <Button onClick={() => navigate('/documents/upload')}>
+                     <Plus />
+                  </Button>
+               ) : (
+                  <>
+                     <span></span>
+                     <span></span>
+                  </>
+               )}
             </div>
-
-            {canTranscribe ? (
-               <Button onClick={() => navigate('/documents/upload')}>
-                  <Plus />
-               </Button>
-            ) : (
-               <>
-                  <span></span>
-                  <span></span>
-               </>
-            )}
          </div>
 
          {isLoading ? (

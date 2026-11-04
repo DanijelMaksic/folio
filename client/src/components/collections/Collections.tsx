@@ -105,36 +105,38 @@ export default function Collections() {
                onChange={setInputValue}
             />
 
-            <div className="flex items-center gap-2 border rounded-md">
-               <span className="pl-3">
-                  <ArrowUpDown className="text-gray-500" />
-               </span>
+            <div className="flex items-center gap-3">
+               <div className="flex items-center gap-2 border rounded-md">
+                  <span className="pl-3">
+                     <ArrowUpDown className="text-gray-500" />
+                  </span>
 
-               <select
-                  value={sort}
-                  onChange={(e) =>
-                     handleSetSort(e.target.value as CollectionSort)
-                  }
-                  className="rounded-md border bg-background px-3 py-1.5 text-sm"
-               >
-                  <option value="newest">Newest</option>
-                  <option value="oldest">Oldest</option>
-                  <option value="title-asc">Title A–Z</option>
-                  <option value="title-desc">Title Z–A</option>
-                  <option value="most-documents">Most documents</option>
-               </select>
+                  <select
+                     value={sort}
+                     onChange={(e) =>
+                        handleSetSort(e.target.value as CollectionSort)
+                     }
+                     className="rounded-md border bg-background px-3 py-2 text-sm"
+                  >
+                     <option value="newest">Newest</option>
+                     <option value="oldest">Oldest</option>
+                     <option value="title-asc">Title A–Z</option>
+                     <option value="title-desc">Title Z–A</option>
+                     <option value="most-documents">Most documents</option>
+                  </select>
+               </div>
+
+               {canTranscribe ? (
+                  <Button onClick={() => navigate('/collections/create')}>
+                     <Plus />
+                  </Button>
+               ) : (
+                  <>
+                     <span></span>
+                     <span></span>
+                  </>
+               )}
             </div>
-
-            {canTranscribe ? (
-               <Button onClick={() => navigate('/collections/create')}>
-                  <Plus />
-               </Button>
-            ) : (
-               <>
-                  <span></span>
-                  <span></span>
-               </>
-            )}
          </div>
 
          {isLoading ? (
