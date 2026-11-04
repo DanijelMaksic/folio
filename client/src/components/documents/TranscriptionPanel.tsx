@@ -82,7 +82,7 @@ function TranscriptionPanel({
                      </p>
                   )}
                <Textarea
-                  className="h-90 text-sm font-mono resize-y disabled:opacity-60"
+                  className="min-h-90 font-mono resize-y disabled:opacity-60"
                   value={transcriptionContent}
                   data-testid="transcription-content"
                   onChange={(e) => setTranscriptionContent(e.target.value)}

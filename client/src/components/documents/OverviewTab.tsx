@@ -31,8 +31,10 @@ function OverviewTab() {
       );
 
    return (
-      <div className="grid grid-cols-2 gap-4">
-         <PageViewer page={page} />
+      <div className="grid grid-cols-2 gap-4 items-start">
+         <div className="sticky top-24">
+            <PageViewer page={page} />
+         </div>
 
          {approvedTranscription ? (
             <div className="space-y-3 border rounded-md p-4">
@@ -49,19 +51,10 @@ function OverviewTab() {
                         </p>
                      )}
                </div>
-               <p>{approvedTranscription.content}</p>
+               <p className="text-[1rem]">{approvedTranscription.content}</p>
             </div>
          ) : (
             <TranscriptionPlaceholder type={placeholderType} />
-         )}
-
-         {page?.description && (
-            <div className="flex flex-col gap-2 my-6">
-               <h2 className="text-xl font-bold">Description</h2>
-               <p className="text-muted-foreground text-md">
-                  {page.description}
-               </p>
-            </div>
          )}
       </div>
    );

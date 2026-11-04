@@ -52,7 +52,7 @@ function PageViewer({ page }: { page: PageBase | undefined }) {
    const savedState = viewers[page?.id ?? ''];
    const [isHovered, setIsHovered] = useState(false);
 
-   if (!document || !page) return null;
+   if (!page) return null;
 
    return (
       <div

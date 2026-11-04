@@ -62,7 +62,7 @@ function ReviewPanel({
       <div className="border rounded-lg p-4 space-y-4">
          <h2 className="font-semibold">Review Transcription</h2>
 
-         <div className="rounded bg-muted p-3 text-sm whitespace-pre-wrap">
+         <div className="rounded bg-muted p-3 text-[1rem] whitespace-pre-wrap">
             {submittedTranscription.content}
          </div>
 

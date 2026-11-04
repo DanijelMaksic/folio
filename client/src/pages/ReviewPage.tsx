@@ -49,8 +49,10 @@ function ReviewPage() {
             </p>
          </div>
 
-         <div className="grid grid-cols-2 gap-4">
-            <PageViewer page={page} />
+         <div className="grid grid-cols-2 gap-4 items-start">
+            <div className="sticky top-24">
+               <PageViewer page={page} />
+            </div>
 
             {isEditor(session?.user?.globalRole) && page ? (
                documentId &&
