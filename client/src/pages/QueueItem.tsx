@@ -8,6 +8,7 @@ import { Button } from '../components/ui/button';
 import { trpc } from '../lib/trpc';
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '@/lib/auth-client';
+import { Link } from 'react-router-dom';
 
 interface QueueItemProps {
    id: string;
@@ -46,9 +47,12 @@ function QueueItem({ item }: { item: QueueItemProps }) {
             <div className="text-sm text-muted-foreground">
                <p>
                   Contributor:{' '}
-                  <span className="font-medium text-foreground">
+                  <Link
+                     to={`/users/${item.contributorUsername}`}
+                     className="font-medium text-foreground hover:underline"
+                  >
                      {item.contributorUsername}
-                  </span>
+                  </Link>
                </p>
                <p>
                   Submitted:{' '}

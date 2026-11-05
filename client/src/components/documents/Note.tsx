@@ -15,6 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useSession } from '@/lib/auth-client';
 import { trpc } from '@/lib/trpc';
 import { zodResolver } from '@/lib/zod-resolver';
+import { Link } from 'react-router-dom';
 
 type NoteData =
    inferRouterOutputs<AppRouter>['notes']['listByPage']['notes'][number];
@@ -74,7 +75,7 @@ function Note({ note }: { note: NoteData }) {
    const isAuthor = !!note.userId && note.userId === session?.user.id;
    const canEdit = isAuthor && isContributor(role);
    const canDelete = isAuthor || isEditor(role);
-   const name = note.authorUsername ?? 'Deleted user';
+   const username = note.authorUsername ?? 'Deleted user';
    const edited =
       !!note.updatedAt &&
       new Date(note.updatedAt).getTime() > new Date(note.createdAt).getTime();
@@ -87,24 +88,36 @@ function Note({ note }: { note: NoteData }) {
    return (
       <div className="flex gap-3">
          {avatar ? (
-            <img
-               src={avatar}
-               alt={`${session?.user?.name || session?.user.username}'s avatar`}
-               className="group relative size-12 overflow-hidden rounded-full focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none border-2"
-            />
+            <Link to={`/users/${username}`}>
+               <img
+                  src={avatar}
+                  alt={`${session?.user?.name || session?.user.username}'s avatar`}
+                  className="group relative size-12 overflow-hidden rounded-full focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none border-2"
+               />
+            </Link>
          ) : (
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-full border bg-muted text-sm font-medium uppercase">
-               {name[0]}
-            </div>
+            <Link
+               to={`/users/${username}`}
+               className="flex size-10 shrink-0 items-center justify-center rounded-full border bg-muted text-sm font-medium uppercase"
+            >
+               {username[0]}
+            </Link>
          )}
 
          <div className="border rounded-md bg-gray-50 flex-1 py-3 px-6">
             <div className="flex items-center gap-3 text-sm mb-1">
-               <span className="font-semibold">{name}</span>
+               <Link
+                  to={`/users/${username}`}
+                  className="font-semibold hover:underline"
+               >
+                  {username}
+               </Link>
+
                <span className="text-muted-foreground">
                   {timeAgo(note.createdAt)}
                   {edited && ' (edited)'}
                </span>
+
                {!isEditing && (
                   <div className="ml-auto">
                      <ActionsMenu

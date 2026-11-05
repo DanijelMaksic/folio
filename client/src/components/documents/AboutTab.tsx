@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import EditModal from '@/components/shared/EditModal';
-import { Button } from '@/components/ui/button';
 import { useSession } from '@/lib/auth-client';
 import { trpc } from '@/lib/trpc';
 import { Document, isEditor } from '@shared';
@@ -68,7 +67,19 @@ function AboutTab({ document }: { document: Document }) {
             </span>
          ),
       },
-      { label: 'Uploaded by', value: displayName(document.uploaderName) },
+      {
+         label: 'Uploaded by',
+         value: document.uploaderUsername ? (
+            <Link
+               to={`/users/${document.uploaderUsername}`}
+               className="text-primary underline underline-offset-4 hover:opacity-80"
+            >
+               {displayName(document.uploaderName)}
+            </Link>
+         ) : (
+            displayName(document.uploaderName)
+         ),
+      },
       {
          label: 'Upload date',
          value: new Date(document.createdAt).toLocaleDateString(undefined, {

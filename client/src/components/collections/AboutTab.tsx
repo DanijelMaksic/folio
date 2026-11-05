@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useSession } from '@/lib/auth-client';
 import { trpc } from '@/lib/trpc';
 import { Collection, isEditor } from '@shared';
+import { Link } from 'react-router-dom';
 
 const displayName = (name?: string | null) => name ?? 'Deleted user';
 
@@ -35,6 +36,12 @@ function AboutTab({ collection }: { collection: Collection }) {
       },
    });
 
+   console.log(
+      collection.createdBy,
+      collection.creatorName,
+      collection.creatorUsername,
+   );
+
    const details: { label: string; value: React.ReactNode }[] = [
       {
          label: 'Description',
@@ -59,7 +66,19 @@ function AboutTab({ collection }: { collection: Collection }) {
             </span>
          ),
       },
-      { label: 'Created by', value: displayName(collection.creatorName) },
+      {
+         label: 'Created by',
+         value: collection.creatorUsername ? (
+            <Link
+               to={`/users/${collection.creatorUsername}`}
+               className="text-primary underline underline-offset-4 hover:opacity-80"
+            >
+               {displayName(collection.creatorName)}
+            </Link>
+         ) : (
+            displayName(collection.creatorName)
+         ),
+      },
       {
          label: 'Created',
          value: new Date(collection.createdAt).toLocaleDateString(undefined, {

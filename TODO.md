@@ -5,6 +5,7 @@
 - In `DocumentCard.tsx` add completion %, but only if it's above 0%
 - Categories/tags
 - Role downgrade
+- Help page (transcription tips)
 
 ## Things to fix
 
@@ -16,7 +17,9 @@
 - On document upload, grey out whole upload form when `isPending` is true
 - On `PageDetails.tsx`, if page pagination is user, doc viewer saved zoom breaks
 - When editor signs in, they are taken to `/` instead to `/dashboard`
-- Normalize the username input: The simplest way is in the shared schema, so it can’t be forgotten: `username: z.string().trim().min(1).toLowerCase()`. Otherwise use `input.username.toLowerCase()` in the router. Also CONFIRM that BetterAuth’s displayUsername is not what you show in the UI, because the public page should display it if you use it. `globalRole` stays in `getPublicProfile`.
+- Normalize the username input: The simplest way is in the shared schema, so it can’t be forgotten: `username: z.string().trim().min(1).toLowerCase()`. Otherwise use `input.username.toLowerCase()` in the router. Also CONFIRM that BetterAuth’s displayUsername is not what you show in the UI, because the public page should display it if you use it. `globalRole` stays in `getPublicProfile`
+- When navigating while the page is scrolled down, scroll position is saved on the new page
+- Run `tsc`
 
 ## Things to refactor
 

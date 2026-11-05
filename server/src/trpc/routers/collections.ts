@@ -91,6 +91,7 @@ export const collectionsRouter = router({
                   description: collections.description,
                   createdBy: collections.createdBy,
                   creatorName: user.name,
+                  creatorUsername: user.username,
                   createdAt: collections.createdAt,
                   coverImageUrl: sql<string | null>`(
                      SELECT dp.image_url FROM document_pages dp
@@ -131,8 +132,17 @@ export const collectionsRouter = router({
       )
       .query(async ({ ctx, input }) => {
          const [collection] = await db
-            .select()
+            .select({
+               id: collections.id,
+               title: collections.title,
+               description: collections.description,
+               createdBy: collections.createdBy,
+               creatorName: user.name,
+               creatorUsername: user.username,
+               createdAt: collections.createdAt,
+            })
             .from(collections)
+            .leftJoin(user, eq(user.id, collections.createdBy))
             .where(eq(collections.id, input.id));
 
          if (!collection) {

@@ -228,6 +228,7 @@ export const documentsRouter = router({
                   createdAt: documents.createdAt,
                   updatedAt: documents.updatedAt,
                   uploaderName: user.name,
+                  uploaderUsername: user.username,
                   coverImageUrl: sql<string | null>`(
                    SELECT image_url FROM document_pages
                    WHERE document_id = ${documents.id}
@@ -274,6 +275,7 @@ export const documentsRouter = router({
                createdAt: documents.createdAt,
                updatedAt: documents.updatedAt,
                uploaderName: user.name,
+               uploaderUsername: user.username,
                coverImageUrl: sql<string | null>`(
                  SELECT image_url FROM document_pages
                  WHERE document_id = ${documents.id}

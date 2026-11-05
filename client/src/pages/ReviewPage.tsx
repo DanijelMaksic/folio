@@ -4,6 +4,7 @@ import { useSession } from '@/lib/auth-client';
 import { trpc } from '@/lib/trpc';
 import { isEditor } from '@shared';
 import { useParams, useSearchParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 function ReviewPage() {
    const { id: documentId, pageNumber } = useParams<{
@@ -41,11 +42,16 @@ function ReviewPage() {
 
             <p className="text-sm text-muted-foreground">
                Submitted by{' '}
-               <span className="font-medium text-foreground">
-                  {submittedTranscription
-                     ? (submittedTranscription.user?.username ?? 'Deleted user')
-                     : ''}{' '}
-               </span>
+               {submittedTranscription ? (
+                  <Link
+                     className="font-medium text-foreground hover:underline"
+                     to={`/users/${submittedTranscription.user?.username}`}
+                  >
+                     {submittedTranscription.user?.username}
+                  </Link>
+               ) : (
+                  <span>Deleted user</span>
+               )}
             </p>
          </div>
 

@@ -91,6 +91,7 @@ export const documentSchema = z.object({
    createdAt: z.string(),
    updatedAt: z.string(),
    uploaderName: z.string().nullable().optional(),
+   uploaderUsername: z.string().nullable().optional(),
    collectionId: z.string().nullable().optional(),
    pageCount: z.number().optional(),
    coverImageUrl: z.string().nullable().optional(),
