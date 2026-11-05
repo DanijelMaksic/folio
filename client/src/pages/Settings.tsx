@@ -109,39 +109,10 @@ function Settings() {
             </div>
          </dl>
 
-         <Tabs value={tab} onValueChange={handleTabChange} className="mt-6">
-            <TabsList>
-               <TabsTrigger value="stats">Contribution stats</TabsTrigger>
-               <TabsTrigger value="settings">Profile settings</TabsTrigger>
-               {isAdmin && (
-                  <TabsTrigger value="roles" className="gap-2">
-                     Role requests
-                     {pendingCount > 0 && (
-                        <span className="rounded-full bg-primary px-1.5 text-xs font-medium text-primary-foreground tabular-nums">
-                           {pendingCount}
-                        </span>
-                     )}
-                  </TabsTrigger>
-               )}
-            </TabsList>
-
-            <TabsContent value="stats" className="mt-6">
-               <ContributionStats />
-            </TabsContent>
-
-            <TabsContent value="settings" className="mt-6">
-               <ProfileSettings
-                  name={user.name ?? ''}
-                  username={user.username ?? ''}
-               />
-            </TabsContent>
-
-            {isAdmin && (
-               <TabsContent value="roles" className="mt-6">
-                  <RoleManagement />
-               </TabsContent>
-            )}
-         </Tabs>
+         <ProfileSettings
+            name={user.name ?? ''}
+            username={user.username ?? ''}
+         />
       </div>
    );
 }

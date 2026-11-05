@@ -18,6 +18,7 @@ import ReviewPage from '@/pages/ReviewPage';
 import Dashboard from '@/pages/Dashboard';
 import UserPage from '@/pages/UserPage';
 import Settings from '@/pages/Settings';
+import RoleRequests from '@/pages/RoleRequests';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
    const { data: session, isPending } = useSession();
@@ -94,6 +95,15 @@ export default function App() {
                   element={
                      <ProtectedRoute>
                         <Dashboard />
+                     </ProtectedRoute>
+                  }
+               />
+
+               <Route
+                  path="/role-requests"
+                  element={
+                     <ProtectedRoute>
+                        <RoleRequests />
                      </ProtectedRoute>
                   }
                />

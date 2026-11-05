@@ -63,7 +63,7 @@ function RoleManagement() {
    const rejecting = data.find((r) => r.id === rejectingId);
 
    return (
-      <div className="space-y-4">
+      <div className="mt-20">
          {listError && (
             <p role="alert" className="text-sm text-destructive">
                {listError}
@@ -71,7 +71,7 @@ function RoleManagement() {
          )}
 
          {data.length === 0 ? (
-            <div className="rounded-lg border border-dashed p-10 text-center">
+            <div className="rounded-lg p-10 text-center">
                <p className="font-medium">No pending requests</p>
                <p className="mt-1 text-sm text-muted-foreground">
                   New role requests will show up here.

@@ -45,9 +45,9 @@ function ProfileSettings({ name, username }: ProfileSettingsProps) {
    }
 
    return (
-      <div className="space-y-10">
+      <div className="mt-8">
          <section>
-            <h2 className="text-xl">Profile</h2>
+            <h2 className="text-xl">Profile settings</h2>
             <div className="mt-2 divide-y border-y">
                <SettingRow
                   title="Profile"
@@ -85,7 +85,7 @@ function ProfileSettings({ name, username }: ProfileSettingsProps) {
             </div>
          </section>
 
-         <section>
+         <section className="mt-8">
             <h2 className="text-xl text-destructive">Danger zone</h2>
             <div className="mt-2 rounded-lg border border-destructive/40 px-4">
                <SettingRow

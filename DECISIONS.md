@@ -653,6 +653,10 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Change `/profile` to `/settings`, and `profile` router to `settings` router
 
+- Made a separate route for managing role requests, removed role request management from `/settings` to `/dashboard`, which has a link to `/role-requests`
+
+- Removed tabs from `/settings`, now Profile settings only contain settings, while role requests and stats are moved to `/dashboard`
+
 **Issues resolved:**
 
 - Fixed a bug where if user hits submit before save when transcribing, revisions tab shows nothing and transcription is not submitted

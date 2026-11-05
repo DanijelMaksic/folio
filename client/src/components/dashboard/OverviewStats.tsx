@@ -29,6 +29,8 @@ export function OverviewStats({ stats, isLoading }: Props) {
          value: stats.approved,
          hint: rate !== null ? `${rate}% approval rate` : undefined,
       },
+      { label: 'Transcriptions', value: stats.totalTranscriptions },
+      { label: 'Rejected', value: stats.rejected },
    ];
 
    return (
