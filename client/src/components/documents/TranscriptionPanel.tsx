@@ -2,6 +2,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { trpc } from '@/lib/trpc';
 import { Transcription } from '@shared';
 import { useEffect, useState } from 'react';
+import {
+   Tooltip,
+   TooltipContent,
+   TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 function TranscriptionPanel({
    transcription,
@@ -112,6 +117,25 @@ function TranscriptionPanel({
                               ? 'Submitting...'
                               : 'Submit'}
                         </button>
+
+                        <Tooltip>
+                           <TooltipTrigger
+                              render={
+                                 <button
+                                    type="button"
+                                    className="border border-gray-300 rounded-full px-1.5 self-start text-gray-600"
+                                 >
+                                    ?
+                                 </button>
+                              }
+                           />
+                           <TooltipContent>
+                              <p className="max-w-44">
+                                 Submitted transcriptions are reviewed by an
+                                 editor before they’re published.
+                              </p>
+                           </TooltipContent>
+                        </Tooltip>
                      </>
                   )}
                </div>

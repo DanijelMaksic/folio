@@ -1,6 +1,5 @@
 ## Things to add
 
-- Guidelines tab
 - Show avatar/name across the app
 - "Fully transcribed" label in `DocumentCard.tsx`, and maybe in `DocumentPages.tsx` add "All pages as fully transcribed"
 - In `DocumentCard.tsx` add completion %, but only if it's above 0%
@@ -8,6 +7,7 @@
 - Role downgrade
 - Sorting in `/role-requests`
 - Home page (general info, FAQ)
+- Save transcription with ctrl + s shortcut (add into about this in guidelines and add tooltip with shortcut on save button, also change the button from "Save" to save icon with tooltip)
 
 ## Things to fix
 
@@ -22,6 +22,7 @@
 - Normalize the username input: The simplest way is in the shared schema, so it can’t be forgotten: `username: z.string().trim().min(1).toLowerCase()`. Otherwise use `input.username.toLowerCase()` in the router. Also CONFIRM that BetterAuth’s displayUsername is not what you show in the UI, because the public page should display it if you use it. `globalRole` stays in `getPublicProfile`
 - When navigating while the page is scrolled down, scroll position is saved on the new page
 - Run `tsc`
+- Fix tests
 
 ## Things to refactor
 

@@ -635,7 +635,9 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Added user page, which displays user information, list of documents, collections and notes.
 
-- Add Guidelines tab
+- Added Guidelines tab
+
+- Included tooltips for additional info or disabled states
 
 **Decisions:**
 

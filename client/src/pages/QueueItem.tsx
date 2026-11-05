@@ -9,6 +9,11 @@ import { trpc } from '../lib/trpc';
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '@/lib/auth-client';
 import { Link } from 'react-router-dom';
+import {
+   Tooltip,
+   TooltipContent,
+   TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface QueueItemProps {
    id: string;
@@ -64,16 +69,27 @@ function QueueItem({ item }: { item: QueueItemProps }) {
                </p>
             </div>
 
-            <Button
-               onClick={() =>
-                  navigate(
-                     `/review/${item.documentId}/pages/${item.pageNumber}?userId=${item.userId}`,
-                  )
-               }
-               disabled={session?.user.id === item.userId}
-            >
-               Review
-            </Button>
+            <Tooltip>
+               <TooltipTrigger
+                  render={
+                     <span className="inline-block w-fit">
+                        <Button
+                           onClick={() =>
+                              navigate(
+                                 `/review/${item.documentId}/pages/${item.pageNumber}?userId=${item.userId}`,
+                              )
+                           }
+                           disabled={session?.user.id === item.userId}
+                        >
+                           Review
+                        </Button>
+                     </span>
+                  }
+               />
+               <TooltipContent>
+                  <p>You cannot review your own transcription</p>
+               </TooltipContent>
+            </Tooltip>
          </CardContent>
       </Card>
    );
