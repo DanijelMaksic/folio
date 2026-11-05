@@ -1,12 +1,12 @@
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { useSession } from '@/lib/auth-client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import ProfileAvatar from '@/components/profile/ProfileAvatar';
-import ContributionStats from '@/components/profile/ContributionStats';
-import ProfileSettings from '@/components/profile/ProfileSettings';
-import RoleRequestCard from '@/components/profile/RoleRequestCard';
+import ProfileAvatar from '@/components/settings/ProfileAvatar';
+import ContributionStats from '@/components/settings/ContributionStats';
+import ProfileSettings from '@/components/settings/ProfileSettings';
+import RoleRequestCard from '@/components/settings/RoleRequestCard';
 import { trpc } from '@/lib/trpc';
-import RoleManagement from '@/components/profile/RoleManagement';
+import RoleManagement from '@/components/settings/RoleManagement';
 
 const TABS = ['stats', 'settings', 'roles'] as const;
 type ProfileTab = (typeof TABS)[number];
@@ -17,7 +17,7 @@ const dateFormatter = new Intl.DateTimeFormat(undefined, {
    day: 'numeric',
 });
 
-function Profile() {
+function Settings() {
    const { data: session, isPending } = useSession();
    const [searchParams, setSearchParams] = useSearchParams();
 
@@ -146,4 +146,4 @@ function Profile() {
    );
 }
 
-export default Profile;
+export default Settings;

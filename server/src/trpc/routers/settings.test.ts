@@ -90,7 +90,7 @@ describe('profile.uploadAvatar', () => {
       });
 
       const caller = createAuthenticatedCaller(contributorUser);
-      const result = await caller.profile.uploadAvatar({
+      const result = await caller.settings.uploadAvatar({
          fileBase64: 'data:image/png;base64,abc123',
       });
 
@@ -112,7 +112,7 @@ describe('profile.uploadAvatar', () => {
 
       const caller = createAuthenticatedCaller(contributorUser);
       await expect(
-         caller.profile.uploadAvatar({
+         caller.settings.uploadAvatar({
             fileBase64: 'data:image/png;base64,abc123',
          }),
       ).rejects.toMatchObject({ code: 'INTERNAL_SERVER_ERROR' });
@@ -121,7 +121,7 @@ describe('profile.uploadAvatar', () => {
    it('throws BAD_REQUEST if the file is not an image data url', async () => {
       const caller = createAuthenticatedCaller(contributorUser);
       await expect(
-         caller.profile.uploadAvatar({
+         caller.settings.uploadAvatar({
             fileBase64: 'data:application/pdf;base64,abc123',
          }),
       ).rejects.toMatchObject({ code: 'BAD_REQUEST' });
@@ -132,7 +132,7 @@ describe('profile.uploadAvatar', () => {
    it('throws UNAUTHORIZED if not signed in', async () => {
       const caller = createUnauthenticatedCaller();
       await expect(
-         caller.profile.uploadAvatar({
+         caller.settings.uploadAvatar({
             fileBase64: 'data:image/png;base64,abc123',
          }),
       ).rejects.toMatchObject({ code: 'UNAUTHORIZED' });
@@ -154,7 +154,7 @@ describe('profile.getStats', () => {
       mockGetUserStats.mockResolvedValueOnce(stats);
 
       const caller = createAuthenticatedCaller(contributorUser);
-      const result = await caller.profile.getStats();
+      const result = await caller.settings.getStats();
 
       expect(result).toEqual(stats);
       expect(mockGetUserStats).toHaveBeenCalledWith(contributorUser.id);
@@ -162,7 +162,7 @@ describe('profile.getStats', () => {
 
    it('throws UNAUTHORIZED if not signed in', async () => {
       const caller = createUnauthenticatedCaller();
-      await expect(caller.profile.getStats()).rejects.toMatchObject({
+      await expect(caller.settings.getStats()).rejects.toMatchObject({
          code: 'UNAUTHORIZED',
       });
    });
@@ -183,7 +183,7 @@ describe('profile.getMyRoleRequest', () => {
       });
 
       const caller = createAuthenticatedCaller(viewerUser);
-      const result = await caller.profile.getMyRoleRequest();
+      const result = await caller.settings.getMyRoleRequest();
 
       expect(result).toMatchObject({
          id: 'req-1',
@@ -214,7 +214,7 @@ describe('profile.getMyRoleRequest', () => {
       });
 
       const caller = createAuthenticatedCaller(viewerUser);
-      const result = await caller.profile.getMyRoleRequest();
+      const result = await caller.settings.getMyRoleRequest();
 
       expect(result).toMatchObject({
          status: 'rejected',
@@ -235,14 +235,14 @@ describe('profile.getMyRoleRequest', () => {
       });
 
       const caller = createAuthenticatedCaller(viewerUser);
-      const result = await caller.profile.getMyRoleRequest();
+      const result = await caller.settings.getMyRoleRequest();
 
       expect(result).toBeNull();
    });
 
    it('throws UNAUTHORIZED if not signed in', async () => {
       const caller = createUnauthenticatedCaller();
-      await expect(caller.profile.getMyRoleRequest()).rejects.toMatchObject({
+      await expect(caller.settings.getMyRoleRequest()).rejects.toMatchObject({
          code: 'UNAUTHORIZED',
       });
    });
@@ -257,7 +257,7 @@ describe('profile.requestRole', () => {
       mockInsert.mockReturnValueOnce({ values: mockValues });
 
       const caller = createAuthenticatedCaller(viewerUser);
-      const result = await caller.profile.requestRole({
+      const result = await caller.settings.requestRole({
          message: validMessage,
       });
 
@@ -275,7 +275,7 @@ describe('profile.requestRole', () => {
       mockInsert.mockReturnValueOnce({ values: mockValues });
 
       const caller = createAuthenticatedCaller(contributorUser);
-      await caller.profile.requestRole({ message: validMessage });
+      await caller.settings.requestRole({ message: validMessage });
 
       expect(mockValues).toHaveBeenCalledWith(
          expect.objectContaining({
@@ -288,7 +288,7 @@ describe('profile.requestRole', () => {
    it('throws BAD_REQUEST for an editor (no higher role)', async () => {
       const caller = createAuthenticatedCaller(editorUser);
       await expect(
-         caller.profile.requestRole({ message: validMessage }),
+         caller.settings.requestRole({ message: validMessage }),
       ).rejects.toMatchObject({ code: 'BAD_REQUEST' });
 
       expect(mockSelect).not.toHaveBeenCalled();
@@ -298,7 +298,7 @@ describe('profile.requestRole', () => {
    it('throws BAD_REQUEST for an admin (no higher role)', async () => {
       const caller = createAuthenticatedCaller(adminUser);
       await expect(
-         caller.profile.requestRole({ message: validMessage }),
+         caller.settings.requestRole({ message: validMessage }),
       ).rejects.toMatchObject({ code: 'BAD_REQUEST' });
 
       expect(mockInsert).not.toHaveBeenCalled();
@@ -309,7 +309,7 @@ describe('profile.requestRole', () => {
 
       const caller = createAuthenticatedCaller(viewerUser);
       await expect(
-         caller.profile.requestRole({ message: validMessage }),
+         caller.settings.requestRole({ message: validMessage }),
       ).rejects.toMatchObject({ code: 'CONFLICT' });
 
       expect(mockInsert).not.toHaveBeenCalled();
@@ -323,7 +323,7 @@ describe('profile.requestRole', () => {
 
       const caller = createAuthenticatedCaller(viewerUser);
       await expect(
-         caller.profile.requestRole({ message: validMessage }),
+         caller.settings.requestRole({ message: validMessage }),
       ).rejects.toMatchObject({ code: 'CONFLICT' });
    });
 
@@ -335,14 +335,14 @@ describe('profile.requestRole', () => {
 
       const caller = createAuthenticatedCaller(viewerUser);
       await expect(
-         caller.profile.requestRole({ message: validMessage }),
+         caller.settings.requestRole({ message: validMessage }),
       ).rejects.toMatchObject({ code: 'INTERNAL_SERVER_ERROR' });
    });
 
    it('throws BAD_REQUEST if the message is too short', async () => {
       const caller = createAuthenticatedCaller(viewerUser);
       await expect(
-         caller.profile.requestRole({ message: 'too short' }),
+         caller.settings.requestRole({ message: 'too short' }),
       ).rejects.toMatchObject({ code: 'BAD_REQUEST' });
 
       expect(mockSelect).not.toHaveBeenCalled();
@@ -351,7 +351,7 @@ describe('profile.requestRole', () => {
    it('throws UNAUTHORIZED if not signed in', async () => {
       const caller = createUnauthenticatedCaller();
       await expect(
-         caller.profile.requestRole({ message: validMessage }),
+         caller.settings.requestRole({ message: validMessage }),
       ).rejects.toMatchObject({ code: 'UNAUTHORIZED' });
    });
 });

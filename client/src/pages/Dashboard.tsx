@@ -33,7 +33,7 @@ export default function Dashboard() {
                transcriptions.
             </p>
             <Button>
-               <Link to="/profile">Request contributor role</Link>
+               <Link to="/settings">Request contributor role</Link>
             </Button>
          </div>
       );

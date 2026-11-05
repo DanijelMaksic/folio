@@ -21,7 +21,7 @@ function Stat({ label, value, hint }: StatProps) {
 }
 
 function ContributionStats() {
-   const { data, isLoading, isError } = trpc.profile.getStats.useQuery();
+   const { data, isLoading, isError } = trpc.settings.getStats.useQuery();
    const { data: session, isPending } = useSession();
    const user = session?.user;
    const canContribute = isContributor(user?.globalRole);

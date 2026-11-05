@@ -120,7 +120,7 @@ test.describe('Editor and admin dashboards', () => {
       await expect(rolesCard).toContainText('pending role requests');
 
       await rolesCard.click();
-      await page.waitForURL(/\/profile\?tab=roles/, { timeout: 15_000 });
+      await page.waitForURL(/\/settings\?tab=roles/, { timeout: 15_000 });
       await expect(
          page.getByRole('tab', { name: /Role requests/ }),
       ).toHaveAttribute('aria-selected', 'true');

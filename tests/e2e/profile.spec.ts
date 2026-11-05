@@ -27,7 +27,7 @@ async function loginInNewContext(browser: Browser, role: Role) {
 }
 
 async function submitRoleRequest(page: Page, buttonName: RegExp) {
-   await page.goto('/profile');
+   await page.goto('/settings');
    await page.getByRole('button', { name: buttonName }).click();
 
    const dialog = page.getByRole('dialog');
@@ -41,12 +41,12 @@ async function submitRoleRequest(page: Page, buttonName: RegExp) {
    });
 }
 
-test.describe('Profile page', () => {
+test.describe('Settings page', () => {
    test('shows header, details and the default stats tab', async ({
       page,
       auth,
    }) => {
-      await page.goto('/profile');
+      await page.goto('/settings');
 
       await expect(page.getByText(`@${auth.username}`)).toBeVisible();
       await expect(page.getByText(auth.email)).toBeVisible();
@@ -59,15 +59,15 @@ test.describe('Profile page', () => {
       page,
       auth,
    }) => {
-      await page.goto('/profile');
+      await page.goto('/settings');
 
       await page.getByRole('tab', { name: 'Profile settings' }).click();
-      await expect(page).toHaveURL(/\/profile\?tab=settings/);
+      await expect(page).toHaveURL(/\/settings\?tab=settings/);
 
       await page.getByRole('tab', { name: 'Contribution stats' }).click();
       await expect(page).not.toHaveURL(/tab=/);
 
-      await page.goto('/profile?tab=settings');
+      await page.goto('/settings?tab=settings');
       await expect(
          page.getByRole('tab', { name: 'Profile settings' }),
       ).toHaveAttribute('aria-selected', 'true');
@@ -77,7 +77,7 @@ test.describe('Profile page', () => {
       page,
       auth,
    }) => {
-      await page.goto('/profile?tab=roles');
+      await page.goto('/settings?tab=roles');
 
       await expect(
          page.getByRole('tab', { name: /Role requests/ }),
@@ -89,7 +89,7 @@ test.describe('Profile page', () => {
 
    test('user can edit their display name', async ({ page, auth }) => {
       const newName = `Renamed ${Date.now()}`;
-      await page.goto('/profile?tab=settings');
+      await page.goto('/settings?tab=settings');
 
       await page.getByRole('button', { name: /Edit profile/ }).click();
       const dialog = page.getByRole('dialog');
@@ -108,7 +108,7 @@ test.describe('Profile page', () => {
 test.describe('Role requests', () => {
    test('editor sees no role request card', async ({ page, loginAs }) => {
       await loginAs('editor');
-      await page.goto('/profile');
+      await page.goto('/settings');
 
       await expect(page.getByRole('button', { name: /Become a/ })).toHaveCount(
          0,
@@ -116,7 +116,7 @@ test.describe('Role requests', () => {
    });
 
    test('contributor sees "Become an editor"', async ({ page, auth }) => {
-      await page.goto('/profile');
+      await page.goto('/settings');
       await expect(
          page.getByRole('button', { name: /Become an editor/ }),
       ).toBeVisible();
@@ -127,7 +127,7 @@ test.describe('Role requests', () => {
       loginAs,
    }) => {
       await loginAs('viewer');
-      await page.goto('/profile');
+      await page.goto('/settings');
 
       await page.getByRole('button', { name: /Become a contributor/ }).click();
       const dialog = page.getByRole('dialog');
@@ -149,7 +149,7 @@ test.describe('Role requests', () => {
 
       const admin = await loginInNewContext(browser, 'admin');
       try {
-         await admin.page.goto('/profile?tab=roles');
+         await admin.page.goto('/settings?tab=roles');
 
          const card = admin.page
             .getByTestId('role-request')
@@ -187,7 +187,7 @@ test.describe('Role requests', () => {
 
       const admin = await loginInNewContext(browser, 'admin');
       try {
-         await admin.page.goto('/profile?tab=roles');
+         await admin.page.goto('/settings?tab=roles');
 
          const card = admin.page
             .getByTestId('role-request')
@@ -205,7 +205,7 @@ test.describe('Role requests', () => {
          await cleanupUser(admin.email);
       }
 
-      await page.goto('/profile');
+      await page.goto('/settings');
       await expect(
          page.getByText('Your last request was declined'),
       ).toBeVisible({ timeout: 15_000 });

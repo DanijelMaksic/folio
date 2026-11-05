@@ -3,7 +3,7 @@ import type { TRPCClientErrorLike } from '@trpc/client';
 import { AppRouter } from '@server/trpc/router';
 import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
-import RejectRoleRequestModal from '@/components/profile/RejectRoleRequestModal';
+import RejectRoleRequestModal from '@/components/settings/RejectRoleRequestModal';
 
 const dateFormatter = new Intl.DateTimeFormat(undefined, {
    dateStyle: 'medium',

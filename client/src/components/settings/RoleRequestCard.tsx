@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Clock, Sparkles } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
-import RequestRoleModal from '@/components/profile/RequestRoleModal';
+import RequestRoleModal from '@/components/settings/RequestRoleModal';
 
 const NEXT_ROLE = {
    viewer: 'contributor',
@@ -19,17 +19,17 @@ function RoleRequestCard({ globalRole }: RoleRequestCardProps) {
 
    const targetRole = NEXT_ROLE[globalRole as keyof typeof NEXT_ROLE];
 
-   const { data: latest } = trpc.profile.getMyRoleRequest.useQuery(undefined, {
+   const { data: latest } = trpc.settings.getMyRoleRequest.useQuery(undefined, {
       enabled: !!targetRole,
    });
-   const requestRole = trpc.profile.requestRole.useMutation();
+   const requestRole = trpc.settings.requestRole.useMutation();
 
    // Editors and admins have nothing left to request
    if (!targetRole) return null;
 
    async function handleSubmit(message: string) {
       await requestRole.mutateAsync({ message });
-      await utils.profile.getMyRoleRequest.invalidate();
+      await utils.settings.getMyRoleRequest.invalidate();
    }
 
    if (latest?.status === 'pending') {

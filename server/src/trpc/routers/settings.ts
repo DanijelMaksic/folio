@@ -3,8 +3,7 @@ import { contributionStatsSchema, uploadAvatarSchema } from '@folio/shared';
 import { router, protectedProcedure } from '@/trpc/trpc.js';
 import cloudinary from '@/lib/cloudinary.js';
 import { db } from '@/db/index.js';
-import { documents, transcriptions } from '@/db/schema/index.js';
-import { and, desc, eq, sql } from 'drizzle-orm';
+import { and, desc, eq } from 'drizzle-orm';
 import { roleRequestSchema, requestRoleSchema } from '@folio/shared';
 import { roleRequests } from '@/db/schema/index.js';
 import { getUserStats } from '@/lib/user-stats.js';
@@ -13,7 +12,7 @@ const avatarPublicId = (userId: string) => `avatars/${userId}`;
 
 const NEXT_ROLE = { viewer: 'contributor', contributor: 'editor' } as const;
 
-export const profileRouter = router({
+export const settingsRouter = router({
    uploadAvatar: protectedProcedure
       .input(uploadAvatarSchema)
       .mutation(async ({ ctx, input }) => {

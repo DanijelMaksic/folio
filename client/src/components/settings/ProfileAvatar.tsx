@@ -32,7 +32,7 @@ function ProfileAvatar({ image, displayName }: ProfileAvatarProps) {
    const [busy, setBusy] = useState(false);
    const [error, setError] = useState<string | null>(null);
 
-   const uploadAvatar = trpc.profile.uploadAvatar.useMutation();
+   const uploadAvatar = trpc.settings.uploadAvatar.useMutation();
 
    async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
       const file = e.target.files?.[0];

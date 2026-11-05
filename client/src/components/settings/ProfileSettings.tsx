@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from '@/lib/auth-client';
 import { Button } from '@/components/ui/button';
-import EditProfileModal from '@/components/profile/EditProfileModal';
-import ChangePasswordModal from '@/components/profile/ChangePasswordModal';
-import DeleteProfileModal from '@/components/profile/DeleteProfileModal';
+import EditProfileModal from '@/components/settings/EditProfileModal';
+import ChangePasswordModal from '@/components/settings/ChangePasswordModal';
+import DeleteProfileModal from '@/components/settings/DeleteProfileModal';
 
 interface ProfileSettingsProps {
    name: string;

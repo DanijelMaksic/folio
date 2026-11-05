@@ -18,7 +18,7 @@ export function AttentionCards({
       },
       pendingRoleRequestCount !== null && {
          key: 'roles',
-         to: '/profile?tab=roles',
+         to: '/settings?tab=roles',
          count: pendingRoleRequestCount,
          label: 'pending role requests',
       },

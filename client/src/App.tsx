@@ -8,7 +8,6 @@ import DocumentPages from '@/pages/DocumentPages';
 import UploadDocument from '@/pages/UploadDocument';
 import ReviewQueue from '@/pages/ReviewQueue';
 import Layout from '@/components/shared/Layout';
-import Profile from './pages/Profile';
 import Home from '@/pages/Home';
 import PageNotFound from '@/pages/PageNotFound';
 import Collections from '@/components/collections/Collections';
@@ -18,6 +17,7 @@ import PageDetails from '@/pages/PageDetails';
 import ReviewPage from '@/pages/ReviewPage';
 import Dashboard from '@/pages/Dashboard';
 import UserPage from '@/pages/UserPage';
+import Settings from '@/pages/Settings';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
    const { data: session, isPending } = useSession();
@@ -81,10 +81,10 @@ export default function App() {
                />
 
                <Route
-                  path="/profile"
+                  path="/settings"
                   element={
                      <ProtectedRoute>
-                        <Profile />
+                        <Settings />
                      </ProtectedRoute>
                   }
                />

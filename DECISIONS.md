@@ -429,19 +429,19 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 ## Sprint 7 — Dashboard and Profile Settings
 
-**Goal:** A signed-in user has a profile where they can manage their account, see their contribution stats and request a higher role, and contributors have a dashboard summarizing their work.
+**Goal:** A signed-in user can access the profile settings page where they can manage their account, see their contribution stats and request a higher role, and contributors have a dashboard summarizing their work.
 
 **Completed:**
 
-- Profile page reworked into a tabbed layout (`/profile?tab=stats|settings|roles`) with a header (avatar, name, `@username`, role pill), a details strip (email, member since) and tabs synced to the URL. The admin-only "Role requests" tab shows a pending-count badge; non-admins fall back to stats
+- Profile page reworked into a tabbed layout (`/settings?tab=stats|settings|roles`) with a header (avatar, name, `@username`, role pill), a details strip (email, member since) and tabs synced to the URL. The admin-only "Role requests" tab shows a pending-count badge; non-admins fall back to stats
 
-- Avatar upload and removal: base64 goes through `profile.uploadAvatar` to Cloudinary under a fixed `avatars/<userId>` public id (overwrite + invalidate, 400x400 fill crop), then the client calls BetterAuth `updateUser({ image })` so the session stays in sync
+- Avatar upload and removal: base64 goes through `settings.uploadAvatar` to Cloudinary under a fixed `avatars/<userId>` public id (overwrite + invalidate, 400x400 fill crop), then the client calls BetterAuth `updateUser({ image })` so the session stays in sync
 
 - Profile settings: edit profile (name, username), change password (with "sign out other sessions" option), sign out, and a danger zone with delete account. Edit modals validate with shared Zod schemas (`updateProfileSchema`, `changePasswordSchema`)
 
-- Contribution stats: `getUserStats(userId)` helper in `server/src/lib/user-stats.ts` (two parallel `db.select()` aggregates with `::int` casts), shared by `profile.getStats` and the dashboard
+- Contribution stats: `getUserStats(userId)` helper in `server/src/lib/user-stats.ts` (two parallel `db.select()` aggregates with `::int` casts), shared by `settings.getStats` and the dashboard
 
-- Role request flow end to end: `role_requests` table with a partial unique index (one pending request per user), `profile.requestRole` / `getMyRoleRequest`, admin `listRoleRequests` / `approveRoleRequest` / `rejectRoleRequest`, approval and rejection emails, `RoleRequestCard`, `RequestRoleModal`, `RoleManagement` and `RejectRoleRequestModal`
+- Role request flow end to end: `role_requests` table with a partial unique index (one pending request per user), `settings.requestRole` / `getMyRoleRequest`, admin `listRoleRequests` / `approveRoleRequest` / `rejectRoleRequest`, approval and rejection emails, `RoleRequestCard`, `RequestRoleModal`, `RoleManagement` and `RejectRoleRequestModal`
 
 - `adminProcedure` added to `trpc.ts`; `admin.setUserRole` now uses it instead of an inline role check
 
@@ -457,13 +457,13 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Zod aligned on v4 across client, server and shared
 
-- Vitest mock-based tests added for `dashboard` and `profile` routers, plus new `transcriptions` cases for deleted authors (`approve` / `reject` return `NOT_FOUND`, `getApprovedByPage` with a null author)
+- Vitest mock-based tests added for `dashboard` and `settings` routers, plus new `transcriptions` cases for deleted authors (`approve` / `reject` return `NOT_FOUND`, `getApprovedByPage` with a null author)
 
 - Playwright e2e added for the dashboard (access gate, contributor, editor and admin views) and the profile page (tabs and deep links, edit name, role request flow with an admin approving or rejecting in a second browser context). Fixtures extended with a `loginAs(role)` helper
 
 **Decisions:**
 
-- Dashboard gets its own router and route rather than living under `profile`, since it is a separate page in the client with a different purpose
+- Dashboard gets its own router and route rather than living under `settings`, since it is a separate page in the client with a different purpose
 
 - Viewers see an explanatory gate on the dashboard instead of a redirect or an empty page, so they know why and where to act (the role request lives on the profile). The Nav link stays visible so they can find it
 
@@ -603,7 +603,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 ## Sprint 9 — Bug Fixes and General Improvements
 
-**Goal:**
+**Goal:** App is bug-free and feature complete.
 
 **Completed:**
 
@@ -650,6 +650,8 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 - Removed `description` field from `pages` drizzle and zod schemas, and adapted `EditModal.tsx` to exclude `description` on `PageDetails.tsx`
 
 - In `TranscriptionPanel.tsx`, if panel is larger than screen height, `sticky` is set on page image while scrolling, until the end of panel is reached
+
+- Change `/profile` to `/settings`, and `profile` router to `settings` router
 
 **Issues resolved:**
 

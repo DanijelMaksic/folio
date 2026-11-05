@@ -62,7 +62,7 @@ function UserPage() {
             </div>
 
             {isMe && (
-               <Link to="/profile" className="ml-auto text-sm underline">
+               <Link to="/settings" className="ml-auto text-sm underline">
                   Edit profile
                </Link>
             )}
