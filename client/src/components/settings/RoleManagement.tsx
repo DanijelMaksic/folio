@@ -4,6 +4,7 @@ import { AppRouter } from '@server/trpc/router';
 import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
 import RejectRoleRequestModal from '@/components/settings/RejectRoleRequestModal';
+import { Link } from 'react-router-dom';
 
 const dateFormatter = new Intl.DateTimeFormat(undefined, {
    dateStyle: 'medium',
@@ -63,7 +64,9 @@ function RoleManagement() {
    const rejecting = data.find((r) => r.id === rejectingId);
 
    return (
-      <div className="mt-20">
+      <div className="max-w-3xl mx-auto py-8 px-4 space-y-3">
+         <h1 className="text-2xl font-semibold">Role Requests</h1>
+
          {listError && (
             <p role="alert" className="text-sm text-destructive">
                {listError}
@@ -80,8 +83,6 @@ function RoleManagement() {
          ) : (
             <ul className="space-y-4">
                {data.map((request) => {
-                  const applicant =
-                     request.name || request.username || request.email;
                   const busy = approvingId === request.id;
 
                   return (
@@ -93,13 +94,15 @@ function RoleManagement() {
                         <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
                            <div className="min-w-0">
                               <p className="font-semibold text-lg">
-                                 {applicant}
+                                 <Link
+                                    className="hover:underline"
+                                    to={`/users/${request.username}`}
+                                 >
+                                    {request.name}
+                                 </Link>
                               </p>
                               <p className="break-all text-sm text-muted-foreground">
-                                 {request.username
-                                    ? `@${request.username} • `
-                                    : ''}
-                                 {request.email}
+                                 @{request.username} • {request.email}
                               </p>
                            </div>
                            <p className="text-sm text-muted-foreground">

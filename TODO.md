@@ -6,6 +6,7 @@
 - In `DocumentCard.tsx` add completion %, but only if it's above 0%
 - Categories/tags
 - Role downgrade
+- Sorting in `/role-requests`
 
 ## Things to fix
 

@@ -76,7 +76,9 @@ function UserPage() {
                <TabsTrigger value="collections">
                   Collections ({profile.stats.collections})
                </TabsTrigger>
-               <TabsTrigger value="notes">Notes</TabsTrigger>
+               <TabsTrigger value="notes">
+                  Notes ({profile.stats.notes})
+               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="documents">

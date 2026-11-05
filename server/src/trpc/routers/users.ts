@@ -2,6 +2,7 @@ import { db } from '@/db/index.js';
 import { user } from '@/db/schema/auth.js';
 import { collections } from '@/db/schema/collections.js';
 import { documents } from '@/db/schema/documents.js';
+import { notes } from '@/db/schema/notes.js';
 import { transcriptions } from '@/db/schema/transcriptions.js';
 import { publicProcedure, router } from '@/trpc/trpc.js';
 import { getPublicProfileSchema } from '@folio/shared';
@@ -25,7 +26,8 @@ export const usersRouter = router({
             .where(eq(user.username, input.username));
          if (!u) throw new TRPCError({ code: 'NOT_FOUND' });
 
-         const [[docs], [cols], [approved]] = await Promise.all([
+         // fetch data for stats
+         const [[docs], [cols], [approved], [totalNotes]] = await Promise.all([
             db
                .select({ n: count() })
                .from(documents)
@@ -48,6 +50,7 @@ export const usersRouter = router({
                      eq(transcriptions.status, 'approved'),
                   ),
                ),
+            db.select({ n: count() }).from(notes).where(eq(notes.userId, u.id)),
          ]);
 
          return {
@@ -56,6 +59,7 @@ export const usersRouter = router({
                documents: docs.n,
                collections: cols.n,
                approvedTranscriptions: approved.n,
+               notes: totalNotes.n,
             },
          };
       }),

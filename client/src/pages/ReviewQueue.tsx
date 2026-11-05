@@ -27,7 +27,7 @@ export default function ReviewQueue() {
 
    if (!queue || queue.length === 0) {
       return (
-         <div className="p-6">
+         <div className="max-w-3xl mx-auto py-8 px-2">
             <h1 className="text-2xl font-semibold mb-4">Review Queue</h1>
             <p className="text-muted-foreground">
                No transcriptions pending review.
@@ -37,7 +37,7 @@ export default function ReviewQueue() {
    }
 
    return (
-      <div className="p-6 max-w-4xl mx-auto">
+      <div className="max-w-3xl mx-auto py-8 px-4">
          <div className="flex items-center justify-between gap-3">
             <h1 className="text-2xl font-semibold mb-6">Review Queue</h1>
 
