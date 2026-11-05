@@ -1,6 +1,5 @@
 ## Things to add
 
-- Show avatar/name across the app
 - "Fully transcribed" label in `DocumentCard.tsx`, and maybe in `DocumentPages.tsx` add "All pages as fully transcribed"
 - In `DocumentCard.tsx` add completion %, but only if it's above 0%
 - Categories/tags
@@ -27,3 +26,4 @@
 ## Things to refactor
 
 - In `TranscriptionPanel.tsx`, switch textarea with rich text editor (and add character limit)
+- Change custom dropdowns to shadcn dropdowns, then make a custom component for each dropdown (like `SortDropdown.tsx`)

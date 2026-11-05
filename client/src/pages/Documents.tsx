@@ -4,13 +4,27 @@ import { isContributor } from '@shared';
 import { Button } from '@/components/ui/button';
 import { useSession } from '@/lib/auth-client';
 import { DocumentCard } from '@/components/documents/DocumentCard.js';
-import { ArrowUpDown, Plus } from 'lucide-react';
+import { ArrowUpDown, Check, ChevronDown, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import SearchBar from '@/components/shared/SearchBar';
 import AppPagination from '@/components/shared/AppPagination';
+import {
+   DropdownMenu,
+   DropdownMenuContent,
+   DropdownMenuGroup,
+   DropdownMenuItem,
+   DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export type DocumentSort = 'newest' | 'oldest' | 'title-asc' | 'title-desc';
 const SORTS: DocumentSort[] = ['newest', 'oldest', 'title-asc', 'title-desc'];
+
+const SORT_LABELS: Record<DocumentSort, string> = {
+   newest: 'Newest',
+   oldest: 'Oldest',
+   'title-asc': 'Title A–Z',
+   'title-desc': 'Title Z–A',
+};
 
 export default function Documents() {
    const navigate = useNavigate();
@@ -80,6 +94,8 @@ export default function Documents() {
    const documents = data?.documents ?? [];
    const totalPages = data?.totalPages ?? 1;
 
+   const longest = Math.max(...Object.values(SORT_LABELS).map((l) => l.length));
+
    return (
       <div className="max-w-4xl mx-auto p-6">
          <div className="flex items-center justify-between gap-3 mb-7.5">
@@ -102,18 +118,33 @@ export default function Documents() {
                      <ArrowUpDown className="text-gray-500" />
                   </span>
 
-                  <select
-                     value={sort}
-                     onChange={(e) =>
-                        handleSetSort(e.target.value as DocumentSort)
-                     }
-                     className="rounded-md border bg-background px-3 py-2 text-sm"
-                  >
-                     <option value="newest">Newest</option>
-                     <option value="oldest">Oldest</option>
-                     <option value="title-asc">Title A–Z</option>
-                     <option value="title-desc">Title Z–A</option>
-                  </select>
+                  <DropdownMenu>
+                     <DropdownMenuTrigger
+                        render={
+                           <Button
+                              variant="outline"
+                              className="justify-between"
+                              style={{ minWidth: `${longest + 2.5}ch` }}
+                           >
+                              {SORT_LABELS[sort]}
+                              <ChevronDown className="size-4 text-muted-foreground" />
+                           </Button>
+                        }
+                     />
+                     <DropdownMenuContent align="end">
+                        {SORTS.map((s) => (
+                           <DropdownMenuItem
+                              key={s}
+                              onClick={() => handleSetSort(s)}
+                           >
+                              {SORT_LABELS[s]}
+                              {s === sort && (
+                                 <Check className="ml-auto size-4" />
+                              )}
+                           </DropdownMenuItem>
+                        ))}
+                     </DropdownMenuContent>
+                  </DropdownMenu>
                </div>
 
                {canTranscribe ? (
