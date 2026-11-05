@@ -1,12 +1,13 @@
 ## Things to add
 
-- Help page (transcription tips)
+- Guidelines tab
 - Show avatar/name across the app
 - "Fully transcribed" label in `DocumentCard.tsx`, and maybe in `DocumentPages.tsx` add "All pages as fully transcribed"
 - In `DocumentCard.tsx` add completion %, but only if it's above 0%
 - Categories/tags
 - Role downgrade
 - Sorting in `/role-requests`
+- Home page (general info, FAQ)
 
 ## Things to fix
 

@@ -3,6 +3,7 @@ import TranscribeTab from '@/components/documents/TranscribeTab';
 import RevisionHistoryTab from '@/components/documents/RevisionHistoryTab';
 import OverviewTab from '@/components/documents/OverviewTab';
 import { ReactElement } from 'react';
+import GuidelinesTab from '@/components/documents/GuidelinesTab';
 
 function PageTabs({
    canTranscribe,
@@ -40,6 +41,9 @@ function PageTabs({
                >
                   Revision History
                </TabsTrigger>
+               <TabsTrigger value="guidelines" data-testid="guidelines-tab-btn">
+                  Guidelines
+               </TabsTrigger>
             </TabsList>
 
             {children}
@@ -53,6 +57,9 @@ function PageTabs({
          </TabsContent>
          <TabsContent value="revision-history">
             <RevisionHistoryTab />
+         </TabsContent>
+         <TabsContent value="guidelines">
+            <GuidelinesTab />
          </TabsContent>
       </Tabs>
    );

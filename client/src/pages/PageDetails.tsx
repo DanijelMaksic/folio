@@ -231,7 +231,9 @@ function PageDetails() {
             </PageTabs>
          )}
 
-         {tab !== 'revision-history' && <NotesAndQuestions pageId={page.id} />}
+         {tab !== 'revision-history' && tab !== 'guidelines' && (
+            <NotesAndQuestions pageId={page.id} />
+         )}
 
          {isEditOpen && (
             <EditModal
