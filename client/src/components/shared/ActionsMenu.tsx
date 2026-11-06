@@ -35,7 +35,7 @@ function ActionsMenu({
    if (!show) return null;
 
    return (
-      <DropdownMenu>
+      <DropdownMenu modal={false}>
          <DropdownMenuTrigger
             render={
                <Button

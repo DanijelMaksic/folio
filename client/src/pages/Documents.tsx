@@ -11,12 +11,12 @@ import AppPagination from '@/components/shared/AppPagination';
 import {
    DropdownMenu,
    DropdownMenuContent,
-   DropdownMenuGroup,
    DropdownMenuItem,
    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
 export type DocumentSort = 'newest' | 'oldest' | 'title-asc' | 'title-desc';
+
 const SORTS: DocumentSort[] = ['newest', 'oldest', 'title-asc', 'title-desc'];
 
 const SORT_LABELS: Record<DocumentSort, string> = {
@@ -94,8 +94,6 @@ export default function Documents() {
    const documents = data?.documents ?? [];
    const totalPages = data?.totalPages ?? 1;
 
-   const longest = Math.max(...Object.values(SORT_LABELS).map((l) => l.length));
-
    return (
       <div className="max-w-4xl mx-auto p-6">
          <div className="flex items-center justify-between gap-3 mb-7.5">
@@ -118,13 +116,12 @@ export default function Documents() {
                      <ArrowUpDown className="text-gray-500" />
                   </span>
 
-                  <DropdownMenu>
+                  <DropdownMenu modal={false}>
                      <DropdownMenuTrigger
                         render={
                            <Button
                               variant="outline"
-                              className="justify-between"
-                              style={{ minWidth: `${longest + 2.5}ch` }}
+                              className="justify-between min-w-26"
                            >
                               {SORT_LABELS[sort]}
                               <ChevronDown className="size-4 text-muted-foreground" />

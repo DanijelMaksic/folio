@@ -1,15 +1,45 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { trpc } from '../lib/trpc';
 import { useSession } from '../lib/auth-client';
 import { isEditor } from '@folio/shared';
 import QueueItem from '@/pages/QueueItem';
 import { useState } from 'react';
-import { ArrowUpDown } from 'lucide-react';
+import { ArrowUpDown, Check, ChevronDown } from 'lucide-react';
+import {
+   DropdownMenu,
+   DropdownMenuContent,
+   DropdownMenuItem,
+   DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+
+export type ItemSort = 'newest' | 'oldest';
+
+const SORTS: ItemSort[] = ['newest', 'oldest'];
+
+const SORT_LABELS: Record<ItemSort, string> = {
+   newest: 'Newest',
+   oldest: 'Oldest',
+};
 
 export default function ReviewQueue() {
    const navigate = useNavigate();
    const { data: session } = useSession();
-   const [sort, setSort] = useState<'oldest' | 'newest'>('oldest');
+   const [searchParams, setSearchParams] = useSearchParams();
+
+   const rawSort = searchParams.get('sort') as ItemSort | null;
+   const sort: ItemSort =
+      rawSort && SORTS.includes(rawSort) ? rawSort : 'newest';
+
+   const handleSetSort = (newSort: ItemSort) => {
+      setSearchParams((prev) => {
+         const next = new URLSearchParams(prev);
+         if (newSort === 'newest') next.delete('sort');
+         else next.set('sort', newSort);
+         next.set('page', '1');
+         return next;
+      });
+   };
 
    const { data: queue, isLoading } = trpc.transcriptions.listQueue.useQuery(
       { sort },
@@ -45,17 +75,31 @@ export default function ReviewQueue() {
                <span className="pl-3">
                   <ArrowUpDown className="text-gray-500" />
                </span>
-               <select
-                  value={sort}
-                  onChange={(e) =>
-                     setSort(e.target.value as 'oldest' | 'newest')
-                  }
-                  disabled={queue.length <= 1}
-                  className={`rounded-md border bg-background px-3 py-1.5 text-sm ${queue.length <= 1 ? 'text-muted-foreground' : ''}`}
-               >
-                  <option value="oldest">Oldest first</option>
-                  <option value="newest">Newest first</option>
-               </select>
+
+               <DropdownMenu modal={false}>
+                  <DropdownMenuTrigger
+                     render={
+                        <Button
+                           variant="outline"
+                           className="justify-between min-w-24"
+                        >
+                           {SORT_LABELS[sort]}
+                           <ChevronDown className="size-4 text-muted-foreground" />
+                        </Button>
+                     }
+                  />
+                  <DropdownMenuContent align="end">
+                     {SORTS.map((s) => (
+                        <DropdownMenuItem
+                           key={s}
+                           onClick={() => handleSetSort(s)}
+                        >
+                           {SORT_LABELS[s]}
+                           {s === sort && <Check className="ml-auto size-4" />}
+                        </DropdownMenuItem>
+                     ))}
+                  </DropdownMenuContent>
+               </DropdownMenu>
             </div>
          </div>
 

@@ -58,7 +58,7 @@ function Nav() {
                      />
                   </NavigationMenuItem>
 
-                  <DropdownMenu>
+                  <DropdownMenu modal={false}>
                      <DropdownMenuTrigger
                         render={
                            <button

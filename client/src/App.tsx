@@ -10,7 +10,7 @@ import ReviewQueue from '@/pages/ReviewQueue';
 import Layout from '@/components/shared/Layout';
 import Home from '@/pages/Home';
 import PageNotFound from '@/pages/PageNotFound';
-import Collections from '@/components/collections/Collections';
+import Collections from '@/pages/Collections';
 import CollectionDetails from '@/pages/CollectionDetails';
 import CreateCollection from '@/components/collections/CreateCollection';
 import PageDetails from '@/pages/PageDetails';

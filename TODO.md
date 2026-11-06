@@ -26,4 +26,3 @@
 ## Things to refactor
 
 - In `TranscriptionPanel.tsx`, switch textarea with rich text editor (and add character limit)
-- Change custom dropdowns to shadcn dropdowns, then make a custom component for each dropdown (like `SortDropdown.tsx`)

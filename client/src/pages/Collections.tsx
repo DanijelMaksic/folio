@@ -6,9 +6,15 @@ import { isContributor } from '@shared';
 import { Button } from '@/components/ui/button';
 import { useSession } from '@/lib/auth-client';
 import { CollectionCard } from '@/components/collections/CollectionCard';
-import { ArrowUpDown, Plus } from 'lucide-react';
+import { ArrowUpDown, Check, ChevronDown, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import SearchBar from '@/components/shared/SearchBar';
+import {
+   DropdownMenu,
+   DropdownMenuContent,
+   DropdownMenuItem,
+   DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export type CollectionSort =
    | 'newest'
@@ -24,6 +30,14 @@ const SORTS: CollectionSort[] = [
    'title-desc',
    'most-documents',
 ];
+
+const SORT_LABELS: Record<CollectionSort, string> = {
+   newest: 'Newest',
+   oldest: 'Oldest',
+   'title-asc': 'Title A–Z',
+   'title-desc': 'Title Z–A',
+   'most-documents': 'Most documents',
+};
 
 export default function Collections() {
    const navigate = useNavigate();
@@ -111,19 +125,32 @@ export default function Collections() {
                      <ArrowUpDown className="text-gray-500" />
                   </span>
 
-                  <select
-                     value={sort}
-                     onChange={(e) =>
-                        handleSetSort(e.target.value as CollectionSort)
-                     }
-                     className="rounded-md border bg-background px-3 py-2 text-sm"
-                  >
-                     <option value="newest">Newest</option>
-                     <option value="oldest">Oldest</option>
-                     <option value="title-asc">Title A–Z</option>
-                     <option value="title-desc">Title Z–A</option>
-                     <option value="most-documents">Most documents</option>
-                  </select>
+                  <DropdownMenu modal={false}>
+                     <DropdownMenuTrigger
+                        render={
+                           <Button
+                              variant="outline"
+                              className="justify-between min-w-40"
+                           >
+                              {SORT_LABELS[sort]}
+                              <ChevronDown className="size-4 text-muted-foreground" />
+                           </Button>
+                        }
+                     />
+                     <DropdownMenuContent align="end">
+                        {SORTS.map((s) => (
+                           <DropdownMenuItem
+                              key={s}
+                              onClick={() => handleSetSort(s)}
+                           >
+                              {SORT_LABELS[s]}
+                              {s === sort && (
+                                 <Check className="ml-auto size-4" />
+                              )}
+                           </DropdownMenuItem>
+                        ))}
+                     </DropdownMenuContent>
+                  </DropdownMenu>
                </div>
 
                {canTranscribe ? (

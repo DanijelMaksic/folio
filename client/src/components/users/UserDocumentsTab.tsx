@@ -4,14 +4,23 @@ import ListControls from '@/components/users/ListControls';
 import { DocumentCard } from '@/components/documents/DocumentCard';
 import AppPagination from '@/components/shared/AppPagination';
 
-const SORTS = [
+type DocumentSort =
+   | 'newest'
+   | 'oldest'
+   | 'title-asc'
+   | 'title-desc'
+   | 'most-pages'
+   | 'most-transcribed';
+
+const SORTS: DocumentSort[] = [
    'newest',
    'oldest',
    'title-asc',
    'title-desc',
    'most-pages',
    'most-transcribed',
-] as const;
+];
+
 type Sort = (typeof SORTS)[number];
 
 const OPTIONS = [

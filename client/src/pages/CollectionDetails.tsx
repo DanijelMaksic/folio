@@ -4,13 +4,20 @@ import { AppRouter } from '@server/trpc/router';
 import { isContributor, isEditor } from '@shared';
 import { TRPCClientErrorLike } from '@trpc/client';
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import SearchBar from '@/components/shared/SearchBar';
 import DeleteModal from '@/components/shared/DeleteModal';
 import EditModal from '@/components/shared/EditModal';
 import ActionsMenu from '@/components/shared/ActionsMenu';
 import CollectionTabs from '@/components/collections/CollectionTabs';
-import { ArrowUpDown, SortAsc } from 'lucide-react';
+import { ArrowUpDown, Check, ChevronDown } from 'lucide-react';
+import {
+   DropdownMenu,
+   DropdownMenuContent,
+   DropdownMenuItem,
+   DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
 
 type DocumentSort =
    | 'newest'
@@ -20,14 +27,32 @@ type DocumentSort =
    | 'most-pages'
    | 'most-transcribed';
 
+const SORTS: DocumentSort[] = [
+   'newest',
+   'oldest',
+   'title-asc',
+   'title-desc',
+   'most-pages',
+   'most-transcribed',
+];
+
+const SORT_LABELS: Record<DocumentSort, string> = {
+   newest: 'Newest',
+   oldest: 'Oldest',
+   'title-asc': 'Title A–Z',
+   'title-desc': 'Title Z–A',
+   'most-pages': 'Most pages',
+   'most-transcribed': 'Most transcribed',
+};
+
 function CollectionDetails() {
    const [serverError, setServerError] = useState('');
    const [deleteError, setDeleteError] = useState('');
    const [isEditOpen, setIsEditOpen] = useState(false);
    const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-   const [sort, setSort] = useState<DocumentSort>('newest');
 
    const { id: collectionId } = useParams<{ id: string }>();
+   const [searchParams, setSearchParams] = useSearchParams();
    const { data: session } = useSession();
    const user = session?.user;
    const navigate = useNavigate();
@@ -40,6 +65,10 @@ function CollectionDetails() {
    const [page, setPage] = useState(1);
 
    const utils = trpc.useUtils();
+
+   const rawSort = searchParams.get('sort') as DocumentSort | null;
+   const sort: DocumentSort =
+      rawSort && SORTS.includes(rawSort) ? rawSort : 'newest';
 
    useEffect(() => {
       const t = setTimeout(() => setDebouncedSearch(search), 500);
@@ -55,6 +84,16 @@ function CollectionDetails() {
    useEffect(() => {
       setPage(1);
    }, [debouncedSearch]);
+
+   const handleSetSort = (newSort: DocumentSort) => {
+      setSearchParams((prev) => {
+         const next = new URLSearchParams(prev);
+         if (newSort === 'newest') next.delete('sort');
+         else next.set('sort', newSort);
+         next.set('page', '1');
+         return next;
+      });
+   };
 
    const { data, isLoading: isLoadingDocs } = trpc.documents.list.useQuery(
       {
@@ -136,23 +175,32 @@ function CollectionDetails() {
                               <ArrowUpDown className="text-gray-500" />
                            </span>
 
-                           <select
-                              value={sort}
-                              onChange={(e) => {
-                                 setSort(e.target.value as DocumentSort);
-                                 setPage(1);
-                              }}
-                              className="rounded-md border bg-background px-3 py-2 text-sm"
-                           >
-                              <option value="newest">Newest</option>
-                              <option value="oldest">Oldest</option>
-                              <option value="title-asc">Title A–Z</option>
-                              <option value="title-desc">Title Z–A</option>
-                              <option value="most-pages">Most pages</option>
-                              <option value="most-transcribed">
-                                 Most transcribed
-                              </option>
-                           </select>
+                           <DropdownMenu modal={false}>
+                              <DropdownMenuTrigger
+                                 render={
+                                    <Button
+                                       variant="outline"
+                                       className="justify-between min-w-41"
+                                    >
+                                       {SORT_LABELS[sort]}
+                                       <ChevronDown className="size-4 text-muted-foreground" />
+                                    </Button>
+                                 }
+                              />
+                              <DropdownMenuContent align="end">
+                                 {SORTS.map((s) => (
+                                    <DropdownMenuItem
+                                       key={s}
+                                       onClick={() => handleSetSort(s)}
+                                    >
+                                       {SORT_LABELS[s]}
+                                       {s === sort && (
+                                          <Check className="ml-auto size-4" />
+                                       )}
+                                    </DropdownMenuItem>
+                                 ))}
+                              </DropdownMenuContent>
+                           </DropdownMenu>
                         </div>
                      </>
                   ) : null}

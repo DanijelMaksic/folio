@@ -10,7 +10,7 @@ import EditModal from '@/components/shared/EditModal';
 import ActionsMenu from '@/components/shared/ActionsMenu';
 import CollectionPickerModal from '@/components/documents/CollectionPickerModal';
 import { useViewerStore } from '@/store/useViewerStore';
-import { ArrowUpDown, Loader2 } from 'lucide-react';
+import { ArrowUpDown, Check, ChevronDown, Loader2 } from 'lucide-react';
 import AddPagesModal from '@/components/documents/AddPagesModal';
 import TranscriptionFilter from '@/components/documents/TranscriptionFilter';
 import { Link } from 'react-router-dom';
@@ -24,10 +24,23 @@ import {
    BreadcrumbPage,
    BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
+import {
+   DropdownMenu,
+   DropdownMenuContent,
+   DropdownMenuItem,
+   DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
 
 export type SortType = 'asc' | 'desc';
+const SORTS: SortType[] = ['asc', 'desc'];
 
 export type StatusType = 'all-pages' | 'transcribed' | 'not-transcribed';
+
+const SORT_LABELS: Record<SortType, string> = {
+   asc: 'Page order (asc)',
+   desc: 'Reverse order (desc)',
+};
 
 const VALID_STATUSES: StatusType[] = [
    'all-pages',
@@ -314,19 +327,32 @@ function DocumentPages() {
                                  <ArrowUpDown className="text-gray-500" />
                               </span>
 
-                              <select
-                                 value={sort}
-                                 onChange={(e) =>
-                                    handleSetSort(e.target.value as SortType)
-                                 }
-                                 disabled={pages.length <= 1}
-                                 className={`rounded-md border bg-background px-3 py-2 text-sm ${pages.length <= 1 ? 'text-muted-foreground font-semibold' : ''}`}
-                              >
-                                 <option value="asc">Page order (asc)</option>
-                                 <option value="desc">
-                                    Reverse order (desc)
-                                 </option>
-                              </select>
+                              <DropdownMenu modal={false}>
+                                 <DropdownMenuTrigger
+                                    render={
+                                       <Button
+                                          variant="outline"
+                                          className="justify-between min-w-47"
+                                       >
+                                          {SORT_LABELS[sort]}
+                                          <ChevronDown className="size-4 text-muted-foreground" />
+                                       </Button>
+                                    }
+                                 />
+                                 <DropdownMenuContent align="end">
+                                    {SORTS.map((s) => (
+                                       <DropdownMenuItem
+                                          key={s}
+                                          onClick={() => handleSetSort(s)}
+                                       >
+                                          {SORT_LABELS[s]}
+                                          {s === sort && (
+                                             <Check className="ml-auto size-4" />
+                                          )}
+                                       </DropdownMenuItem>
+                                    ))}
+                                 </DropdownMenuContent>
+                              </DropdownMenu>
                            </div>
                         </>
                      )}

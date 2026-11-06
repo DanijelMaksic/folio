@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { StatusType } from '@/pages/DocumentPages';
-import { Filter } from 'lucide-react';
+import { Check, ChevronDown, Filter } from 'lucide-react';
 
 interface TranscriptionFilterProps {
    onSetStatus: (status: StatusType) => void;
@@ -19,34 +19,46 @@ function TranscriptionFilter({
    status,
 }: TranscriptionFilterProps) {
    return (
-      <div className="flex items-center justify-center gap-2 w-44 border rounded-md">
-         <span className="pl-1">
+      <div className="flex items-center justify-between gap-3 border rounded-md">
+         <span className="pl-3">
             <Filter className="text-gray-500" />
          </span>
 
-         <DropdownMenu>
+         <DropdownMenu modal={false}>
             <DropdownMenuTrigger
                render={
-                  <Button variant="outline" className=" capitalize w-31">
+                  <Button
+                     variant="outline"
+                     className="capitalize justify-between min-w-40"
+                  >
                      {status === 'all-pages' && 'all pages'}
                      {status === 'transcribed' && 'transcribed'}
                      {status === 'not-transcribed' && 'not transcribed'}
+                     <ChevronDown className="size-4 text-muted-foreground" />
                   </Button>
                }
             />
             <DropdownMenuContent>
                <DropdownMenuGroup>
                   <DropdownMenuItem onClick={() => onSetStatus('all-pages')}>
-                     All Pages
+                     All Pages{' '}
+                     {status === 'all-pages' && (
+                        <Check className="ml-auto size-4" />
+                     )}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => onSetStatus('transcribed')}>
                      Transcribed
+                     {status === 'transcribed' && (
+                        <Check className="ml-auto size-4" />
+                     )}
                   </DropdownMenuItem>
                   <DropdownMenuItem
                      onClick={() => onSetStatus('not-transcribed')}
-                     className="w-max"
                   >
                      Not Transcribed
+                     {status === 'not-transcribed' && (
+                        <Check className="ml-auto size-4" />
+                     )}
                   </DropdownMenuItem>
                </DropdownMenuGroup>
             </DropdownMenuContent>

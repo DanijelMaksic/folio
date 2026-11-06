@@ -51,7 +51,7 @@ function OverviewTab() {
                         </p>
                      )}
                </div>
-               <p className="text-[1rem] whitespace-pre-wrap">
+               <p className="text-[1rem] whitespace-pre-wrap leading-7">
                   {approvedTranscription.content}
                </p>
             </div>
