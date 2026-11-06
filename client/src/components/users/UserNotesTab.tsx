@@ -5,7 +5,9 @@ import ListControls from '@/components/users/ListControls';
 import AppPagination from '@/components/shared/AppPagination';
 
 const SORTS = ['newest', 'oldest'] as const;
+
 type Sort = (typeof SORTS)[number];
+
 const OPTIONS = [
    { value: 'newest', label: 'Newest' },
    { value: 'oldest', label: 'Oldest' },

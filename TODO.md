@@ -23,5 +23,6 @@
 - When navigating while the page is scrolled down, scroll position is saved on the new page
 - Run `tsc`
 - Fix tests
+- Notes are misaligned
 
 ## Things to refactor

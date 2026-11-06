@@ -13,20 +13,49 @@ import { Textarea } from '@/components/ui/textarea';
 import { useSession } from '@/lib/auth-client';
 import { trpc } from '@/lib/trpc';
 import { zodResolver } from '@/lib/zod-resolver';
-import { ArrowUpDown, User2 } from 'lucide-react';
+import { ArrowUpDown, Check, ChevronDown, User2 } from 'lucide-react';
 import SignInModal from '@/components/documents/SignInModal';
+import {
+   DropdownMenu,
+   DropdownMenuContent,
+   DropdownMenuItem,
+   DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { useSearchParams } from 'react-router-dom';
 
 const PAGE_SIZE = 10;
+
+type NoteSort = 'newest' | 'oldest';
+
+const SORTS: NoteSort[] = ['newest', 'oldest'];
+
+const SORT_LABELS: Record<NoteSort, string> = {
+   newest: 'Newest',
+   oldest: 'Oldest',
+};
 
 function NotesAndQuestions({ pageId }: { pageId: string }) {
    const { data: session } = useSession();
    const [page, setPage] = useState(1);
    const [expanded, setExpanded] = useState(false);
    const [modalOpen, setModalOpen] = useState(false);
+   const [searchParams, setSearchParams] = useSearchParams();
 
    const utils = trpc.useUtils();
 
-   const [sort, setSort] = useState<'newest' | 'oldest'>('newest');
+   const rawSort = searchParams.get('sort') as NoteSort | null;
+   const sort: NoteSort =
+      rawSort && SORTS.includes(rawSort) ? rawSort : 'newest';
+
+   const handleSetSort = (newSort: NoteSort) => {
+      setSearchParams((prev) => {
+         const next = new URLSearchParams(prev);
+         if (newSort === 'newest') next.delete('sort');
+         else next.set('sort', newSort);
+         next.set('page', '1');
+         return next;
+      });
+   };
 
    function closeForm() {
       reset({ content: '' });
@@ -163,22 +192,37 @@ function NotesAndQuestions({ pageId }: { pageId: string }) {
             </div>
 
             {data?.notes && (
-               <div className="flex items-center gap-1 border rounded-md">
-                  <span className="pl-2">
+               <div className="flex items-center gap-2 border rounded-md">
+                  <span className="pl-3">
                      <ArrowUpDown className="text-gray-500" />
                   </span>
-                  <select
-                     value={sort}
-                     onChange={(e) => {
-                        setSort(e.target.value as 'newest' | 'oldest');
-                        setPage(1);
-                     }}
-                     className={`rounded-md border bg-background px-3 py-1.5 text-sm ${data.notes.length <= 1 && 'text-muted-foreground'}`}
-                     disabled={data.notes.length <= 1}
-                  >
-                     <option value="newest">Newest</option>
-                     <option value="oldest">Oldest</option>
-                  </select>
+
+                  <DropdownMenu modal={false}>
+                     <DropdownMenuTrigger
+                        render={
+                           <Button
+                              variant="outline"
+                              className="justify-between min-w-26"
+                           >
+                              {SORT_LABELS[sort]}
+                              <ChevronDown className="size-4 text-muted-foreground" />
+                           </Button>
+                        }
+                     />
+                     <DropdownMenuContent align="end">
+                        {SORTS.map((s) => (
+                           <DropdownMenuItem
+                              key={s}
+                              onClick={() => handleSetSort(s)}
+                           >
+                              {SORT_LABELS[s]}
+                              {s === sort && (
+                                 <Check className="ml-auto size-4" />
+                              )}
+                           </DropdownMenuItem>
+                        ))}
+                     </DropdownMenuContent>
+                  </DropdownMenu>
                </div>
             )}
          </div>
