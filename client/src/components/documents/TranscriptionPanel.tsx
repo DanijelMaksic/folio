@@ -151,7 +151,7 @@ function TranscriptionPanel({
                   {!isSubmitted && (
                      <>
                         <button
-                           className="px-3 py-1 text-sm border rounded hover:bg-muted disabled:opacity-50"
+                           className="px-3 py-1 text-sm border disabled:pointer-events-none rounded hover:bg-muted disabled:opacity-50"
                            onClick={handleSave}
                            disabled={
                               updateMutation.isPending ||
@@ -162,7 +162,7 @@ function TranscriptionPanel({
                         </button>
 
                         <button
-                           className="px-3 py-1 text-sm bg-primary text-primary-foreground rounded hover:opacity-90 disabled:opacity-50"
+                           className="px-3 py-1 text-sm bg-primary text-primary-foreground disabled:pointer-events-none rounded  hover:opacity-90 disabled:opacity-50"
                            onClick={handleSubmit}
                            disabled={
                               submitMutation.isPending ||
