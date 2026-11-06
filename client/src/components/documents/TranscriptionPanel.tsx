@@ -1,12 +1,13 @@
 import { Textarea } from '@/components/ui/textarea';
 import { trpc } from '@/lib/trpc';
 import { Transcription } from '@shared';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useLayoutEffect, useRef } from 'react';
 import {
    Tooltip,
    TooltipContent,
    TooltipTrigger,
 } from '@/components/ui/tooltip';
+import TranscriptionToolbar from '@/components/documents/TranscriptionToolbar';
 
 function TranscriptionPanel({
    transcription,
@@ -16,6 +17,9 @@ function TranscriptionPanel({
    pageId?: string;
 }) {
    const [transcriptionContent, setTranscriptionContent] = useState('');
+
+   const textareaRef = useRef<HTMLTextAreaElement>(null);
+   const pendingSelection = useRef<[number, number] | null>(null);
 
    const isSubmitted = transcription?.status === 'submitted';
 
@@ -35,9 +39,8 @@ function TranscriptionPanel({
 
    // Sync textarea when transcription loads
    useEffect(() => {
-      if (transcription?.content)
-         setTranscriptionContent(transcription.content);
-   }, [transcription?.content]);
+      if (transcription) setTranscriptionContent(transcription.content);
+   }, [transcription?.content ?? '']);
 
    function handleSave() {
       if (!transcription) return;
@@ -55,10 +58,57 @@ function TranscriptionPanel({
       });
    }
 
+   function wrapSelection(open: string, close: string) {
+      const el = textareaRef.current;
+      if (!el) return;
+      const { selectionStart: s, selectionEnd: e, value } = el;
+      const selected = value.slice(s, e);
+
+      setTranscriptionContent(
+         value.slice(0, s) + open + selected + close + value.slice(e),
+      );
+      // selected text stays selected; with no selection the cursor lands between the tags
+      pendingSelection.current = [
+         s + open.length,
+         s + open.length + selected.length,
+      ];
+   }
+
+   function insertIllegible() {
+      const el = textareaRef.current;
+      if (!el) return;
+      const { selectionStart: s, selectionEnd: e, value } = el;
+      const marker = '[illegible]';
+
+      setTranscriptionContent(value.slice(0, s) + marker + value.slice(e));
+      const pos = s + marker.length;
+      pendingSelection.current = [pos, pos];
+   }
+
+   useLayoutEffect(() => {
+      const sel = pendingSelection.current;
+      const el = textareaRef.current;
+      if (!sel || !el) return;
+      pendingSelection.current = null;
+      el.focus();
+      el.setSelectionRange(sel[0], sel[1]);
+   }, [transcriptionContent]);
+
    return (
       <div className="space-y-3 border rounded-md p-4 h-full">
          <div className="flex gap-6 justify-between items-center">
-            <h2 className="text-lg font-medium">Transcription</h2>
+            <div className="flex items-center gap-6">
+               <h2 className="text-lg font-medium">Transcription</h2>
+
+               {transcription && (
+                  <TranscriptionToolbar
+                     disabled={isSubmitted}
+                     onItalic={() => wrapSelection('<i>', '</i>')}
+                     onDeleted={() => wrapSelection('<del>', '</del>')}
+                     onIllegible={insertIllegible}
+                  />
+               )}
+            </div>
 
             {transcription?.status && (
                <p className="text-sm text-muted-foreground space-y-1 capitalize italic">
@@ -86,21 +136,27 @@ function TranscriptionPanel({
                         Rejection reason: {transcription.rejectionReason}
                      </p>
                   )}
+
                <Textarea
                   className="min-h-90 font-mono resize-y disabled:opacity-60 leading-6"
                   value={transcriptionContent}
+                  ref={textareaRef}
                   data-testid="transcription-content"
                   onChange={(e) => setTranscriptionContent(e.target.value)}
                   disabled={isSubmitted}
                   placeholder="Type your transcription here..."
                />
+
                <div className="flex gap-2 items-center">
                   {!isSubmitted && (
                      <>
                         <button
                            className="px-3 py-1 text-sm border rounded hover:bg-muted disabled:opacity-50"
                            onClick={handleSave}
-                           disabled={updateMutation.isPending}
+                           disabled={
+                              updateMutation.isPending ||
+                              !transcriptionContent.trim()
+                           }
                         >
                            {updateMutation.isPending ? 'Saving...' : 'Save'}
                         </button>

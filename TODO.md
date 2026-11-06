@@ -7,6 +7,7 @@
 - Sorting in `/role-requests`
 - Home page (general info, FAQ)
 - Save transcription with ctrl + s shortcut (add into about this in guidelines and add tooltip with shortcut on save button, also change the button from "Save" to save icon with tooltip)
+- "Mark as blank" button to mark an empty page
 
 ## Things to fix
 
@@ -24,5 +25,3 @@
 - Fix tests
 
 ## Things to refactor
-
-- In `TranscriptionPanel.tsx`, switch textarea with rich text editor (and add character limit)

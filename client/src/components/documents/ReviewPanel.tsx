@@ -9,6 +9,7 @@ import { zodResolver } from '@/lib/zod-resolver';
 import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import TranscriptionText from '@/components/documents/TranscriptionText';
 
 function ReviewPanel({
    submittedTranscription,
@@ -63,7 +64,7 @@ function ReviewPanel({
          <h2 className="font-semibold">Review Transcription</h2>
 
          <div className="rounded bg-muted p-3 text-[1rem] whitespace-pre-wrap">
-            {submittedTranscription.content}
+            <TranscriptionText content={submittedTranscription.content} />
          </div>
 
          <Button onClick={handleApprove} disabled={busy}>

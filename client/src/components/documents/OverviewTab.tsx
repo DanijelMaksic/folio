@@ -1,5 +1,6 @@
 import PageViewer from '@/components/documents/PageViewer';
 import TranscriptionPlaceholder from '@/components/documents/TranscriptionPlaceholder';
+import TranscriptionText from '@/components/documents/TranscriptionText';
 import { useSession } from '@/lib/auth-client';
 import { trpc } from '@/lib/trpc';
 import { isContributor } from '@shared';
@@ -37,7 +38,7 @@ function OverviewTab() {
          </div>
 
          {approvedTranscription ? (
-            <div className="space-y-3 border rounded-md p-4">
+            <div className="space-y-3 border rounded-md p-4 h-full">
                <div className="flex gap-6 justify-between items-center">
                   <h2 className="text-lg font-medium">Transcription</h2>
 
@@ -52,7 +53,10 @@ function OverviewTab() {
                      )}
                </div>
                <p className="text-[1rem] whitespace-pre-wrap leading-7">
-                  {approvedTranscription.content}
+                  <TranscriptionText
+                     className="text-[1rem] leading-7"
+                     content={approvedTranscription.content}
+                  />{' '}
                </p>
             </div>
          ) : (

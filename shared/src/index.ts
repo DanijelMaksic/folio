@@ -6,3 +6,4 @@ export * from './schemas/pages.js';
 export * from './schemas/dashboard.js';
 export * from './schemas/notes.js';
 export * from './schemas/users.js';
+export * from './transcription-parser.js';

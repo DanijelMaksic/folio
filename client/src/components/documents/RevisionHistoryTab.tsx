@@ -1,3 +1,4 @@
+import TranscriptionText from '@/components/documents/TranscriptionText';
 import { useSession } from '@/lib/auth-client';
 import { trpc } from '@/lib/trpc';
 import { isContributor } from '@shared';
@@ -52,9 +53,13 @@ function RevisionHistoryTab() {
                   </p>
                   <p
                      data-testid="transcription-revision"
-                     className="font-mono whitespace-pre-wrap"
+                     className="font-mono text-sm whitespace-pre-wrap"
                   >
-                     {rev.content}
+                     <TranscriptionText
+                        data-testid="transcription-revision"
+                        content={rev.content}
+                        className="..."
+                     />
                   </p>
                </li>
             ))}
