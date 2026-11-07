@@ -1,5 +1,7 @@
 ## Things to add
 
+- In Transcription panel, add preview button
+- Transcribe as guest? (fromThePage: You may save up to three transcriptions as a guest or sign up now)
 - "Fully transcribed" label in `DocumentCard.tsx`, and maybe in `DocumentPages.tsx` add "All pages as fully transcribed"
 - In `DocumentCard.tsx` add completion %, but only if it's above 0%
 - Categories/tags

@@ -103,8 +103,7 @@ function TranscriptionPanel({
                {transcription && (
                   <TranscriptionToolbar
                      disabled={isSubmitted}
-                     onItalic={() => wrapSelection('<i>', '</i>')}
-                     onDeleted={() => wrapSelection('<del>', '</del>')}
+                     onWrap={(tag) => wrapSelection(`<${tag}>`, `</${tag}>`)}
                      onIllegible={insertIllegible}
                   />
                )}

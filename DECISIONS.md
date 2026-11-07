@@ -639,7 +639,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Included tooltips for additional info and disabled states
 
-- Added Toolbar to the Transcription panel with options to mark parts of a transcription as illegible, italic or crossed out (deleted)
+- Added Toolbar to the Transcription panel with options to mark parts of a transcription as illegible, italic or crossed out (deleted) etc.
 
 **Decisions:**
 

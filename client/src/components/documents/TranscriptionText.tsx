@@ -1,6 +1,16 @@
 import { useMemo } from 'react';
-import { parseTranscription } from '@shared';
+import { parseTranscription, Tag } from '@shared';
 import { cn } from '@/lib/utils';
+
+const MARK_CLASS: Record<Tag, string> = {
+   i: 'italic',
+   del: 'line-through text-muted-foreground',
+   u: 'underline',
+   sub: 'align-sub text-xs',
+   sup: 'align-super text-xs',
+   add: 'bg-yellow-100 dark:bg-yellow-900/30 rounded-sm px-0.5',
+   head: 'font-bold text-lg',
+};
 
 function TranscriptionText({
    content,
@@ -26,15 +36,12 @@ function TranscriptionText({
                );
             }
 
-            if (!seg.italic && !seg.deleted) return seg.text;
+            if (!seg.marks.length) return seg.text;
 
             return (
                <span
                   key={i}
-                  className={cn(
-                     seg.italic && 'italic',
-                     seg.deleted && 'line-through text-muted-foreground',
-                  )}
+                  className={cn(seg.marks.map((m) => MARK_CLASS[m]))}
                >
                   {seg.text}
                </span>

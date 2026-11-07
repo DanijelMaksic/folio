@@ -1,35 +1,26 @@
-export type TextSegment = {
-   type: 'text';
-   text: string;
-   italic: boolean;
-   deleted: boolean;
-};
+export const TAGS = ['i', 'del', 'u', 'sub', 'sup', 'add', 'head'] as const;
+export type Tag = (typeof TAGS)[number];
 
+export type TextSegment = { type: 'text'; text: string; marks: Tag[] };
 export type IllegibleSegment = { type: 'illegible' };
 export type Segment = TextSegment | IllegibleSegment;
 
-const TOKEN = /<\/?(?:i|del)>|\[illegible\]/g;
+const TOKEN = new RegExp(`</?(?:${TAGS.join('|')})>|\\[illegible\\]`, 'g');
 
 export function parseTranscription(input: string): Segment[] {
    const segments: Segment[] = [];
-   const open = { i: false, del: false };
+   const open = new Set<Tag>();
+   // always in TAGS order, so equal mark sets compare equal
+   const currentMarks = () => TAGS.filter((t) => open.has(t));
 
    function pushText(text: string) {
       if (!text) return;
+      const marks = currentMarks();
       const last = segments[segments.length - 1];
-      if (
-         last?.type === 'text' &&
-         last.italic === open.i &&
-         last.deleted === open.del
-      ) {
+      if (last?.type === 'text' && last.marks.join() === marks.join()) {
          last.text += text;
       } else {
-         segments.push({
-            type: 'text',
-            text,
-            italic: open.i,
-            deleted: open.del,
-         });
+         segments.push({ type: 'text', text, marks });
       }
    }
 
@@ -48,20 +39,16 @@ export function parseTranscription(input: string): Segment[] {
       }
 
       const closing = token[1] === '/';
-      const tag = (closing ? token.slice(2, -1) : token.slice(1, -1)) as
-         | 'i'
-         | 'del';
+      const tag = token.replace(/[<>/]/g, '') as Tag;
 
       if (closing) {
-         // stray closer stays literal
-         if (open[tag]) open[tag] = false;
+         if (open.has(tag)) open.delete(tag);
          else pushText(token);
       } else {
-         // opener only counts if a closer exists later
          const hasCloser = tokens
             .slice(idx + 1)
             .some((m) => m[0] === `</${tag}>`);
-         if (!open[tag] && hasCloser) open[tag] = true;
+         if (!open.has(tag) && hasCloser) open.add(tag);
          else pushText(token);
       }
    });
