@@ -23,7 +23,6 @@ vi.mock('@/db/index.js', () => ({
 
 const contributorUser = mockUser({ globalRole: 'contributor' });
 const editorUser = mockUser({ globalRole: 'editor' });
-const viewerUser = mockUser({ globalRole: 'viewer' });
 
 const mockCollection = {
    id: 'col-1',
@@ -146,13 +145,6 @@ describe('collections.create', () => {
       });
 
       expect(result).toMatchObject({ description: null });
-   });
-
-   it('throws FORBIDDEN if user is a viewer', async () => {
-      const caller = createAuthenticatedCaller(viewerUser);
-      await expect(
-         caller.collections.create({ title: 'Test' }),
-      ).rejects.toMatchObject({ code: 'FORBIDDEN' });
    });
 
    it('throws UNAUTHORIZED if not signed in', async () => {
@@ -376,13 +368,6 @@ describe('collections.update', () => {
       ).rejects.toMatchObject({ code: 'NOT_FOUND' });
    });
 
-   it('throws FORBIDDEN if user is a viewer', async () => {
-      const caller = createAuthenticatedCaller(viewerUser);
-      await expect(
-         caller.collections.update({ id: 'col-1', title: 'X' }),
-      ).rejects.toMatchObject({ code: 'FORBIDDEN' });
-   });
-
    it('throws UNAUTHORIZED if not signed in', async () => {
       const caller = createUnauthenticatedCaller();
       await expect(
@@ -442,13 +427,6 @@ describe('collections.delete', () => {
       await expect(
          caller.collections.delete({ id: 'col-1' }),
       ).rejects.toMatchObject({ code: 'NOT_FOUND' });
-   });
-
-   it('throws FORBIDDEN if user is a viewer', async () => {
-      const caller = createAuthenticatedCaller(viewerUser);
-      await expect(
-         caller.collections.delete({ id: 'col-1' }),
-      ).rejects.toMatchObject({ code: 'FORBIDDEN' });
    });
 
    it('throws UNAUTHORIZED if not signed in', async () => {

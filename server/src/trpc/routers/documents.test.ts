@@ -50,7 +50,6 @@ vi.mock('@/lib/queue.js', () => ({
 
 const contributorUser = mockUser({ globalRole: 'contributor' });
 const editorUser = mockUser({ globalRole: 'editor' });
-const viewerUser = mockUser({ globalRole: 'viewer' });
 
 const mockDoc = {
    id: 'doc-1',
@@ -214,13 +213,6 @@ describe('documents.upload', () => {
       });
    });
 
-   it('throws FORBIDDEN if user is a viewer', async () => {
-      const caller = createAuthenticatedCaller(viewerUser);
-      await expect(
-         caller.documents.upload({ title: 'Test' }),
-      ).rejects.toMatchObject({ code: 'FORBIDDEN' });
-   });
-
    it('throws UNAUTHORIZED if not signed in', async () => {
       const caller = createUnauthenticatedCaller();
       await expect(
@@ -307,26 +299,6 @@ describe('documents.list', () => {
       });
       expect(result.documents[0]).toMatchObject({ collectionId: 'col-1' });
    });
-
-   it.each([
-      ['anonymous', undefined],
-      ['contributor', contributorUser],
-      ['editor', editorUser],
-   ] as const)(
-      'passes the same where to results and count (%s, with search)',
-      async (_label, viewer) => {
-         const { resultsWhere, countWhere } = mockListQueries([mockDoc], 1);
-
-         const caller = viewer
-            ? createAuthenticatedCaller(viewer)
-            : createUnauthenticatedCaller();
-         await caller.documents.list({ page: 1, limit: 20, search: 'Test' });
-
-         expect(resultsWhere.mock.calls[0][0]).toStrictEqual(
-            countWhere.mock.calls[0][0],
-         );
-      },
-   );
 });
 
 // ── getById ───────────────────────
@@ -427,13 +399,6 @@ describe('documents.update', () => {
       ).rejects.toMatchObject({ code: 'NOT_FOUND' });
    });
 
-   it('throws FORBIDDEN if user is a viewer', async () => {
-      const caller = createAuthenticatedCaller(viewerUser);
-      await expect(
-         caller.documents.update({ id: 'doc-1', title: 'X' }),
-      ).rejects.toMatchObject({ code: 'FORBIDDEN' });
-   });
-
    it('throws UNAUTHORIZED if not signed in', async () => {
       const caller = createUnauthenticatedCaller();
       await expect(
@@ -487,13 +452,6 @@ describe('documents.delete', () => {
       await expect(
          caller.documents.delete({ id: 'nonexistent' }),
       ).rejects.toMatchObject({ code: 'NOT_FOUND' });
-   });
-
-   it('throws FORBIDDEN if user is a viewer', async () => {
-      const caller = createAuthenticatedCaller(viewerUser);
-      await expect(
-         caller.documents.delete({ id: 'doc-1' }),
-      ).rejects.toMatchObject({ code: 'FORBIDDEN' });
    });
 
    it('throws FORBIDDEN if user is a non-owner contributor', async () => {

@@ -52,7 +52,6 @@ vi.mock('@/lib/email.js', () => ({
 
 const contributorUser = mockUser({ globalRole: 'contributor' });
 const editorUser = mockUser({ globalRole: 'editor' });
-const viewerUser = mockUser({ globalRole: 'viewer' });
 const otherUser = mockUser({ id: 'other-user-id', globalRole: 'contributor' });
 
 const mockPage = {
@@ -341,13 +340,6 @@ describe('pages.update', () => {
       ).rejects.toMatchObject({ code: 'NOT_FOUND' });
    });
 
-   it('throws FORBIDDEN if user is a viewer', async () => {
-      const caller = createAuthenticatedCaller(viewerUser);
-      await expect(
-         caller.pages.update({ id: 'page-1', title: 'X' }),
-      ).rejects.toMatchObject({ code: 'FORBIDDEN' });
-   });
-
    it('throws UNAUTHORIZED if not signed in', async () => {
       const caller = createUnauthenticatedCaller();
       await expect(
@@ -403,21 +395,6 @@ describe('pages.delete', () => {
       await expect(
          caller.pages.delete({ pageId: 'nonexistent' }),
       ).rejects.toMatchObject({ code: 'NOT_FOUND' });
-   });
-
-   it('throws FORBIDDEN if user is a viewer', async () => {
-      mockSelect.mockReturnValueOnce({
-         from: vi.fn(() => ({
-            innerJoin: vi.fn(() => ({
-               where: vi.fn().mockResolvedValueOnce([mockPageWithUploadedBy]),
-            })),
-         })),
-      });
-
-      const caller = createAuthenticatedCaller(viewerUser);
-      await expect(
-         caller.pages.delete({ pageId: 'page-1' }),
-      ).rejects.toMatchObject({ code: 'FORBIDDEN' });
    });
 
    it("throws FORBIDDEN if contributor tries to delete another user's page", async () => {
@@ -583,18 +560,6 @@ describe('pages.addPages', () => {
       ).rejects.toMatchObject({ code: 'NOT_FOUND' });
    });
 
-   it('throws FORBIDDEN if user is a viewer', async () => {
-      mockFindFirst.mockResolvedValueOnce(mockDocument);
-
-      const caller = createAuthenticatedCaller(viewerUser);
-      await expect(
-         caller.pages.addPages({
-            documentId: 'doc-1',
-            files: ['data:image/png;base64,abc123'],
-         }),
-      ).rejects.toMatchObject({ code: 'FORBIDDEN' });
-   });
-
    it('throws UNAUTHORIZED if not signed in', async () => {
       const caller = createUnauthenticatedCaller();
       await expect(
@@ -743,24 +708,6 @@ describe('pages.replaceImage', () => {
       });
 
       const caller = createAuthenticatedCaller(contributorUser);
-      await expect(
-         caller.pages.replaceImage({
-            pageId: 'page-1',
-            fileBase64: 'data:image/png;base64,abc',
-         }),
-      ).rejects.toMatchObject({ code: 'FORBIDDEN' });
-   });
-
-   it('throws FORBIDDEN if user is a viewer', async () => {
-      mockSelect.mockReturnValueOnce({
-         from: vi.fn(() => ({
-            innerJoin: vi.fn(() => ({
-               where: vi.fn().mockResolvedValueOnce([mockPageWithUploadedBy]),
-            })),
-         })),
-      });
-
-      const caller = createAuthenticatedCaller(viewerUser);
       await expect(
          caller.pages.replaceImage({
             pageId: 'page-1',

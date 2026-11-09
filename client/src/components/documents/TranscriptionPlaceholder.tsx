@@ -18,10 +18,6 @@ function TranscriptionPlaceholder({ type }: { type: string }) {
                </Link>
             )}
 
-            {type === 'viewer' && (
-               <span>You need to become contrubitor to transcribe</span>
-            )}
-
             {type === 'contributor' && (
                <span className="border rounded-lg px-2 py-1 border-gray-400">
                   Go to Transcribe tab to contribute

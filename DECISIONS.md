@@ -451,7 +451,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Approved transcriptions show "Transcribed by [avatar] name" on the page view, falling back to "Deleted user" (confirm)
 
-- Dashboard (`/dashboard`): new `dashboard.getOverview` procedure returning stats, five most recent documents (with page count and cover image), recent rejected transcriptions, a review queue count (editors and above) and a pending role request count (admins). Client components: `OverviewStats`, `AttentionCards`, `RejectedList`, `RecentDocuments`. Viewers see a "become a contributor" gate that links to their profile instead of an empty dashboard. Sign in now lands on `/dashboard`
+- Dashboard (`/dashboard`): new `dashboard.getOverview` procedure returning stats, five most recent documents (with page count and cover image), recent rejected transcriptions, a review queue count (editors and above) and a pending role request count (admins). Client components: `OverviewStats`, `AttentionCards`, `RejectedList`, `RecentDocuments`
 
 - `EditModal` rewritten as a shadcn `Dialog` with the same props (Save disabled until changed, blocked while pending)
 
@@ -465,9 +465,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Dashboard gets its own router and route rather than living under `settings`, since it is a separate page in the client with a different purpose
 
-- Viewers see an explanatory gate on the dashboard instead of a redirect or an empty page, so they know why and where to act (the role request lives on the profile). The Nav link stays visible so they can find it
-
-- The target role of a request is derived server-side from the current role (viewer to contributor, contributor to editor); the client never sends it. A race between two simultaneous submits is caught by the partial unique index (Postgres `23505`) and mapped to `CONFLICT`
+- The target role of a request is derived server-side from the current role (contributor to editor); the client never sends it. A race between two simultaneous submits is caught by the partial unique index (Postgres `23505`) and mapped to `CONFLICT`
 
 - Approval is guarded by `status = 'pending'` inside a transaction, and the approval email is sent in a try/catch so an email failure never undoes the approval
 
@@ -485,7 +483,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - `getByPageNumber` results and list items share a base page schema; `approvedTranscriptionCount` only belongs to the list query, so it is not required where it isn't produced (confirm)
 
-- Two users in one e2e test (for example viewer requests, admin approves) use separate browser contexts, since one `page` shares one set of session cookies
+- Two users in one e2e test (for example contributor requests, admin approves) use separate browser contexts, since one `page` shares one set of session cookies
 
 **Issues resolved:**
 
@@ -508,8 +506,6 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 - Password strength rule (letter + number) is enforced client-side only; BetterAuth only enforces min/max length server-side. Needs BetterAuth `hooks.before` on `/sign-up/email`, `/change-password` and `/reset-password`, and `passwordSchema` reused in SignUp
 
 - Stale session after role approval: if the BetterAuth session cookie cache is enabled, an approved user keeps the old role until it expires or they log in again. Option: delete that user's session rows in the approve transaction (this would also push new editors straight into email OTP)
-
-- `dashboard.getOverview` still returns empty or null data for viewers instead of throwing `FORBIDDEN`; the gate is client-side only. Making it strict would allow a non-nullable `stats` in the schema
 
 - Account deletion is not atomic across BetterAuth's steps (content deleted in `beforeDelete`, user row afterward). Deleting while a PDF job is processing makes the worker's inserts fail on the FK (a harmless failed BullMQ job). Password-confirmed deletion works for credential accounts only
 
@@ -625,7 +621,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Implement react-hook-form for displaying the error messages
 
-- In `PageDetails.tsx`, hide "transcribe" and "revisions" tabs along with page settings for non-authenticated users and users with `viewer` role
+- In `PageDetails.tsx`, hide "transcribe" and "revisions" tabs along with page settings for non-authenticated users
 
 - Statistics tab for `DocumentDetails.tsx` and `CollectionDetails.tsx`
 
@@ -642,8 +638,6 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 - Added Toolbar to the Transcription panel with options to mark parts of a transcription as illegible, italic or crossed out (deleted) etc.
 
 **Decisions:**
-
-- User with viewer role is redirected to `/documents` on sign in, while other roles are redirected to `/dashboard`
 
 - Move "Add Pages" button to `ActionsMenu.tsx`
 
@@ -662,6 +656,8 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 - Made a separate route for managing role requests, removed role request management from `/settings` to `/dashboard`, which has a link to `/role-requests`
 
 - Removed tabs from `/settings`, now Profile settings only contain settings, while role requests and stats are moved to `/dashboard`
+
+- Remove `viewer` role, since user gains nothing for signing up and can't transcribe until granted the `contributor` role. The whole point of the app is to enable users to sign up and upload documents and transcribe them, so locking up basic app features under `contributor` role means no one would want to sign up only to find out they can't transcribe
 
 **Issues resolved:**
 

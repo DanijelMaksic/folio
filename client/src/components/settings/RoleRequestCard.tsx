@@ -4,11 +4,6 @@ import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
 import RequestRoleModal from '@/components/settings/RequestRoleModal';
 
-const NEXT_ROLE = {
-   viewer: 'contributor',
-   contributor: 'editor',
-} as const;
-
 interface RoleRequestCardProps {
    globalRole: string;
 }
@@ -17,7 +12,7 @@ function RoleRequestCard({ globalRole }: RoleRequestCardProps) {
    const [open, setOpen] = useState(false);
    const utils = trpc.useUtils();
 
-   const targetRole = NEXT_ROLE[globalRole as keyof typeof NEXT_ROLE];
+   const targetRole = 'editor';
 
    const { data: latest } = trpc.settings.getMyRoleRequest.useQuery(undefined, {
       enabled: !!targetRole,
@@ -64,9 +59,7 @@ function RoleRequestCard({ globalRole }: RoleRequestCardProps) {
                   <p className="text-sm font-medium leading-snug">
                      {wasRejected
                         ? 'Your last request was declined'
-                        : targetRole === 'contributor'
-                          ? 'Want to help transcribe?'
-                          : 'Ready to help review?'}
+                        : 'Ready to help review?'}
                   </p>
                   {wasRejected && latest.rejectionReason && (
                      <p className="mt-1 text-xs text-muted-foreground">
@@ -75,11 +68,7 @@ function RoleRequestCard({ globalRole }: RoleRequestCardProps) {
                   )}
                </div>
                <Button size="sm" onClick={() => setOpen(true)}>
-                  {wasRejected
-                     ? 'Request again'
-                     : targetRole === 'contributor'
-                       ? 'Become a contributor'
-                       : ' Become an editor'}
+                  {wasRejected ? 'Request again' : ' Become an editor'}
                </Button>
             </div>
          </div>

@@ -41,7 +41,7 @@ export const auth = betterAuth({
          globalRole: {
             type: 'string',
             required: false,
-            defaultValue: 'viewer',
+            defaultValue: 'contributor',
          },
       },
       deleteUser: {

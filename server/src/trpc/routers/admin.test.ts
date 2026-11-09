@@ -98,13 +98,13 @@ const pendingRequest = (requestedRole: 'contributor' | 'editor') => ({
 // --- setUserRole -----------------------------------------------------------
 
 describe('admin.setUserRole', () => {
-   it('allows admin to set a viewer role', async () => {
+   it('allows admin to set editor role', async () => {
       mockRoleTx([{ id: 'target-user-id' }]);
 
       const caller = createAuthenticatedCaller(adminUser);
       const result = await caller.admin.setUserRole({
          userId: 'target-user-id',
-         role: 'viewer',
+         role: 'editor',
       });
 
       expect(result).toEqual({ success: true });
@@ -114,7 +114,6 @@ describe('admin.setUserRole', () => {
       ['editor', true],
       ['admin', true],
       ['contributor', false],
-      ['viewer', false],
    ] as const)(
       'sets twoFactorEnabled correctly when assigning %s',
       async (role, expected) => {
@@ -144,7 +143,7 @@ describe('admin.setUserRole', () => {
       const caller = createAuthenticatedCaller(adminUser);
       await caller.admin.setUserRole({
          userId: 'target-user-id',
-         role: 'viewer', // demotion also invalidates sessions
+         role: 'editor', // demotion also invalidates sessions
       });
 
       expect(txDelete).toHaveBeenCalledTimes(1);
@@ -166,7 +165,7 @@ describe('admin.setUserRole', () => {
    it('throws BAD_REQUEST when an admin changes their own role', async () => {
       const caller = createAuthenticatedCaller(adminUser);
       await expect(
-         caller.admin.setUserRole({ userId: adminUser.id, role: 'viewer' }),
+         caller.admin.setUserRole({ userId: adminUser.id, role: 'editor' }),
       ).rejects.toMatchObject({ code: 'BAD_REQUEST' });
 
       expect(mockTransaction).not.toHaveBeenCalled();

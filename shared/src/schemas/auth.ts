@@ -26,12 +26,7 @@ export const CONTRIBUTOR_ROLES = ['contributor', 'editor', 'admin'] as const;
 
 export const EDITOR_ROLES = ['editor', 'admin'] as const;
 
-export const GLOBAL_ROLES = [
-   'viewer',
-   'contributor',
-   'editor',
-   'admin',
-] as const;
+export const GLOBAL_ROLES = ['contributor', 'editor', 'admin'] as const;
 // Without 'as const', TypeScript infers ['editor', 'admin'] as string[], which would be unusable in .includes()
 
 export function isContributor(role: string | null | undefined): boolean {

@@ -126,7 +126,7 @@ test.describe('Role requests', () => {
       page,
       loginAs,
    }) => {
-      await loginAs('viewer');
+      await loginAs('contributor');
       await page.goto('/settings');
 
       await page.getByRole('button', { name: /Become a contributor/ }).click();
@@ -137,81 +137,5 @@ test.describe('Role requests', () => {
       // Dialog stays open and nothing becomes pending
       await expect(dialog).toBeVisible();
       await expect(page.getByText('Request pending')).toHaveCount(0);
-   });
-
-   test('viewer requests contributor, admin approves, viewer can contribute', async ({
-      page,
-      browser,
-      loginAs,
-   }) => {
-      const viewer = await loginAs('viewer');
-      await submitRoleRequest(page, /Become a contributor/);
-
-      const admin = await loginInNewContext(browser, 'admin');
-      try {
-         await admin.page.goto('/settings?tab=roles');
-
-         const card = admin.page
-            .getByTestId('role-request')
-            .filter({ hasText: viewer.username });
-         await card.waitFor({ state: 'visible', timeout: 15_000 });
-         await expect(card).toContainText(REQUEST_MESSAGE);
-
-         await card.getByRole('button', { name: 'Approve' }).click();
-         await expect(card).not.toBeVisible({ timeout: 15_000 });
-      } finally {
-         await admin.context.close();
-         await cleanupUser(admin.email);
-      }
-
-      // Fresh sign in so a cached session can't hide the new role
-      await page.context().clearCookies();
-      await page.goto('/sign-in');
-      await page.getByLabel('Email').fill(viewer.email);
-      await page.getByLabel('Password').fill(viewer.password);
-      await page.getByRole('button', { name: 'Sign in' }).click();
-      await page.waitForURL('/dashboard');
-
-      await expect(
-         page.getByRole('heading', { name: /Welcome back/ }),
-      ).toBeVisible({ timeout: 15_000 });
-   });
-
-   test('admin rejects with a reason, viewer sees it and can request again', async ({
-      page,
-      browser,
-      loginAs,
-   }) => {
-      const viewer = await loginAs('viewer');
-      await submitRoleRequest(page, /Become a contributor/);
-
-      const admin = await loginInNewContext(browser, 'admin');
-      try {
-         await admin.page.goto('/settings?tab=roles');
-
-         const card = admin.page
-            .getByTestId('role-request')
-            .filter({ hasText: viewer.username });
-         await card.waitFor({ state: 'visible', timeout: 15_000 });
-
-         await card.getByRole('button', { name: 'Reject' }).click();
-         const dialog = admin.page.getByRole('dialog');
-         await dialog.getByRole('textbox').fill('Please add more detail.');
-         await dialog.getByRole('button', { name: 'Reject' }).click();
-
-         await expect(card).not.toBeVisible({ timeout: 15_000 });
-      } finally {
-         await admin.context.close();
-         await cleanupUser(admin.email);
-      }
-
-      await page.goto('/settings');
-      await expect(
-         page.getByText('Your last request was declined'),
-      ).toBeVisible({ timeout: 15_000 });
-      await expect(page.getByText('Please add more detail.')).toBeVisible();
-      await expect(
-         page.getByRole('button', { name: 'Request again' }),
-      ).toBeVisible();
    });
 });

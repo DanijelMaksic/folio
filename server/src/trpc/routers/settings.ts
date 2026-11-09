@@ -10,8 +10,6 @@ import { getUserStats } from '@/lib/user-stats.js';
 
 const avatarPublicId = (userId: string) => `avatars/${userId}`;
 
-const NEXT_ROLE = { viewer: 'contributor', contributor: 'editor' } as const;
-
 export const settingsRouter = router({
    uploadAvatar: protectedProcedure
       .input(uploadAvatarSchema)
@@ -70,8 +68,7 @@ export const settingsRouter = router({
    requestRole: protectedProcedure
       .input(requestRoleSchema)
       .mutation(async ({ ctx, input }) => {
-         const targetRole =
-            NEXT_ROLE[ctx.user.globalRole as keyof typeof NEXT_ROLE];
+         const targetRole = 'editor';
          if (!targetRole) {
             throw new TRPCError({
                code: 'BAD_REQUEST',

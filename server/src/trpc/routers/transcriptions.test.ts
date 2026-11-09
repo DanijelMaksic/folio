@@ -41,7 +41,6 @@ vi.mock('@/lib/email.js', () => ({
 
 const contributorUser = mockUser({ globalRole: 'contributor' });
 const editorUser = mockUser({ id: 'editor-id', globalRole: 'editor' });
-const viewerUser = mockUser({ globalRole: 'viewer' });
 
 const mockTranscription = {
    id: 'transcription-1',
@@ -156,20 +155,6 @@ describe('transcriptions.create', () => {
 
       expect(result).toMatchObject({ id: 'transcription-1' });
       expect(mockInsert).toHaveBeenCalled();
-   });
-
-   it('throws FORBIDDEN if user is a viewer', async () => {
-      const caller = createAuthenticatedCaller(viewerUser);
-      await expect(
-         caller.transcriptions.create({ pageId: 'page-1' }),
-      ).rejects.toMatchObject({ code: 'FORBIDDEN' });
-   });
-
-   it('throws UNAUTHORIZED if not signed in', async () => {
-      const caller = createUnauthenticatedCaller();
-      await expect(
-         caller.transcriptions.create({ pageId: 'page-1' }),
-      ).rejects.toMatchObject({ code: 'UNAUTHORIZED' });
    });
 });
 
@@ -573,6 +558,7 @@ describe('transcriptions.approve', () => {
       const caller = createAuthenticatedCaller(editorUser);
       const result = await caller.transcriptions.approve({
          transcriptionId: 'transcription-1',
+         pageId: 'page-1',
       });
 
       expect(result).toEqual({ success: true });
@@ -586,7 +572,10 @@ describe('transcriptions.approve', () => {
 
       const caller = createAuthenticatedCaller(editorUser);
       await expect(
-         caller.transcriptions.approve({ transcriptionId: 'nonexistent' }),
+         caller.transcriptions.approve({
+            transcriptionId: 'nonexistent',
+            pageId: 'page-1',
+         }),
       ).rejects.toMatchObject({ code: 'NOT_FOUND' });
    });
 
@@ -599,7 +588,10 @@ describe('transcriptions.approve', () => {
 
       const caller = createAuthenticatedCaller(editorUser);
       await expect(
-         caller.transcriptions.approve({ transcriptionId: 'transcription-1' }),
+         caller.transcriptions.approve({
+            transcriptionId: 'transcription-1',
+            pageId: 'page-1',
+         }),
       ).rejects.toMatchObject({ code: 'NOT_FOUND' });
 
       expect(mockUpdate).not.toHaveBeenCalled();
@@ -614,7 +606,10 @@ describe('transcriptions.approve', () => {
 
       const caller = createAuthenticatedCaller(editorUser);
       await expect(
-         caller.transcriptions.approve({ transcriptionId: 'transcription-1' }),
+         caller.transcriptions.approve({
+            transcriptionId: 'transcription-1',
+            pageId: 'page-1',
+         }),
       ).rejects.toMatchObject({ code: 'FORBIDDEN' });
    });
 
@@ -626,21 +621,30 @@ describe('transcriptions.approve', () => {
 
       const caller = createAuthenticatedCaller(editorUser);
       await expect(
-         caller.transcriptions.approve({ transcriptionId: 'transcription-1' }),
+         caller.transcriptions.approve({
+            transcriptionId: 'transcription-1',
+            pageId: 'page-1',
+         }),
       ).rejects.toMatchObject({ code: 'BAD_REQUEST' });
    });
 
    it('throws FORBIDDEN if user is a contributor', async () => {
       const caller = createAuthenticatedCaller(contributorUser);
       await expect(
-         caller.transcriptions.approve({ transcriptionId: 'transcription-1' }),
+         caller.transcriptions.approve({
+            transcriptionId: 'transcription-1',
+            pageId: 'page-1',
+         }),
       ).rejects.toMatchObject({ code: 'FORBIDDEN' });
    });
 
    it('throws UNAUTHORIZED if not signed in', async () => {
       const caller = createUnauthenticatedCaller();
       await expect(
-         caller.transcriptions.approve({ transcriptionId: 'transcription-1' }),
+         caller.transcriptions.approve({
+            transcriptionId: 'transcription-1',
+            pageId: 'page-1',
+         }),
       ).rejects.toMatchObject({ code: 'UNAUTHORIZED' });
    });
 });

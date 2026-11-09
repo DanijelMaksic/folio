@@ -1,6 +1,5 @@
 ## Things to add
 
-- Remove `viewer` role
 - In Transcription panel, add preview button
 - "Mark as blank" button to mark an empty page
 - Transcribe as guest? (fromThePage: You may save up to three transcriptions as a guest or sign up now)
@@ -27,5 +26,8 @@
 - Run `tsc`
 - Fix tests
 - Notes are misaligned
+- On sign up, navigate user to `/dashboard` instead of `/`
 
 ## Things to refactor
+
+- Move role request window to profile route?

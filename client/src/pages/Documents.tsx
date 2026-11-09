@@ -146,7 +146,7 @@ export default function Documents() {
 
                {canTranscribe ? (
                   <Button onClick={() => navigate('/documents/upload')}>
-                     <Plus />
+                     <Plus /> Upload
                   </Button>
                ) : (
                   <>

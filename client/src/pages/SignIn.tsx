@@ -40,12 +40,9 @@ export default function SignIn() {
       } else if (data && !('twoFactorRedirect' in data)) {
          await refetch();
 
-         navigate(
-            data.user.globalRole === 'viewer' ? '/documents' : '/dashboard',
-            {
-               replace: true,
-            },
-         );
+         navigate('/dashboard', {
+            replace: true,
+         });
       }
    };
 

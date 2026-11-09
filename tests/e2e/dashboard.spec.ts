@@ -13,17 +13,6 @@ test.describe('Dashboard access', () => {
       await page.goto('/dashboard');
       await page.waitForURL('/sign-in', { timeout: 15_000 });
    });
-
-   test('viewer sees the /documents page instead of the dashboard', async ({
-      page,
-      loginAs,
-   }) => {
-      await loginAs('viewer');
-
-      await expect(page.getByTestId('documents-label')).toBeVisible({
-         timeout: 15_000,
-      });
-   });
 });
 
 test.describe('Contributor dashboard', () => {

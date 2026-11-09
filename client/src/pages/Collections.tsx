@@ -155,7 +155,7 @@ export default function Collections() {
 
                {canTranscribe ? (
                   <Button onClick={() => navigate('/collections/create')}>
-                     <Plus />
+                     <Plus /> Create
                   </Button>
                ) : (
                   <>

@@ -20,7 +20,7 @@ export const user = pgTable('user', {
       .$onUpdate(() => new Date())
       .notNull(),
    username: text().notNull().unique(),
-   globalRole: globalRoleEnum().notNull().default('viewer'),
+   globalRole: globalRoleEnum().notNull().default('contributor'),
    twoFactorEnabled: boolean().default(false),
 });
 

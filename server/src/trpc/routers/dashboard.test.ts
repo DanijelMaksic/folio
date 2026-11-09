@@ -42,7 +42,6 @@ vi.mock('@/lib/queue.js', () => ({
 const contributorUser = mockUser({ globalRole: 'contributor' });
 const editorUser = mockUser({ id: 'editor-id', globalRole: 'editor' });
 const adminUser = mockUser({ id: 'admin-id', globalRole: 'admin' });
-const viewerUser = mockUser({ globalRole: 'viewer' });
 
 const updatedAt = new Date('2025-01-15T10:00:00.000Z');
 
@@ -232,20 +231,6 @@ describe('dashboard.getOverview', () => {
       expect(result.reviewQueueCount).toBe(7);
       expect(result.pendingRoleRequestCount).toBe(3);
       expect(mockSelect).toHaveBeenCalledTimes(4);
-   });
-
-   it('throws FORBIDDEN for a viewer', async () => {
-      mockRecentDocsQuery([]);
-
-      const caller = createAuthenticatedCaller(viewerUser);
-
-      await expect(caller.dashboard.getOverview()).rejects.toMatchObject({
-         code: 'FORBIDDEN',
-      });
-
-      // the guard runs before any query
-      expect(mockGetUserStats).not.toHaveBeenCalled();
-      expect(mockSelect).not.toHaveBeenCalled();
    });
 
    it('throws UNAUTHORIZED if not signed in', async () => {

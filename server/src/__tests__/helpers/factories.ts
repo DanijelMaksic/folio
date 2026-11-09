@@ -3,7 +3,7 @@ export function mockUser(overrides = {}) {
       id: 'user-test-id',
       email: 'test@example.com',
       username: 'testUser',
-      globalRole: 'viewer',
+      globalRole: 'contributor',
       ...overrides,
    };
 }

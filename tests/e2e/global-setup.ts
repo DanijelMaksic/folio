@@ -17,7 +17,7 @@ const headers = {
    Origin: 'http://localhost:5173',
 };
 
-export type Role = 'viewer' | 'contributor' | 'editor' | 'admin';
+export type Role = 'contributor' | 'editor' | 'admin';
 
 export interface UserPayload {
    email: string;
