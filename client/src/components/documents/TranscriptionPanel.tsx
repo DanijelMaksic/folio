@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/tooltip';
 import TranscriptionToolbar from '@/components/documents/TranscriptionToolbar';
 import { Checkbox } from '@/components/ui/checkbox';
+import TranscriptionText from '@/components/documents/TranscriptionText';
 
 function TranscriptionPanel({
    transcription,
@@ -19,11 +20,13 @@ function TranscriptionPanel({
 }) {
    const [transcriptionContent, setTranscriptionContent] = useState('');
    const [isBlank, setIsBlank] = useState(false);
+   const [preview, setPreview] = useState(false);
 
    const textareaRef = useRef<HTMLTextAreaElement>(null);
    const pendingSelection = useRef<[number, number] | null>(null);
 
    const isSubmitted = transcription?.status === 'submitted';
+   const isApproved = transcription?.status === 'approved';
 
    const utils = trpc.useUtils();
 
@@ -103,13 +106,27 @@ function TranscriptionPanel({
 
    const hasContent = isBlank || !!transcriptionContent.trim();
 
+   if (isApproved)
+      return (
+         <div className="space-y-3 border rounded-md px-4 py-3 h-full">
+            <h2 className="text-lg font-medium pt-1">Transcription</h2>{' '}
+            <div className="flex flex-col gap-3 justify-center items-center min-h-90">
+               <p className="text-lg">Your transcription is approved!</p>
+               <p className="text-muted-foreground">
+                  You can see your transcription for this page in the Overview
+                  tab
+               </p>
+            </div>
+         </div>
+      );
+
    return (
-      <div className="space-y-3 border rounded-md p-4 h-full">
+      <div className="space-y-3 border rounded-md px-4 py-3 h-full">
          <div className="flex gap-6 justify-between items-center">
             <div className="flex items-center gap-6">
-               <h2 className="text-lg font-medium">Transcription</h2>
+               <h2 className="text-lg font-medium pt-1">Transcription</h2>
 
-               {transcription && (
+               {transcription && !preview && (
                   <TranscriptionToolbar
                      disabled={isSubmitted || isBlank}
                      onWrap={(tag) => wrapSelection(`<${tag}>`, `</${tag}>`)}
@@ -145,30 +162,52 @@ function TranscriptionPanel({
                      </p>
                   )}
 
-               <Textarea
-                  className={`min-h-90 font-mono resize-y disabled:opacity-60 leading-6 ${isBlank && 'caret-transparent'}`}
-                  value={transcriptionContent}
-                  ref={textareaRef}
-                  readOnly={isBlank}
-                  data-testid="transcription-content"
-                  onChange={(e) => setTranscriptionContent(e.target.value)}
-                  disabled={isSubmitted || isBlank}
-                  placeholder="Type your transcription here..."
-               />
+               {preview ? (
+                  <div className="flex flex-col gap-3 border rounded-md p-4 min-h-90">
+                     <p className="text-[1rem] whitespace-pre-wrap leading-7">
+                        <TranscriptionText content={transcriptionContent} />
+                     </p>
+                  </div>
+               ) : (
+                  <Textarea
+                     className={`min-h-90 font-mono resize-y disabled:opacity-60 leading-6 ${isBlank && 'caret-transparent'}`}
+                     value={transcriptionContent}
+                     ref={textareaRef}
+                     readOnly={isBlank}
+                     data-testid="transcription-content"
+                     onChange={(e) => setTranscriptionContent(e.target.value)}
+                     disabled={isSubmitted || isBlank}
+                     placeholder="Type your transcription here..."
+                  />
+               )}
 
                <div className="flex gap-2 items-center justify-end">
                   {!isSubmitted && (
                      <>
-                        <div className="flex items-center gap-2 mr-4">
-                           <span>Mark as blank</span>
-                           <Checkbox
-                              onCheckedChange={(v) => setIsBlank(v === true)}
-                              className="border-gray-400"
-                              id="blank-checkbox"
-                              name="blank-checkbox"
-                              checked={isBlank}
-                           />
-                        </div>
+                        {!preview && (
+                           <div className="flex items-center gap-2 mr-4">
+                              <span>Mark as blank</span>
+                              <Checkbox
+                                 onCheckedChange={(v) => setIsBlank(v === true)}
+                                 className="border-gray-400"
+                                 id="blank-checkbox"
+                                 name="blank-checkbox"
+                                 checked={isBlank}
+                              />
+                           </div>
+                        )}
+
+                        <button
+                           className="px-3 py-1 text-sm border disabled:pointer-events-none rounded hover:bg-muted disabled:opacity-50"
+                           onClick={() => setPreview(!preview)}
+                           disabled={
+                              updateMutation.isPending ||
+                              !transcriptionContent.trim() ||
+                              isBlank
+                           }
+                        >
+                           {preview ? 'Edit' : 'Preview'}
+                        </button>
 
                         <button
                            className="px-3 py-1 text-sm border disabled:pointer-events-none rounded hover:bg-muted disabled:opacity-50"

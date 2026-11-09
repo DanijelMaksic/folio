@@ -369,12 +369,29 @@ export const transcriptionsRouter = router({
    getApprovedByPage: publicProcedure
       .input(z.object({ pageId: z.string() }))
       .query(async ({ ctx, input }) => {
-         const approved = await db.query.transcriptions.findFirst({
-            where: and(
-               eq(transcriptions.pageId, input.pageId),
-               eq(transcriptions.status, 'approved'),
-            ),
-         });
+         const [approved] = await db
+            .select({
+               id: transcriptions.id,
+               pageId: transcriptions.pageId,
+               userId: transcriptions.userId,
+               content: transcriptions.content,
+               isBlank: transcriptions.isBlank,
+               status: transcriptions.status,
+               rejectionReason: transcriptions.rejectionReason,
+               createdAt: transcriptions.createdAt,
+               updatedAt: transcriptions.updatedAt,
+               username: user.username,
+               userAvatar: user.image,
+            })
+            .from(transcriptions)
+            .innerJoin(user, eq(user.id, transcriptions.userId))
+            .where(
+               and(
+                  eq(transcriptions.pageId, input.pageId),
+                  eq(transcriptions.status, 'approved'),
+               ),
+            )
+            .limit(1);
 
          return approved ?? null;
       }),

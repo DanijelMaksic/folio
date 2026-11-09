@@ -1,9 +1,14 @@
 ## Things to add
 
-- In Transcription panel, add preview button
+- Transcriptions tab on public profile
+- Show 'transcribe' and 'revision history' tabs to non-signed-in users, with message to sign up to contribute
+- Fullscreen view of document viewer
+- Layout change for transcription panel
 - Transcribe as guest? (fromThePage: You may save up to three transcriptions as a guest or sign up now)
 - "Fully transcribed" label in `DocumentCard.tsx`, and maybe in `DocumentPages.tsx` add "All pages as fully transcribed"
 - In `DocumentCard.tsx` add completion %, but only if it's above 0%
+- Audit table on role management route
+
 - Categories/tags
 - Role downgrade
 - Sorting in `/role-requests`

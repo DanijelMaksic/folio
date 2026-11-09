@@ -36,42 +36,35 @@ function RevisionHistoryTab() {
    if (!session) return <Navigate to="/sign-in" replace />;
 
    return (
-      <div>
-         <ul className="mt-2 space-y-2 max-h-48 overflow-y-auto">
-            {!revisions?.length && (
-               <li className="text-md text-muted-foreground">
-                  No revisions yet.
-               </li>
-            )}
-            {revisions?.map((rev) => (
-               <li
-                  key={rev.id}
-                  className="text-xs border rounded p-2 space-y-1"
-               >
-                  <p className="text-muted-foreground">
-                     {new Date(rev.savedAt).toLocaleString()}
-                  </p>
+      <ul className="mt-2 space-y-2 max-h-96 overflow-y-auto">
+         {!revisions?.length && (
+            <li className="text-md text-muted-foreground">No revisions yet.</li>
+         )}
+         {revisions?.map((rev) => (
+            <li key={rev.id} className="text-xs border rounded p-2 space-y-1">
+               <p className="text-muted-foreground">
+                  {new Date(rev.savedAt).toLocaleString()}
+               </p>
 
-                  {rev.content === '' ? (
-                     <span className="text-muted-foreground text-sm">
-                        Blank page
-                     </span>
-                  ) : (
-                     <p
+               {rev.content === '' ? (
+                  <span className="text-muted-foreground text-sm">
+                     Blank page
+                  </span>
+               ) : (
+                  <p
+                     data-testid="transcription-revision"
+                     className="font-mono text-sm whitespace-pre-wrap"
+                  >
+                     <TranscriptionText
                         data-testid="transcription-revision"
-                        className="font-mono text-sm whitespace-pre-wrap"
-                     >
-                        <TranscriptionText
-                           data-testid="transcription-revision"
-                           content={rev.content}
-                           className="..."
-                        />
-                     </p>
-                  )}
-               </li>
-            ))}
-         </ul>
-      </div>
+                        content={rev.content}
+                        className="..."
+                     />
+                  </p>
+               )}
+            </li>
+         ))}
+      </ul>
    );
 }
 

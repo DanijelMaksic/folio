@@ -5,6 +5,7 @@ import { useSession } from '@/lib/auth-client';
 import { trpc } from '@/lib/trpc';
 import { isContributor } from '@shared';
 import { useParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 function OverviewTab() {
    const { id: documentId, pageNumber } = useParams<{
@@ -42,15 +43,21 @@ function OverviewTab() {
                <div className="flex gap-6 justify-between items-center">
                   <h2 className="text-lg font-medium">Transcription</h2>
 
-                  {approvedTranscription?.status &&
-                     user?.id === approvedTranscription.userId && (
-                        <p className="text-sm text-muted-foreground space-y-1 capitalize italic">
-                           Status:{' '}
-                           <span data-testid="transcription-status">
-                              {approvedTranscription?.status}
-                           </span>
-                        </p>
-                     )}
+                  {user?.id === approvedTranscription.userId ? (
+                     <p className="text-sm space-y-1 capitalize bg-gray-900 rounded-md text-white px-3 py-1">
+                        Your transcription
+                     </p>
+                  ) : (
+                     <div>
+                        <span>Transcribed by : </span>
+                        <Link
+                           to={`${window.location.origin}/users/${approvedTranscription.username}`}
+                           className="font-semibold hover:underline"
+                        >
+                           {approvedTranscription.username}
+                        </Link>
+                     </div>
+                  )}
                </div>
 
                {approvedTranscription.content === '' ? (
