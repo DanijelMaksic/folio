@@ -188,6 +188,7 @@ describe('transcriptions.update', () => {
       const result = await caller.transcriptions.update({
          transcriptionId: 'transcription-1',
          content: 'Updated content',
+         isBlank: false,
       });
 
       expect(result).toMatchObject({ content: 'Updated content' });
@@ -208,6 +209,7 @@ describe('transcriptions.update', () => {
          caller.transcriptions.update({
             transcriptionId: 'nonexistent',
             content: 'x',
+            isBlank: false,
          }),
       ).rejects.toMatchObject({ code: 'NOT_FOUND' });
    });
@@ -230,6 +232,7 @@ describe('transcriptions.update', () => {
          caller.transcriptions.update({
             transcriptionId: 'transcription-1',
             content: 'x',
+            isBlank: false,
          }),
       ).rejects.toMatchObject({ code: 'FORBIDDEN' });
    });
@@ -252,6 +255,7 @@ describe('transcriptions.update', () => {
          caller.transcriptions.update({
             transcriptionId: 'transcription-1',
             content: 'x',
+            isBlank: false,
          }),
       ).rejects.toMatchObject({ code: 'FORBIDDEN' });
    });
@@ -262,6 +266,7 @@ describe('transcriptions.update', () => {
          caller.transcriptions.update({
             transcriptionId: 'transcription-1',
             content: 'x',
+            isBlank: false,
          }),
       ).rejects.toMatchObject({ code: 'UNAUTHORIZED' });
    });
@@ -305,6 +310,7 @@ describe('transcriptions.submit', () => {
       const result = await caller.transcriptions.submit({
          transcriptionId: 'transcription-1',
          content: 'Updated content',
+         isBlank: false,
       });
 
       expect(result).toMatchObject({ status: 'submitted' });
@@ -328,6 +334,7 @@ describe('transcriptions.submit', () => {
          caller.transcriptions.submit({
             transcriptionId: 'transcription-1',
             content: 'Updated content',
+            isBlank: false,
          }),
       ).rejects.toMatchObject({ code: 'FORBIDDEN' });
    });
@@ -350,11 +357,12 @@ describe('transcriptions.submit', () => {
          caller.transcriptions.submit({
             transcriptionId: 'transcription-1',
             content: 'Updated content',
+            isBlank: false,
          }),
       ).rejects.toMatchObject({ code: 'FORBIDDEN' });
    });
 
-   it('throws BAD_REQUEST if content is empty', async () => {
+   it('throws BAD_REQUEST if content is empty and isBlank is false', async () => {
       mockSelect.mockReturnValueOnce({
          from: vi.fn(() => ({
             where: vi.fn(() => ({
@@ -372,6 +380,7 @@ describe('transcriptions.submit', () => {
          caller.transcriptions.submit({
             transcriptionId: 'transcription-1',
             content: '',
+            isBlank: false,
          }),
       ).rejects.toMatchObject({ code: 'BAD_REQUEST' });
    });
@@ -390,6 +399,7 @@ describe('transcriptions.submit', () => {
          caller.transcriptions.submit({
             transcriptionId: 'nonexistent',
             content: 'x',
+            isBlank: false,
          }),
       ).rejects.toMatchObject({ code: 'NOT_FOUND' });
    });
@@ -400,6 +410,7 @@ describe('transcriptions.submit', () => {
          caller.transcriptions.submit({
             transcriptionId: 'transcription-1',
             content: 'x',
+            isBlank: false,
          }),
       ).rejects.toMatchObject({ code: 'UNAUTHORIZED' });
    });
