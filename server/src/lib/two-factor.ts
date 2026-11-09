@@ -1,4 +1,3 @@
-// lib/two-factor.ts
 import { randomBytes } from 'crypto';
 import { eq } from 'drizzle-orm';
 import { twoFactor } from '@/db/schema/auth.js';

@@ -1,6 +1,8 @@
 ## Things to add
 
+- Remove `viewer` role
 - In Transcription panel, add preview button
+- "Mark as blank" button to mark an empty page
 - Transcribe as guest? (fromThePage: You may save up to three transcriptions as a guest or sign up now)
 - "Fully transcribed" label in `DocumentCard.tsx`, and maybe in `DocumentPages.tsx` add "All pages as fully transcribed"
 - In `DocumentCard.tsx` add completion %, but only if it's above 0%
@@ -9,7 +11,6 @@
 - Sorting in `/role-requests`
 - Home page (general info, FAQ)
 - Save transcription with ctrl + s shortcut (add into about this in guidelines and add tooltip with shortcut on save button, also change the button from "Save" to save icon with tooltip)
-- "Mark as blank" button to mark an empty page
 
 ## Things to fix
 

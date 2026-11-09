@@ -146,9 +146,28 @@ function TranscriptionPanel({
                   placeholder="Type your transcription here..."
                />
 
-               <div className="flex gap-2 items-center">
+               <div className="flex gap-2 items-center justify-end">
                   {!isSubmitted && (
                      <>
+                        <Tooltip>
+                           <TooltipTrigger
+                              render={
+                                 <button
+                                    type="button"
+                                    className="border border-gray-300 rounded-full px-1.5 self-start text-gray-600"
+                                 >
+                                    ?
+                                 </button>
+                              }
+                           />
+                           <TooltipContent>
+                              <p className="max-w-44">
+                                 Submitted transcriptions are reviewed by an
+                                 editor before they’re published.
+                              </p>
+                           </TooltipContent>
+                        </Tooltip>
+
                         <button
                            className="px-3 py-1 text-sm border disabled:pointer-events-none rounded hover:bg-muted disabled:opacity-50"
                            onClick={handleSave}
@@ -172,25 +191,6 @@ function TranscriptionPanel({
                               ? 'Submitting...'
                               : 'Submit'}
                         </button>
-
-                        <Tooltip>
-                           <TooltipTrigger
-                              render={
-                                 <button
-                                    type="button"
-                                    className="border border-gray-300 rounded-full px-1.5 self-start text-gray-600"
-                                 >
-                                    ?
-                                 </button>
-                              }
-                           />
-                           <TooltipContent>
-                              <p className="max-w-44">
-                                 Submitted transcriptions are reviewed by an
-                                 editor before they’re published.
-                              </p>
-                           </TooltipContent>
-                        </Tooltip>
                      </>
                   )}
                </div>

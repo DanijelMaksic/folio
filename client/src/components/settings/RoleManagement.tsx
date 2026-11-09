@@ -5,6 +5,8 @@ import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
 import RejectRoleRequestModal from '@/components/settings/RejectRoleRequestModal';
 import { Link } from 'react-router-dom';
+import PromoteEditors from '@/components/settings/PromoteEditors';
+import { useSession } from '@/lib/auth-client';
 
 const dateFormatter = new Intl.DateTimeFormat(undefined, {
    dateStyle: 'medium',
@@ -14,6 +16,7 @@ const dateFormatter = new Intl.DateTimeFormat(undefined, {
 function RoleManagement() {
    const utils = trpc.useUtils();
    const { data, isLoading, isError } = trpc.admin.listRoleRequests.useQuery();
+   const { data: session } = useSession();
 
    const [approvingId, setApprovingId] = useState<string | null>(null);
    const [rejectingId, setRejectingId] = useState<string | null>(null);
@@ -153,6 +156,8 @@ function RoleManagement() {
                })}
             </ul>
          )}
+
+         {session?.user.globalRole === 'admin' && <PromoteEditors />}
 
          <RejectRoleRequestModal
             open={!!rejecting}

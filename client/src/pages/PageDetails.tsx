@@ -168,10 +168,10 @@ function PageDetails() {
                tab={tab}
                onTabChange={setTab}
             >
-               <div className="flex items-center justify-center gap-3">
+               <div className="flex items-center justify-center gap-3 text-sm">
                   <Pagination className="border rounded-md border-gray-300 py-1 px-2">
                      <PaginationContent>
-                        <PaginationItem className="flex items-center border-r border-gray-300 pr-2">
+                        <PaginationItem className="flex items-center border-r border-gray-300 pr-2 py-0.5">
                            <button
                               onClick={(e) => {
                                  e.preventDefault();
@@ -187,7 +187,7 @@ function PageDetails() {
                                     : ''
                               }
                            >
-                              <ChevronLeft />
+                              <ChevronLeft size={22} />
                            </button>
                         </PaginationItem>
 
@@ -213,7 +213,7 @@ function PageDetails() {
                                     : ''
                               }
                            >
-                              <ChevronRight />
+                              <ChevronRight size={22} />
                            </button>
                         </PaginationItem>
                      </PaginationContent>

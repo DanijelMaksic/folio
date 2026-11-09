@@ -6,3 +6,5 @@ export * from './transcriptions.js';
 export * from './relations.js';
 export * from './pages.js';
 export * from './roleRequests.js';
+export * from './roleChanges.js';
+export * from './notes.js';

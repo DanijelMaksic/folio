@@ -41,7 +41,7 @@ function ActionsMenu({
                <Button
                   variant="outline"
                   data-testid="actions-dropdown-btn"
-                  className="border-gray-400"
+                  className="border-gray-300"
                >
                   <EllipsisVertical />
                </Button>

@@ -4,7 +4,6 @@ import { router, adminProcedure } from '@/trpc/trpc.js';
 import { TRPCError } from '@trpc/server';
 import {
    adminRoleRequestSchema,
-   GLOBAL_ROLES,
    isEditor,
    reviewRoleRequestSchema,
    userRoleSchema,
@@ -17,12 +16,12 @@ import {
 import { session as sessionTable, user } from '@/db/schema/auth.js';
 import { roleRequests } from '@/db/schema/roleRequests.js';
 import { syncTwoFactorRow } from '@/lib/two-factor.js';
+import { roleChanges } from '@/db/schema/roleChanges.js';
 
 export const adminRouter = router({
    setUserRole: adminProcedure
       .input(userRoleSchema)
       .mutation(async ({ ctx, input }) => {
-         // Optional guard: stops an admin demoting themselves (and the last admin vanishing)
          if (input.userId === ctx.user.id) {
             throw new TRPCError({
                code: 'BAD_REQUEST',
@@ -32,30 +31,66 @@ export const adminRouter = router({
 
          const twoFactorEnabled = isEditor(input.role);
 
-         const found = await db.transaction(async (tx) => {
-            const [row] = await tx
+         await db.transaction(async (tx) => {
+            const [target] = await tx
+               .select({
+                  role: user.globalRole,
+                  username: user.username,
+               })
+               .from(user)
+               .where(eq(user.id, input.userId))
+               .limit(1)
+               .for('update');
+
+            if (!target) throw new TRPCError({ code: 'NOT_FOUND' });
+
+            if (target.role === input.role) {
+               throw new TRPCError({
+                  code: 'BAD_REQUEST',
+                  message: 'User already has this role',
+               });
+            }
+
+            if (input.role === 'admin' && target.role !== 'editor') {
+               throw new TRPCError({
+                  code: 'BAD_REQUEST',
+                  message: 'Only editors can be promoted to admin',
+               });
+            }
+
+            await tx
                .update(user)
                .set({ globalRole: input.role, twoFactorEnabled })
-               .where(eq(user.id, input.userId))
-               .returning({ id: user.id });
-
-            if (!row) return false;
+               .where(eq(user.id, input.userId));
 
             await syncTwoFactorRow(tx, input.userId, twoFactorEnabled);
 
-            // Force a fresh sign in: the user passes email OTP if now editor+,
-            // and no session keeps a stale role
             await tx
                .delete(sessionTable)
                .where(eq(sessionTable.userId, input.userId));
 
-            return true;
+            await tx.insert(roleChanges).values({
+               actorId: ctx.user.id,
+               targetId: input.userId,
+               actorUsername: ctx.user.username,
+               targetUsername: target.username,
+               oldRole: target.role,
+               newRole: input.role,
+               source: 'direct',
+            });
          });
-
-         if (!found) throw new TRPCError({ code: 'NOT_FOUND' });
 
          return { success: true };
       }),
+
+   listEditors: adminProcedure.query(async () => {
+      const editors = await db
+         .select()
+         .from(user)
+         .where(eq(user.globalRole, 'editor'));
+
+      return editors;
+   }),
 
    listRoleRequests: adminProcedure
       .output(z.array(adminRoleRequestSchema))
@@ -117,7 +152,23 @@ export const adminRouter = router({
             });
          }
 
+         if (request.requestedRole === 'admin') {
+            throw new TRPCError({
+               code: 'BAD_REQUEST',
+               message: 'Admin role cannot be granted through a request',
+            });
+         }
+
          await db.transaction(async (tx) => {
+            const [target] = await tx
+               .select({ role: user.globalRole, username: user.username })
+               .from(user)
+               .where(eq(user.id, request.userId))
+               .limit(1)
+               .for('update');
+
+            if (!target) throw new TRPCError({ code: 'NOT_FOUND' });
+
             const twoFactorEnabled = isEditor(request.requestedRole);
 
             await tx
@@ -147,6 +198,16 @@ export const adminRouter = router({
             await tx
                .delete(sessionTable)
                .where(eq(sessionTable.userId, request.userId));
+
+            await tx.insert(roleChanges).values({
+               actorId: ctx.user.id,
+               targetId: request.userId,
+               actorUsername: ctx.user.username,
+               targetUsername: target.username,
+               oldRole: target.role,
+               newRole: request.requestedRole,
+               source: 'request',
+            });
          });
 
          // A failed email must not undo a completed approval
