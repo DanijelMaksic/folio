@@ -1,4 +1,11 @@
-import { pgTable, text, timestamp, index, unique } from 'drizzle-orm/pg-core';
+import {
+   pgTable,
+   text,
+   timestamp,
+   index,
+   unique,
+   boolean,
+} from 'drizzle-orm/pg-core';
 import { transcriptionStatusEnum } from './enums.js';
 import { user } from './auth.js';
 import { pages } from '@/db/schema/pages.js';
@@ -14,6 +21,7 @@ export const transcriptions = pgTable(
          .references(() => pages.id, { onDelete: 'cascade' }),
       userId: text().references(() => user.id, { onDelete: 'set null' }),
       content: text().notNull().default(''),
+      isBlank: boolean().notNull().default(false),
       status: transcriptionStatusEnum().notNull().default('draft'),
       rejectionReason: text(),
       createdAt: timestamp().notNull().defaultNow(),

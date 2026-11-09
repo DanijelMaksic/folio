@@ -51,16 +51,23 @@ function RevisionHistoryTab() {
                   <p className="text-muted-foreground">
                      {new Date(rev.savedAt).toLocaleString()}
                   </p>
-                  <p
-                     data-testid="transcription-revision"
-                     className="font-mono text-sm whitespace-pre-wrap"
-                  >
-                     <TranscriptionText
+
+                  {rev.content === '' ? (
+                     <span className="text-muted-foreground text-sm">
+                        Blank page
+                     </span>
+                  ) : (
+                     <p
                         data-testid="transcription-revision"
-                        content={rev.content}
-                        className="..."
-                     />
-                  </p>
+                        className="font-mono text-sm whitespace-pre-wrap"
+                     >
+                        <TranscriptionText
+                           data-testid="transcription-revision"
+                           content={rev.content}
+                           className="..."
+                        />
+                     </p>
+                  )}
                </li>
             ))}
          </ul>

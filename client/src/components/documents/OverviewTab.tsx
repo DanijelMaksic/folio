@@ -38,7 +38,7 @@ function OverviewTab() {
          </div>
 
          {approvedTranscription ? (
-            <div className="space-y-3 border rounded-md p-4 h-full">
+            <div className="flex flex-col gap-3 border rounded-md p-4 h-full">
                <div className="flex gap-6 justify-between items-center">
                   <h2 className="text-lg font-medium">Transcription</h2>
 
@@ -52,12 +52,21 @@ function OverviewTab() {
                         </p>
                      )}
                </div>
-               <p className="text-[1rem] whitespace-pre-wrap leading-7">
-                  <TranscriptionText
-                     className="text-[1rem] leading-7"
-                     content={approvedTranscription.content}
-                  />{' '}
-               </p>
+
+               {approvedTranscription.content === '' ? (
+                  <div className="flex flex-1 items-center justify-center">
+                     <span className="text-muted-foreground text-lg">
+                        This page is blank
+                     </span>
+                  </div>
+               ) : (
+                  <p className="text-[1rem] whitespace-pre-wrap leading-7">
+                     <TranscriptionText
+                        className="text-[1rem] leading-7"
+                        content={approvedTranscription.content}
+                     />
+                  </p>
+               )}
             </div>
          ) : (
             <TranscriptionPlaceholder type={placeholderType} />

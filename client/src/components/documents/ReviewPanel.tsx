@@ -64,7 +64,11 @@ function ReviewPanel({
          <h2 className="font-semibold">Review Transcription</h2>
 
          <div className="rounded bg-muted p-3 text-[1rem] whitespace-pre-wrap">
-            <TranscriptionText content={submittedTranscription.content} />
+            {submittedTranscription.content === '' ? (
+               <span className="text-muted-foreground">This page is blank</span>
+            ) : (
+               <TranscriptionText content={submittedTranscription.content} />
+            )}
          </div>
 
          <Button onClick={handleApprove} disabled={busy}>

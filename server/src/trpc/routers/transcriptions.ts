@@ -93,13 +93,16 @@ export const transcriptionsRouter = router({
          // Update the transcription
          const [updated] = await db
             .update(transcriptions)
-            .set({ content: input.content, updatedAt: new Date() })
+            .set({
+               content: input.isBlank ? '' : input.content,
+               updatedAt: new Date(),
+            })
             .where(eq(transcriptions.id, input.transcriptionId))
             .returning();
 
          await db.insert(transcriptionRevisions).values({
             transcriptionId: input.transcriptionId,
-            content: input.content,
+            content: input.isBlank ? '' : input.content,
          });
 
          return updated;
@@ -121,7 +124,7 @@ export const transcriptionsRouter = router({
             throw new TRPCError({ code: 'FORBIDDEN' });
 
          // A user cannot submit an empty transcription
-         if (!input.content.trim()) {
+         if (!input.content.trim() && !input.isBlank) {
             throw new TRPCError({
                code: 'BAD_REQUEST',
                message: 'Cannot submit an empty transcription',
@@ -131,14 +134,17 @@ export const transcriptionsRouter = router({
          // Update the transcription
          const [updated] = await db
             .update(transcriptions)
-            .set({ content: input.content, updatedAt: new Date() })
+            .set({
+               content: input.isBlank ? '' : input.content,
+               updatedAt: new Date(),
+            })
             .where(eq(transcriptions.id, input.transcriptionId))
             .returning();
 
          if (existing.content !== updated.content)
             await db.insert(transcriptionRevisions).values({
                transcriptionId: input.transcriptionId,
-               content: input.content,
+               content: input.isBlank ? '' : input.content,
             });
 
          // Submit the transcription

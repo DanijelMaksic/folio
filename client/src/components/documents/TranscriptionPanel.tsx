@@ -8,6 +8,7 @@ import {
    TooltipTrigger,
 } from '@/components/ui/tooltip';
 import TranscriptionToolbar from '@/components/documents/TranscriptionToolbar';
+import { Checkbox } from '@/components/ui/checkbox';
 
 function TranscriptionPanel({
    transcription,
@@ -17,6 +18,7 @@ function TranscriptionPanel({
    pageId?: string;
 }) {
    const [transcriptionContent, setTranscriptionContent] = useState('');
+   const [isBlank, setIsBlank] = useState(false);
 
    const textareaRef = useRef<HTMLTextAreaElement>(null);
    const pendingSelection = useRef<[number, number] | null>(null);
@@ -39,14 +41,18 @@ function TranscriptionPanel({
 
    // Sync textarea when transcription loads
    useEffect(() => {
-      if (transcription) setTranscriptionContent(transcription.content);
-   }, [transcription?.content ?? '']);
+      if (transcription) {
+         setTranscriptionContent(transcription.content);
+         setIsBlank(transcription.isBlank);
+      }
+   }, [transcription?.content ?? '', transcription?.isBlank]);
 
    function handleSave() {
       if (!transcription) return;
       updateMutation.mutate({
          transcriptionId: transcription.id,
          content: transcriptionContent,
+         isBlank: isBlank,
       });
    }
 
@@ -55,6 +61,7 @@ function TranscriptionPanel({
       submitMutation.mutate({
          transcriptionId: transcription.id,
          content: transcriptionContent,
+         isBlank: isBlank,
       });
    }
 
@@ -94,6 +101,8 @@ function TranscriptionPanel({
       el.setSelectionRange(sel[0], sel[1]);
    }, [transcriptionContent]);
 
+   const hasContent = isBlank || !!transcriptionContent.trim();
+
    return (
       <div className="space-y-3 border rounded-md p-4 h-full">
          <div className="flex gap-6 justify-between items-center">
@@ -102,7 +111,7 @@ function TranscriptionPanel({
 
                {transcription && (
                   <TranscriptionToolbar
-                     disabled={isSubmitted}
+                     disabled={isSubmitted || isBlank}
                      onWrap={(tag) => wrapSelection(`<${tag}>`, `</${tag}>`)}
                      onIllegible={insertIllegible}
                   />
@@ -137,18 +146,48 @@ function TranscriptionPanel({
                   )}
 
                <Textarea
-                  className="min-h-90 font-mono resize-y disabled:opacity-60 leading-6"
+                  className={`min-h-90 font-mono resize-y disabled:opacity-60 leading-6 ${isBlank && 'caret-transparent'}`}
                   value={transcriptionContent}
                   ref={textareaRef}
+                  readOnly={isBlank}
                   data-testid="transcription-content"
                   onChange={(e) => setTranscriptionContent(e.target.value)}
-                  disabled={isSubmitted}
+                  disabled={isSubmitted || isBlank}
                   placeholder="Type your transcription here..."
                />
 
                <div className="flex gap-2 items-center justify-end">
                   {!isSubmitted && (
                      <>
+                        <div className="flex items-center gap-2 mr-4">
+                           <span>Mark as blank</span>
+                           <Checkbox
+                              onCheckedChange={(v) => setIsBlank(v === true)}
+                              className="border-gray-400"
+                              id="blank-checkbox"
+                              name="blank-checkbox"
+                              checked={isBlank}
+                           />
+                        </div>
+
+                        <button
+                           className="px-3 py-1 text-sm border disabled:pointer-events-none rounded hover:bg-muted disabled:opacity-50"
+                           onClick={handleSave}
+                           disabled={updateMutation.isPending || !hasContent}
+                        >
+                           {updateMutation.isPending ? 'Saving...' : 'Save'}
+                        </button>
+
+                        <button
+                           className="px-3 py-1 text-sm bg-primary text-primary-foreground disabled:pointer-events-none rounded  hover:opacity-90 disabled:opacity-50"
+                           onClick={handleSubmit}
+                           disabled={submitMutation.isPending || !hasContent}
+                        >
+                           {submitMutation.isPending
+                              ? 'Submitting...'
+                              : 'Submit'}
+                        </button>
+
                         <Tooltip>
                            <TooltipTrigger
                               render={
@@ -167,30 +206,6 @@ function TranscriptionPanel({
                               </p>
                            </TooltipContent>
                         </Tooltip>
-
-                        <button
-                           className="px-3 py-1 text-sm border disabled:pointer-events-none rounded hover:bg-muted disabled:opacity-50"
-                           onClick={handleSave}
-                           disabled={
-                              updateMutation.isPending ||
-                              !transcriptionContent.trim()
-                           }
-                        >
-                           {updateMutation.isPending ? 'Saving...' : 'Save'}
-                        </button>
-
-                        <button
-                           className="px-3 py-1 text-sm bg-primary text-primary-foreground disabled:pointer-events-none rounded  hover:opacity-90 disabled:opacity-50"
-                           onClick={handleSubmit}
-                           disabled={
-                              submitMutation.isPending ||
-                              !transcriptionContent.trim()
-                           }
-                        >
-                           {submitMutation.isPending
-                              ? 'Submitting...'
-                              : 'Submit'}
-                        </button>
                      </>
                   )}
                </div>

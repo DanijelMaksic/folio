@@ -6,6 +6,7 @@ export const transcriptionSchema = z.object({
    pageId: z.string(),
    userId: z.string().nullable(),
    content: z.string(),
+   isBlank: z.boolean(),
    status: z.enum(['draft', 'submitted', 'approved', 'rejected']),
    rejectionReason: z.string().nullable(),
    createdAt: z.string(),
@@ -15,6 +16,7 @@ export const transcriptionSchema = z.object({
 export const updateTranscriptionSchema = z.object({
    id: z.string(),
    content: z.string().min(1, 'Transcription content cannot be empty'),
+   isBlank: z.boolean(),
 });
 
 export const transcriptionRevisionSchema = z.object({
@@ -27,6 +29,7 @@ export const transcriptionRevisionSchema = z.object({
 export const transcriptionContentSchema = z.object({
    transcriptionId: z.string(),
    content: z.string(),
+   isBlank: z.boolean(),
 });
 
 export const submittedByPageSchema = z.object({
