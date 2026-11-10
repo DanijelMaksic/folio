@@ -13,10 +13,8 @@ import TranscriptionText from '@/components/documents/TranscriptionText';
 
 function ReviewPanel({
    submittedTranscription,
-   pageId,
 }: {
    submittedTranscription: SubmittedTranscription;
-   pageId: string;
 }) {
    const navigate = useNavigate();
 
@@ -48,7 +46,6 @@ function ReviewPanel({
    function handleApprove() {
       approveMutation.mutate({
          transcriptionId: submittedTranscription.id,
-         pageId: pageId,
       });
    }
 

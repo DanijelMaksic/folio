@@ -3,12 +3,13 @@ import {
    text,
    timestamp,
    index,
-   unique,
    boolean,
+   uniqueIndex,
 } from 'drizzle-orm/pg-core';
 import { transcriptionStatusEnum } from './enums.js';
 import { user } from './auth.js';
 import { pages } from '@/db/schema/pages.js';
+import { sql } from 'drizzle-orm';
 
 export const transcriptions = pgTable(
    'transcriptions',
@@ -28,10 +29,12 @@ export const transcriptions = pgTable(
       updatedAt: timestamp().notNull().defaultNow(),
    },
    (table) => [
-      unique('transcriptions_page_id_user_id_unique').on(
-         table.pageId,
-         table.userId,
-      ),
+      uniqueIndex('transcriptions_one_open_per_user_page')
+         .on(table.pageId, table.userId)
+         .where(sql`${table.status} in ('draft', 'submitted', 'rejected')`),
+      uniqueIndex('transcriptions_one_approved_per_page')
+         .on(table.pageId)
+         .where(sql`${table.status} = 'approved'`),
       index('transcriptions_page_id_idx').on(table.pageId),
       index('transcriptions_user_id_idx').on(table.userId),
    ],
@@ -48,6 +51,7 @@ export const transcriptionRevisions = pgTable(
          .references(() => transcriptions.id, { onDelete: 'cascade' }),
       content: text().notNull(),
       savedAt: timestamp().notNull().defaultNow(),
+      isBlank: boolean().notNull().default(false),
    },
    (table) => [
       index('revisions_transcription_id_idx').on(table.transcriptionId),

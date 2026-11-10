@@ -661,6 +661,8 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Remove `viewer` role, since user gains nothing for signing up and can't transcribe until granted the `contributor` role. The whole point of the app is to enable users to sign up and upload documents and transcribe them, so locking up basic app features under `contributor` role means no one would want to sign up only to find out they can't transcribe
 
+- Refactored how transcriptions are approved. Now upon approval the transcription is saved to `versions` table, and old version is deleted, so user can suggest a correction and write a new one
+
 **Issues resolved:**
 
 - Fixed a bug where if user hits submit before save when transcribing, revisions tab shows nothing and transcription is not submitted

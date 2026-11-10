@@ -29,8 +29,6 @@ function TranscribeTab() {
 
    if (isPending) return null;
 
-   if (!session) return <Navigate to="/sign-in" replace />;
-
    return (
       <div className="grid grid-cols-2 gap-4 items-start">
          <div className="sticky top-24">
@@ -41,6 +39,7 @@ function TranscribeTab() {
             <TranscriptionPanel
                transcription={transcription}
                pageId={page?.id}
+               canTranscribe={canTranscribe}
             />
          )}
       </div>

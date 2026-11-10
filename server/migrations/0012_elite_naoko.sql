@@ -1,0 +1,1 @@
+ALTER TABLE "transcription_revisions" ADD COLUMN "is_blank" boolean DEFAULT false NOT NULL;

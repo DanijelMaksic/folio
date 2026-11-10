@@ -1,7 +1,7 @@
 ## Things to add
 
+- Versions tab
 - Transcriptions tab on public profile
-- Show 'transcribe' and 'revision history' tabs to non-signed-in users, with message to sign up to contribute
 - Fullscreen view of document viewer
 - Layout change for transcription panel
 - Transcribe as guest? (fromThePage: You may save up to three transcriptions as a guest or sign up now)

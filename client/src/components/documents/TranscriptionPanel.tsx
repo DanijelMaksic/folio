@@ -10,11 +10,15 @@ import {
 import TranscriptionToolbar from '@/components/documents/TranscriptionToolbar';
 import { Checkbox } from '@/components/ui/checkbox';
 import TranscriptionText from '@/components/documents/TranscriptionText';
+import { useParams } from 'react-router-dom';
+import GuestTranscriptionPanel from '@/components/documents/GuestTranscriptionPanel';
 
 function TranscriptionPanel({
+   canTranscribe,
    transcription,
    pageId,
 }: {
+   canTranscribe: boolean;
    transcription?: Transcription;
    pageId?: string;
 }) {
@@ -22,11 +26,20 @@ function TranscriptionPanel({
    const [isBlank, setIsBlank] = useState(false);
    const [preview, setPreview] = useState(false);
 
+   const { id: documentId, pageNumber } = useParams<{
+      id: string;
+      pageNumber: string;
+   }>();
+
+   const { data: page } = trpc.pages.getByPageNumber.useQuery({
+      documentId: documentId!,
+      pageNumber: Number(pageNumber),
+   });
+
    const textareaRef = useRef<HTMLTextAreaElement>(null);
    const pendingSelection = useRef<[number, number] | null>(null);
 
    const isSubmitted = transcription?.status === 'submitted';
-   const isApproved = transcription?.status === 'approved';
 
    const utils = trpc.useUtils();
 
@@ -42,13 +55,27 @@ function TranscriptionPanel({
       onSuccess: () => utils.transcriptions.getByPage.invalidate(),
    });
 
+   const { data: approvedTranscription } =
+      trpc.transcriptions.getApprovedByPage.useQuery(
+         { pageId: page?.id! },
+         { enabled: !!page?.id },
+      );
+
    // Sync textarea when transcription loads
    useEffect(() => {
       if (transcription) {
          setTranscriptionContent(transcription.content);
          setIsBlank(transcription.isBlank);
+      } else {
+         setTranscriptionContent('');
+         setIsBlank(false);
+         setPreview(false);
       }
-   }, [transcription?.content ?? '', transcription?.isBlank]);
+   }, [
+      transcription?.id,
+      transcription?.content ?? '',
+      transcription?.isBlank,
+   ]);
 
    function handleSave() {
       if (!transcription) return;
@@ -106,19 +133,30 @@ function TranscriptionPanel({
 
    const hasContent = isBlank || !!transcriptionContent.trim();
 
-   if (isApproved)
+   if (!canTranscribe)
       return (
-         <div className="space-y-3 border rounded-md px-4 py-3 h-full">
-            <h2 className="text-lg font-medium pt-1">Transcription</h2>{' '}
-            <div className="flex flex-col gap-3 justify-center items-center min-h-90">
-               <p className="text-lg">Your transcription is approved!</p>
-               <p className="text-muted-foreground">
-                  You can see your transcription for this page in the Overview
-                  tab
-               </p>
-            </div>
-         </div>
+         <GuestTranscriptionPanel
+            onIllegible={insertIllegible}
+            wrapSelection={(tag) => wrapSelection(`<${tag}>`, `</${tag}>`)}
+            transcription={transcription!}
+            approvedTranscriptionContent={approvedTranscription?.content!}
+            transcriptionContent={transcriptionContent}
+         />
       );
+
+   // if (isApproved)
+   //    return (
+   //       <div className="space-y-3 border rounded-md px-4 py-3 h-full">
+   //          <h2 className="text-lg font-medium pt-1">Transcription</h2>{' '}
+   //          <div className="flex flex-col gap-3 justify-center items-center min-h-90">
+   //             <p className="text-lg">Your transcription is approved!</p>
+   //             <p className="text-muted-foreground">
+   //                You can see your transcription for this page in the Overview
+   //                tab
+   //             </p>
+   //          </div>
+   //       </div>
+   //    );
 
    return (
       <div className="space-y-3 border rounded-md px-4 py-3 h-full">
@@ -174,7 +212,9 @@ function TranscriptionPanel({
                onClick={() => createMutation.mutate({ pageId: pageId! })}
                disabled={createMutation.isPending}
             >
-               Start transcribing
+               {approvedTranscription
+                  ? 'Suggest a correction'
+                  : 'Start transcribing'}
             </button>
          ) : (
             <>
@@ -193,7 +233,7 @@ function TranscriptionPanel({
                   </div>
                ) : (
                   <Textarea
-                     className={`min-h-90 font-mono resize-y disabled:opacity-60 leading-6 ${isBlank && 'caret-transparent'}`}
+                     className="min-h-90 font-mono resize-y disabled:opacity-60 leading-6 disabled:caret-transparent"
                      value={transcriptionContent}
                      ref={textareaRef}
                      readOnly={isBlank}

@@ -24,6 +24,7 @@ export const transcriptionRevisionSchema = z.object({
    transcriptionId: z.string(),
    content: z.string(),
    savedAt: z.string(),
+   isBlank: z.boolean(),
 });
 
 export const transcriptionContentSchema = z.object({
@@ -39,7 +40,6 @@ export const submittedByPageSchema = z.object({
 
 export const approveSchema = z.object({
    transcriptionId: z.string(),
-   pageId: z.string(),
 });
 
 export const rejectSchema = z.object({

@@ -1,0 +1,2 @@
+ALTER TABLE "transcriptions" DROP CONSTRAINT "transcriptions_page_id_user_id_unique";--> statement-breakpoint
+CREATE UNIQUE INDEX "transcriptions_one_open_per_user_page" ON "transcriptions" USING btree ("page_id","user_id") WHERE "transcriptions"."status" <> 'approved';

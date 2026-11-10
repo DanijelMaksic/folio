@@ -245,7 +245,9 @@ function NotesAndQuestions({ pageId }: { pageId: string }) {
             onPageChange={setPage}
          />
 
-         {modalOpen && <SignInModal onClose={() => setModalOpen(false)} />}
+         {modalOpen && (
+            <SignInModal onClose={() => setModalOpen(false)} label="comment" />
+         )}
       </div>
    );
 }

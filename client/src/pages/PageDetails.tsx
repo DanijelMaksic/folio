@@ -1,4 +1,4 @@
-import { Outlet, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { trpc } from '../lib/trpc';
 import { useSession } from '../lib/auth-client';
 import { isContributor, isEditor } from '@shared';
@@ -163,11 +163,7 @@ function PageDetails() {
          </h1>
 
          {page.id && (
-            <PageTabs
-               canTranscribe={canTranscribe}
-               tab={tab}
-               onTabChange={setTab}
-            >
+            <PageTabs tab={tab} onTabChange={setTab}>
                <div className="flex items-center justify-center gap-3 text-sm">
                   <Pagination className="border rounded-md border-gray-300 py-1 px-2">
                      <PaginationContent>

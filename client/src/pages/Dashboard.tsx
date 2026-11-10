@@ -89,12 +89,14 @@ export default function Dashboard() {
                <h2 id="docs-heading" className="text-lg font-medium">
                   Your recent documents
                </h2>
-               <Link
-                  to="/documents"
-                  className="text-sm text-muted-foreground hover:underline"
-               >
-                  View all
-               </Link>
+               {data?.recentDocuments.length! > 0 && (
+                  <Link
+                     to="/documents"
+                     className="text-sm text-muted-foreground hover:underline"
+                  >
+                     View all
+                  </Link>
+               )}
             </div>
 
             <RecentDocuments

@@ -2,7 +2,7 @@ import TranscriptionText from '@/components/documents/TranscriptionText';
 import { useSession } from '@/lib/auth-client';
 import { trpc } from '@/lib/trpc';
 import { isContributor } from '@shared';
-import { Navigate, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 
 function RevisionHistoryTab() {
    const { id: documentId, pageNumber } = useParams<{
@@ -33,7 +33,15 @@ function RevisionHistoryTab() {
 
    if (isPending) return null;
 
-   if (!session) return <Navigate to="/sign-in" replace />;
+   if (!session)
+      return (
+         <div className="text-[1rem] mt-2">
+            <Link to="/sign-in" className="hover:underline font-semibold">
+               Sign in
+            </Link>{' '}
+            <span>to see your transcription history</span>
+         </div>
+      );
 
    return (
       <ul className="mt-2 space-y-2 max-h-96 overflow-y-auto">
@@ -46,7 +54,7 @@ function RevisionHistoryTab() {
                   {new Date(rev.savedAt).toLocaleString()}
                </p>
 
-               {rev.content === '' ? (
+               {rev.isBlank ? (
                   <span className="text-muted-foreground text-sm">
                      Blank page
                   </span>

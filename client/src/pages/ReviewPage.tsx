@@ -65,7 +65,6 @@ function ReviewPage() {
                submittedTranscription && (
                   <ReviewPanel
                      submittedTranscription={submittedTranscription}
-                     pageId={page.id}
                   />
                )
             ) : (

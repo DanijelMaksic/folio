@@ -6,18 +6,14 @@ import { ReactElement } from 'react';
 import GuidelinesTab from '@/components/documents/GuidelinesTab';
 
 function PageTabs({
-   canTranscribe,
    children,
    tab,
    onTabChange,
 }: {
-   canTranscribe: boolean;
    children: ReactElement;
    tab: string;
    onTabChange: (tab: string) => void;
 }) {
-   const hiddenStyle = `${canTranscribe ? '' : 'hidden'}`;
-
    return (
       <Tabs
          defaultValue="overview"
@@ -27,19 +23,14 @@ function PageTabs({
          <div className="flex justify-between items-center gap-3 mt-1 mb-2">
             <TabsList>
                <TabsTrigger value="overview">Overview</TabsTrigger>
-               <TabsTrigger
-                  value="transcribe"
-                  data-testid="transcribe-tab-btn"
-                  className={hiddenStyle}
-               >
+               <TabsTrigger value="transcribe" data-testid="transcribe-tab-btn">
                   Transcribe
                </TabsTrigger>
                <TabsTrigger
                   value="revision-history"
                   data-testid="revision-tab-btn"
-                  className={hiddenStyle}
                >
-                  Revision History
+                  My Revisions
                </TabsTrigger>
                <TabsTrigger value="guidelines" data-testid="guidelines-tab-btn">
                   Guidelines

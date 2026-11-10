@@ -1,0 +1,84 @@
+import SignInModal from '@/components/documents/SignInModal';
+import TranscriptionToolbar from '@/components/documents/TranscriptionToolbar';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Textarea } from '@/components/ui/textarea';
+import { Tag, Transcription } from '@shared';
+import { useState } from 'react';
+
+function GuestTranscriptionPanel({
+   onIllegible,
+   wrapSelection,
+   transcription,
+   transcriptionContent,
+   approvedTranscriptionContent,
+}: {
+   onIllegible: () => void;
+   wrapSelection: (tag: Tag) => void;
+   transcription: Transcription;
+   transcriptionContent: string;
+   approvedTranscriptionContent: string;
+}) {
+   const [modalOpen, setModalOpen] = useState(false);
+
+   return (
+      <div className="space-y-3 border rounded-md px-4 py-3 h-full">
+         <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-between gap-6">
+               <div className="flex items-center gap-6">
+                  <h2 className="text-lg font-medium pt-1">Transcription</h2>
+
+                  <TranscriptionToolbar
+                     disabled={true}
+                     onWrap={wrapSelection}
+                     onIllegible={onIllegible}
+                  />
+               </div>
+
+               <div className="text-sm text-muted-foreground capitalize flex gap-2">
+                  <p className="italic self-end">Status: Draft</p>
+               </div>
+            </div>
+
+            <Textarea
+               className="min-h-102 font-mono resize-y leading-6"
+               value={
+                  transcriptionContent
+                     ? transcriptionContent
+                     : approvedTranscriptionContent
+               }
+               onClick={() => setModalOpen(true)}
+               onChange={() => setModalOpen(true)}
+               placeholder="Type your transcription here..."
+            />
+         </div>
+
+         <div className="flex gap-2 items-center justify-end opacity-50 pointer-events-none">
+            <div className="flex items-center gap-2 mr-4">
+               <span>Mark as blank</span>
+               <Checkbox className="border-gray-400" />
+            </div>
+
+            <button className="px-3 py-1 text-sm border rounded hover:bg-muted">
+               Preview
+            </button>
+
+            <button className="px-3 py-1 text-sm border rounded hover:bg-muted">
+               Save
+            </button>
+
+            <button className="px-3 py-1 text-sm bg-primary text-primary-foreground rounded">
+               Submit
+            </button>
+         </div>
+
+         {modalOpen && (
+            <SignInModal
+               onClose={() => setModalOpen(false)}
+               label="transcribe"
+            />
+         )}
+      </div>
+   );
+}
+
+export default GuestTranscriptionPanel;

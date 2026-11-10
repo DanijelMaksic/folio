@@ -5,11 +5,16 @@ import {
    DialogFooter,
    DialogHeader,
    DialogTitle,
-   DialogDescription,
 } from '@/components/ui/dialog';
 import { useNavigate } from 'react-router-dom';
 
-function SignInModal({ onClose }: { onClose: () => void }) {
+function SignInModal({
+   onClose,
+   label,
+}: {
+   onClose: () => void;
+   label: string;
+}) {
    const navigate = useNavigate();
 
    return (
@@ -22,12 +27,8 @@ function SignInModal({ onClose }: { onClose: () => void }) {
          <DialogContent className="sm:max-w-md">
             <DialogHeader>
                <DialogTitle className="text-lg font-semibold">
-                  Sign in to write notes
+                  Sign in to {label}
                </DialogTitle>
-               <DialogDescription>
-                  You will also need to become a contrubutor in order to post
-                  notes
-               </DialogDescription>
             </DialogHeader>
 
             <DialogFooter>
