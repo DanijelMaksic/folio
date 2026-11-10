@@ -136,12 +136,35 @@ function TranscriptionPanel({
             </div>
 
             {transcription?.status && (
-               <p className="text-sm text-muted-foreground space-y-1 capitalize italic">
-                  Status:{' '}
-                  <span data-testid="transcription-status">
-                     {transcription?.status}
-                  </span>
-               </p>
+               <div className="text-sm text-muted-foreground capitalize flex gap-2">
+                  <div className="italic self-end">
+                     <span>Status: </span>
+                     <span data-testid="transcription-status">
+                        {transcription?.status}
+                     </span>
+                  </div>
+
+                  {transcription?.status === 'submitted' && (
+                     <Tooltip>
+                        <TooltipTrigger
+                           render={
+                              <button
+                                 type="button"
+                                 className="border border-gray-300 rounded-full px-2 text-gray-600"
+                              >
+                                 ?
+                              </button>
+                           }
+                        />
+                        <TooltipContent>
+                           <p className="max-w-44">
+                              Submitted transcriptions are reviewed by an editor
+                              before they’re published.
+                           </p>
+                        </TooltipContent>
+                     </Tooltip>
+                  )}
+               </div>
             )}
          </div>
 
@@ -226,25 +249,6 @@ function TranscriptionPanel({
                               ? 'Submitting...'
                               : 'Submit'}
                         </button>
-
-                        <Tooltip>
-                           <TooltipTrigger
-                              render={
-                                 <button
-                                    type="button"
-                                    className="border border-gray-300 rounded-full px-1.5 self-start text-gray-600"
-                                 >
-                                    ?
-                                 </button>
-                              }
-                           />
-                           <TooltipContent>
-                              <p className="max-w-44">
-                                 Submitted transcriptions are reviewed by an
-                                 editor before they’re published.
-                              </p>
-                           </TooltipContent>
-                        </Tooltip>
                      </>
                   )}
                </div>
