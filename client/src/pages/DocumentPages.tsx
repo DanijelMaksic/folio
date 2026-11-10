@@ -48,6 +48,10 @@ const VALID_STATUSES: StatusType[] = [
    'not-transcribed',
 ];
 
+const TABS = ['pages', 'about', 'statistics'] as const;
+
+type Tab = (typeof TABS)[number];
+
 function DocumentPages() {
    const [isEditOpen, setIsEditOpen] = useState(false);
    const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -68,6 +72,9 @@ function DocumentPages() {
    const { data: session } = useSession();
    const user = session?.user;
    const navigate = useNavigate();
+
+   const rawTab = searchParams.get('tab');
+   const tab: Tab = TABS.includes(rawTab as Tab) ? (rawTab as Tab) : 'pages';
 
    const rawSort = searchParams.get('sort');
    const sort: SortType = rawSort === 'desc' ? 'desc' : 'asc';
@@ -220,6 +227,18 @@ function DocumentPages() {
       });
    };
 
+   function handleTabChange(value: string) {
+      setSearchParams(
+         (prev) => {
+            const next = new URLSearchParams(prev);
+            if (value === 'pages') next.delete('tab');
+            else next.set('tab', value);
+            return next;
+         },
+         { replace: true },
+      );
+   }
+
    const handleSetSort = (newSort: SortType) => {
       setSearchParams((prev) => {
          const next = new URLSearchParams(prev);
@@ -297,10 +316,12 @@ function DocumentPages() {
                <DocumentTabs
                   isReady={isReady}
                   pages={pages}
+                  tab={tab}
                   search={search}
                   status={status}
                   isLoadingPages={isLoadingPages}
                   documentId={documentId}
+                  onTabChange={handleTabChange}
                   totalPages={totalPages}
                   document={document}
                   onPageChange={handlePageChange}

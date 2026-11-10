@@ -24,9 +24,11 @@ export interface DocumentTabsProps {
    documentId: string | undefined;
    currentPage: number;
    totalPages: number;
+   tab: string;
    document: Document;
    onPageChange: (newNumber: number) => void;
    children: ReactElement;
+   onTabChange: (tab: string) => void;
 }
 
 function DocumentTabs({
@@ -35,16 +37,22 @@ function DocumentTabs({
    isLoadingPages,
    search,
    status,
+   tab,
    documentId,
    currentPage,
    document,
    totalPages,
    onPageChange,
+   onTabChange,
    children,
 }: DocumentTabsProps) {
    return (
       <div className="">
-         <Tabs defaultValue="pages">
+         <Tabs
+            defaultValue="pages"
+            value={tab}
+            onValueChange={(value) => onTabChange(String(value))}
+         >
             <div className="flex justify-between items-center gap-3 mt-1 mb-2">
                <TabsList>
                   <TabsTrigger value="pages">Pages</TabsTrigger>

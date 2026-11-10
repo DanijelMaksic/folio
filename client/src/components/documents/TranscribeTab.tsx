@@ -3,7 +3,7 @@ import TranscriptionPanel from '@/components/documents/TranscriptionPanel';
 import { useSession } from '@/lib/auth-client';
 import { trpc } from '@/lib/trpc';
 import { isContributor } from '@shared';
-import { Navigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 function TranscribeTab() {
    const { id: documentId, pageNumber } = useParams<{

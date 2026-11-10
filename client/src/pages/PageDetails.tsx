@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { trpc } from '../lib/trpc';
 import { useSession } from '../lib/auth-client';
 import { isContributor, isEditor } from '@shared';
@@ -28,11 +28,24 @@ import {
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import NotesAndQuestions from '@/components/documents/NotesAndQuestions';
 
+const TABS = [
+   'overview',
+   'versions',
+   'transcribe',
+   'revision-history',
+   'guidelines',
+] as const;
+
+type Tab = (typeof TABS)[number];
+
 function PageDetails() {
    const [isEditOpen, setIsEditOpen] = useState(false);
    const [isDeleteOpen, setIsDeleteOpen] = useState(false);
    const [isReplaceImageOpen, setIsReplaceImageOpen] = useState(false);
-   const [tab, setTab] = useState('overview');
+   const [searchParams, setSearchParams] = useSearchParams();
+
+   const raw = searchParams.get('tab');
+   const tab: Tab = TABS.includes(raw as Tab) ? (raw as Tab) : 'overview';
 
    const [serverError, setServerError] = useState('');
    const [deleteError, setDeleteError] = useState('');
@@ -43,6 +56,7 @@ function PageDetails() {
       id: string;
       pageNumber: string;
    }>();
+
    const { data: session } = useSession();
    const user = session?.user;
    const navigate = useNavigate();
@@ -66,6 +80,13 @@ function PageDetails() {
       },
       {
          enabled: !!document?.collectionId,
+      },
+   );
+
+   const { data: transcription } = trpc.transcriptions.getByPage.useQuery(
+      { pageId: page?.id! },
+      {
+         enabled: canTranscribe && !!page?.id,
       },
    );
 
@@ -100,6 +121,18 @@ function PageDetails() {
    const handleDelete = async () => {
       deletePage.mutate({ pageId: page?.id as string });
    };
+
+   function handleTabChange(value: string) {
+      setSearchParams(
+         (prev) => {
+            const next = new URLSearchParams(prev);
+            if (value === 'overview') next.delete('tab');
+            else next.set('tab', value);
+            return next;
+         },
+         { replace: true },
+      );
+   }
 
    if (isLoading) return <p>Loading...</p>;
 
@@ -163,7 +196,11 @@ function PageDetails() {
          </h1>
 
          {page.id && (
-            <PageTabs tab={tab} onTabChange={setTab}>
+            <PageTabs
+               tab={tab}
+               onTabChange={handleTabChange}
+               transcription={transcription}
+            >
                <div className="flex items-center justify-center gap-3 text-sm">
                   <Pagination className="border rounded-md border-gray-300 py-1 px-2">
                      <PaginationContent>
@@ -227,9 +264,9 @@ function PageDetails() {
             </PageTabs>
          )}
 
-         {tab !== 'revision-history' && tab !== 'guidelines' && (
-            <NotesAndQuestions pageId={page.id} />
-         )}
+         {tab !== 'versions' &&
+            tab !== 'revision-history' &&
+            tab !== 'guidelines' && <NotesAndQuestions pageId={page.id} />}
 
          {isEditOpen && (
             <EditModal

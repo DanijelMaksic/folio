@@ -4,28 +4,45 @@ import RevisionHistoryTab from '@/components/documents/RevisionHistoryTab';
 import OverviewTab from '@/components/documents/OverviewTab';
 import { ReactElement } from 'react';
 import GuidelinesTab from '@/components/documents/GuidelinesTab';
+import { Transcription } from '@shared';
 
 function PageTabs({
    children,
    tab,
    onTabChange,
+   transcription,
 }: {
    children: ReactElement;
    tab: string;
    onTabChange: (tab: string) => void;
+   transcription?: Transcription;
 }) {
    return (
-      <Tabs
-         defaultValue="overview"
-         value={tab}
-         onValueChange={(value) => onTabChange(String(value))}
-      >
+      <Tabs value={tab} onValueChange={(value) => onTabChange(String(value))}>
          <div className="flex justify-between items-center gap-3 mt-1 mb-2">
             <TabsList>
                <TabsTrigger value="overview">Overview</TabsTrigger>
-               <TabsTrigger value="transcribe" data-testid="transcribe-tab-btn">
-                  Transcribe
+               <TabsTrigger value="versions" data-testid="versions-tab-btn">
+                  Versions
                </TabsTrigger>
+
+               <TabsTrigger
+                  value="transcribe"
+                  data-testid="transcribe-tab-btn"
+                  className={`relative ${transcription?.status === 'rejected' ? 'text-destructive' : ''}`}
+               >
+                  Transcribe
+                  {transcription?.status === 'rejected' && (
+                     <span
+                        role="img"
+                        aria-label="Transcription rejected"
+                        className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold leading-none text-white z-10"
+                     >
+                        !
+                     </span>
+                  )}
+               </TabsTrigger>
+
                <TabsTrigger
                   value="revision-history"
                   data-testid="revision-tab-btn"
@@ -43,6 +60,7 @@ function PageTabs({
          <TabsContent value="overview">
             <OverviewTab />
          </TabsContent>
+         <TabsContent value="versions"></TabsContent>
          <TabsContent value="transcribe">
             <TranscribeTab />
          </TabsContent>

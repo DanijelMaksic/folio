@@ -144,20 +144,6 @@ function TranscriptionPanel({
          />
       );
 
-   // if (isApproved)
-   //    return (
-   //       <div className="space-y-3 border rounded-md px-4 py-3 h-full">
-   //          <h2 className="text-lg font-medium pt-1">Transcription</h2>{' '}
-   //          <div className="flex flex-col gap-3 justify-center items-center min-h-90">
-   //             <p className="text-lg">Your transcription is approved!</p>
-   //             <p className="text-muted-foreground">
-   //                You can see your transcription for this page in the Overview
-   //                tab
-   //             </p>
-   //          </div>
-   //       </div>
-   //    );
-
    return (
       <div className="space-y-3 border rounded-md px-4 py-3 h-full">
          <div className="flex gap-6 justify-between items-center">
@@ -220,7 +206,7 @@ function TranscriptionPanel({
             <>
                {transcription?.status === 'rejected' &&
                   transcription.rejectionReason && (
-                     <p className="text-sm text-destructive mt-1">
+                     <p className="text-sm text-destructive mt-1 border border-destructive px-4 py-2 rounded-md">
                         Rejection reason: {transcription.rejectionReason}
                      </p>
                   )}

@@ -9,7 +9,7 @@ export function RejectedList({ items }: Props) {
          {items.map((item) => (
             <li key={item.id}>
                <Link
-                  to={`/documents/${item.documentId}/pages/${item.pageNumber}`}
+                  to={`/documents/${item.documentId}/pages/${item.pageNumber}?tab=transcribe`}
                   data-testid="rejected-item"
                   className="block p-4 hover:bg-muted"
                >
