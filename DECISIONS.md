@@ -641,6 +641,8 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - If transcription is rejected, navigate to transcribe tab or show red `!` label on transcribe tab button
 
+- Added versions tab in `PageDetails.tsx`, which lists past approved transcriptions for the current page
+
 **Decisions:**
 
 - Move "Add Pages" button to `ActionsMenu.tsx`

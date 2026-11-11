@@ -1,6 +1,5 @@
 ## Things to add
 
-- Versions tab
 - Transcriptions tab on public profile
 - Fullscreen view of document viewer
 - Layout change for transcription panel

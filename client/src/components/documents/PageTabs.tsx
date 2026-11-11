@@ -5,6 +5,7 @@ import OverviewTab from '@/components/documents/OverviewTab';
 import { ReactElement } from 'react';
 import GuidelinesTab from '@/components/documents/GuidelinesTab';
 import { Transcription } from '@shared';
+import VersionsTab from '@/components/documents/VersionsTab';
 
 function PageTabs({
    children,
@@ -60,7 +61,9 @@ function PageTabs({
          <TabsContent value="overview">
             <OverviewTab />
          </TabsContent>
-         <TabsContent value="versions"></TabsContent>
+         <TabsContent value="versions">
+            <VersionsTab />
+         </TabsContent>
          <TabsContent value="transcribe">
             <TranscribeTab />
          </TabsContent>
