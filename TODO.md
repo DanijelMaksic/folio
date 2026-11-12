@@ -1,6 +1,5 @@
 ## Things to add
 
-- Transcriptions tab on public profile
 - Fullscreen view of document viewer
 - Layout change for transcription panel
 - Transcribe as guest? (fromThePage: You may save up to three transcriptions as a guest or sign up now)
@@ -30,5 +29,7 @@
 - Fix tests
 - Notes are misaligned
 - On sign up, navigate user to `/dashboard` instead of `/`
+- Potentially fix list flashing a loading screen when paginating/filtering/sorting by using placeholderData in trpc procedure call
+- Find a way to disable filter in `ListControls.tsx` when `{data?.length! < 2}`
 
 ## Things to refactor

@@ -6,8 +6,9 @@ import PageNotFound from '@/pages/PageNotFound';
 import UserDocumentsTab from '@/components/users/UserDocumentsTab';
 import UserCollectionsTab from '@/components/users/UserCollectionsTab';
 import UserNotesTab from '@/components/users/UserNotesTab';
+import UserTranscriptionsTab from '@/components/users/UserTranscriptionsTab';
 
-const TABS = ['documents', 'collections', 'notes'] as const;
+const TABS = ['documents', 'transcriptions', 'collections', 'notes'] as const;
 
 function UserPage() {
    const { username } = useParams<{ username: string }>();
@@ -73,6 +74,9 @@ function UserPage() {
                <TabsTrigger value="documents">
                   Documents ({profile.stats.documents})
                </TabsTrigger>
+               <TabsTrigger value="transcriptions">
+                  Transcriptions ({profile.stats.approvedTranscriptions})
+               </TabsTrigger>
                <TabsTrigger value="collections">
                   Collections ({profile.stats.collections})
                </TabsTrigger>
@@ -83,6 +87,9 @@ function UserPage() {
 
             <TabsContent value="documents">
                <UserDocumentsTab userId={profile.id} />
+            </TabsContent>
+            <TabsContent value="transcriptions">
+               <UserTranscriptionsTab userId={profile.id} />
             </TabsContent>
             <TabsContent value="collections">
                <UserCollectionsTab userId={profile.id} />

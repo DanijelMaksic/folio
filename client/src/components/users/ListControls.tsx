@@ -67,18 +67,6 @@ function ListControls({
                   ))}
                </DropdownMenuContent>
             </DropdownMenu>
-            {/*
-            <select
-               value={sort}
-               onChange={(e) => onSort(e.target.value)}
-               className="rounded-md border bg-background px-3 py-2 text-sm"
-            >
-               {options.map((o) => (
-                  <option key={o.value} value={o.value}>
-                     {o.label}
-                  </option>
-               ))}
-            </select> */}
          </div>
       </div>
    );

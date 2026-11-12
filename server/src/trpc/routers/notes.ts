@@ -142,6 +142,7 @@ export const notesRouter = router({
             documentVisibility(ctx.user),
             pattern ? ilike(notes.content, pattern) : undefined,
          );
+
          const order =
             sort === 'newest' ? desc(notes.createdAt) : asc(notes.createdAt);
 

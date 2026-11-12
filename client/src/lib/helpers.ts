@@ -5,3 +5,10 @@ export const toBase64 = (file: File): Promise<string> =>
       reader.onerror = rej;
       reader.readAsDataURL(file);
    });
+
+export const formatDate = (d: string | Date) =>
+   new Date(d).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+   });

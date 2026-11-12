@@ -10,6 +10,7 @@ import {
    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import TranscriptionText from '@/components/documents/TranscriptionText';
+import { formatDate } from '@/lib/helpers';
 
 type VersionSort = 'newest' | 'oldest';
 
@@ -55,13 +56,6 @@ function VersionsTab() {
       { pageId: page?.id!, limit: 30, sort },
       { enabled: !!page?.id },
    );
-
-   const fmt = (d: string | Date) =>
-      new Date(d).toLocaleDateString(undefined, {
-         year: 'numeric',
-         month: 'short',
-         day: 'numeric',
-      });
 
    return (
       <div className="space-y-3 border rounded-md px-4 py-3">
@@ -114,7 +108,7 @@ function VersionsTab() {
                               Current
                            </span>
                         )}
-                        <span>{fmt(v.approvedAt)}</span>
+                        <span>{formatDate(v.approvedAt)}</span>
                         <span>•</span>
                         <span>
                            Transcribed by{' '}
