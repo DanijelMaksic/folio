@@ -153,7 +153,7 @@ function TranscriptionPanel({
          }`}
       >
          {' '}
-         <div className="flex gap-6 justify-between items-center">
+         <div className="flex gap-6 justify-between items-center shrink-0">
             <div className="flex items-center gap-6">
                <h2 className="text-lg font-medium pt-1">Transcription</h2>
 
@@ -212,7 +212,8 @@ function TranscriptionPanel({
             <>
                {transcription?.status === 'rejected' &&
                   transcription.rejectionReason && (
-                     <p className="text-sm text-destructive mt-1 border border-destructive px-4 py-2 rounded-md">
+                     <p className="text-sm text-destructive mt-1 border border-destructive px-4 py-2 rounded-md shrink-0 max-h-24 overflow-y-auto">
+                        {' '}
                         Rejection reason: {transcription.rejectionReason}
                      </p>
                   )}
@@ -240,7 +241,8 @@ function TranscriptionPanel({
                   />
                )}
 
-               <div className="flex gap-2 items-center justify-end">
+               <div className="flex gap-2 items-center justify-end shrink-0">
+                  {' '}
                   {!isSubmitted && (
                      <>
                         {!preview && (

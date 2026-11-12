@@ -43,10 +43,6 @@ function GuestTranscriptionPanel({
                      onIllegible={onIllegible}
                   />
                </div>
-
-               <div className="text-sm text-muted-foreground capitalize flex gap-2">
-                  <p className="italic self-end">Status: Draft</p>
-               </div>
             </div>
             <Textarea
                className={`font-mono disabled:opacity-60 leading-6 disabled:caret-transparent ${

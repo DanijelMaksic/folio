@@ -1,7 +1,7 @@
 ## Things to add
 
 - Layout change for transcription panel
-- Transcribe as guest? (fromThePage: You may save up to three transcriptions as a guest or sign up now)
+- Overview and preview show line numbers on the left of panel
 - "Fully transcribed" label in `DocumentCard.tsx`, and maybe in `DocumentPages.tsx` add "All pages as fully transcribed"
 - In `DocumentCard.tsx` add completion %, but only if it's above 0%
 - Audit table on role management route
@@ -10,7 +10,7 @@
 - Role downgrade
 - Sorting in `/role-requests`
 - Home page (general info, FAQ)
-- Save transcription with ctrl + s shortcut (add into about this in guidelines and add tooltip with shortcut on save button, also change the button from "Save" to save icon with tooltip)
+- Save transcription with ctrl + s shortcut (add into about this in guidelines)
 
 ## Things to fix
 
