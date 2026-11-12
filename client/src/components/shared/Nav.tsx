@@ -26,6 +26,10 @@ function Nav() {
       <NavigationMenu>
          <NavigationMenuList className="gap-3">
             <NavigationMenuItem>
+               <NavigationMenuLink render={<Link to="/">Home</Link>} />
+            </NavigationMenuItem>
+
+            <NavigationMenuItem>
                <NavigationMenuLink
                   render={<Link to="/documents">Documents</Link>}
                />

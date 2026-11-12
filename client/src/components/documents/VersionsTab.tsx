@@ -115,7 +115,7 @@ function VersionsTab() {
                            {v.authorUsername ? (
                               <Link
                                  to={`/users/${v.authorUsername}`}
-                                 className="underline"
+                                 className="hover:underline"
                               >
                                  {v.authorUsername}
                               </Link>
@@ -129,7 +129,7 @@ function VersionsTab() {
                            {v.approverUsername ? (
                               <Link
                                  to={`/users/${v.approverUsername}`}
-                                 className="underline"
+                                 className="hover:underline"
                               >
                                  {v.approverUsername}
                               </Link>
