@@ -218,7 +218,7 @@ function TranscriptionPanel({
                   )}
 
                {preview ? (
-                  <div className="flex flex-col gap-3 border rounded-md p-4 min-h-90">
+                  <div className="flex flex-col gap-3 border rounded-md p-4 min-h-90 overflow-y-auto">
                      <p className="text-[1rem] whitespace-pre-wrap leading-7">
                         <TranscriptionText content={transcriptionContent} />
                      </p>

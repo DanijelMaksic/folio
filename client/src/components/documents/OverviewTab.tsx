@@ -43,7 +43,7 @@ function OverviewTab() {
                : 'items-start'
          }`}
       >
-         <div className={focusMode ? 'h-full min-h-0' : 'sticky top-4'}>
+         <div className={focusMode ? 'h-full min-h-0' : 'sticky top-24'}>
             <PageViewer page={page} />
          </div>
 
