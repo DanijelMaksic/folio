@@ -103,7 +103,7 @@ function PageViewer({ page }: { page: PageBase | undefined }) {
                wrapperStyle={{
                   width: '100%',
                   height: '100%',
-                  minHeight: '520px', // Matches your min-h-130 (130 * 4px)
+                  minHeight: '520px',
                }}
                contentStyle={{
                   width: '100%',

@@ -141,7 +141,6 @@ function TranscriptionPanel({
          <GuestTranscriptionPanel
             onIllegible={insertIllegible}
             wrapSelection={(tag) => wrapSelection(`<${tag}>`, `</${tag}>`)}
-            transcription={transcription!}
             approvedTranscriptionContent={approvedTranscription?.content!}
             transcriptionContent={transcriptionContent}
          />

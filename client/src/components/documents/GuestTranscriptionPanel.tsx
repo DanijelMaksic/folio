@@ -2,27 +2,37 @@ import SignInModal from '@/components/documents/SignInModal';
 import TranscriptionToolbar from '@/components/documents/TranscriptionToolbar';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
+import { useViewerStore } from '@/store/useViewerStore';
 import { Tag, Transcription } from '@shared';
 import { useState } from 'react';
 
 function GuestTranscriptionPanel({
    onIllegible,
    wrapSelection,
-   transcription,
    transcriptionContent,
    approvedTranscriptionContent,
 }: {
    onIllegible: () => void;
    wrapSelection: (tag: Tag) => void;
-   transcription: Transcription;
    transcriptionContent: string;
    approvedTranscriptionContent: string;
 }) {
    const [modalOpen, setModalOpen] = useState(false);
 
+   const { focusMode } = useViewerStore();
+
    return (
-      <div className="space-y-3 border rounded-md px-4 py-3 h-full">
-         <div className="flex flex-col gap-3">
+      <div
+         className={`border rounded-md px-4 py-3 h-full ${
+            focusMode
+               ? 'flex flex-col gap-3 min-h-0 overflow-hidden'
+               : 'space-y-3'
+         }`}
+      >
+         <div
+            className={`flex flex-col gap-3 ${focusMode ? 'flex-1 min-h-0' : ''}`}
+         >
+            {' '}
             <div className="flex items-center justify-between gap-6">
                <div className="flex items-center gap-6">
                   <h2 className="text-lg font-medium pt-1">Transcription</h2>
@@ -38,9 +48,12 @@ function GuestTranscriptionPanel({
                   <p className="italic self-end">Status: Draft</p>
                </div>
             </div>
-
             <Textarea
-               className="min-h-102 font-mono resize-y leading-6"
+               className={`font-mono disabled:opacity-60 leading-6 disabled:caret-transparent ${
+                  focusMode
+                     ? 'flex-1 min-h-0 resize-none overflow-y-auto field-sizing-fixed!'
+                     : 'min-h-90 resize-y'
+               }`}
                value={
                   transcriptionContent
                      ? transcriptionContent
