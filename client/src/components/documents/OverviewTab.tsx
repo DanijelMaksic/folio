@@ -3,6 +3,7 @@ import TranscriptionPlaceholder from '@/components/documents/TranscriptionPlaceh
 import TranscriptionText from '@/components/documents/TranscriptionText';
 import { useSession } from '@/lib/auth-client';
 import { trpc } from '@/lib/trpc';
+import { useViewerStore } from '@/store/useViewerStore';
 import { isContributor } from '@shared';
 import { useParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
@@ -14,6 +15,8 @@ function OverviewTab() {
    }>();
    const { data: session } = useSession();
    const user = session?.user;
+
+   const { focusMode } = useViewerStore();
 
    const { data: page } = trpc.pages.getByPageNumber.useQuery({
       documentId: documentId!,
@@ -33,13 +36,19 @@ function OverviewTab() {
       );
 
    return (
-      <div className="grid grid-cols-2 gap-4 items-start">
-         <div className="sticky top-24">
+      <div
+         className={`grid grid-cols-2 gap-4 ${
+            focusMode
+               ? 'h-full min-h-0 grid-rows-[minmax(0,1fr)]'
+               : 'items-start'
+         }`}
+      >
+         <div className={focusMode ? 'h-full min-h-0' : 'sticky top-4'}>
             <PageViewer page={page} />
          </div>
 
          {approvedTranscription ? (
-            <div className="flex flex-col gap-3 border rounded-md p-4 h-full">
+            <div className="flex flex-col gap-3 border rounded-md p-4 h-full overflow-y-auto">
                <div className="flex gap-6 justify-between items-center">
                   <h2 className="text-lg font-medium">Transcription</h2>
 

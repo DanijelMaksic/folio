@@ -1,8 +1,13 @@
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import {
+   useNavigate,
+   useParams,
+   useSearchParams,
+   Link,
+} from 'react-router-dom';
 import { trpc } from '../lib/trpc';
 import { useSession } from '../lib/auth-client';
 import { isContributor, isEditor } from '@shared';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { TRPCClientErrorLike } from '@trpc/client';
 import { AppRouter } from '@server/trpc/router';
 import DeleteModal from '@/components/shared/DeleteModal';
@@ -10,7 +15,6 @@ import EditModal from '@/components/shared/EditModal';
 import ActionsMenu from '@/components/shared/ActionsMenu';
 import { useViewerStore } from '@/store/useViewerStore';
 import PageTabs from '@/components/documents/PageTabs';
-import { Link } from 'react-router-dom';
 import ReplaceImageModal from '@/components/documents/ReplaceImageModal';
 import {
    Breadcrumb,
@@ -27,6 +31,7 @@ import {
 } from '@/components/ui/pagination';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import NotesAndQuestions from '@/components/documents/NotesAndQuestions';
+import { Button } from '@/components/ui/button';
 
 const TABS = [
    'overview',
@@ -35,23 +40,20 @@ const TABS = [
    'revision-history',
    'guidelines',
 ] as const;
-
 type Tab = (typeof TABS)[number];
+
+const truncate = (s: string | undefined, n = 50) =>
+   s && s.length > n ? `${s.slice(0, n)}...` : s;
 
 function PageDetails() {
    const [isEditOpen, setIsEditOpen] = useState(false);
    const [isDeleteOpen, setIsDeleteOpen] = useState(false);
    const [isReplaceImageOpen, setIsReplaceImageOpen] = useState(false);
-   const [searchParams, setSearchParams] = useSearchParams();
-
-   const raw = searchParams.get('tab');
-   const tab: Tab = TABS.includes(raw as Tab) ? (raw as Tab) : 'overview';
-
    const [serverError, setServerError] = useState('');
    const [deleteError, setDeleteError] = useState('');
+   const [searchParams, setSearchParams] = useSearchParams();
 
-   const { resetViewerState } = useViewerStore();
-
+   const { resetViewerState, focusMode, setFocusMode } = useViewerStore();
    const { id: documentId, pageNumber } = useParams<{
       id: string;
       pageNumber: string;
@@ -62,12 +64,32 @@ function PageDetails() {
    const navigate = useNavigate();
    const canTranscribe = isContributor(user?.globalRole);
    const editor = isEditor(user?.globalRole);
-
    const utils = trpc.useUtils();
 
-   const { data: document } = trpc.documents.getById.useQuery({
-      id: documentId!,
-   });
+   const raw = searchParams.get('tab');
+   const tab: Tab = TABS.includes(raw as Tab) ? (raw as Tab) : 'overview';
+
+   // Focus mode only makes sense where the image sits next to text
+   const canFocus = tab === 'overview' || tab === 'transcribe';
+
+   // Reset on leaving the page
+   useEffect(() => () => setFocusMode(false), [setFocusMode]);
+
+   // Leave focus mode if the tab changes to one that doesn't support it
+   useEffect(() => {
+      if (!canFocus) setFocusMode(false);
+   }, [canFocus, setFocusMode]);
+
+   useEffect(() => {
+      if (!focusMode) return;
+      const onKey = (e: KeyboardEvent) => {
+         if (e.key === 'Escape') setFocusMode(false);
+      };
+      window.addEventListener('keydown', onKey);
+      return () => window.removeEventListener('keydown', onKey);
+   }, [focusMode, setFocusMode]);
+
+   const { data: doc } = trpc.documents.getById.useQuery({ id: documentId! });
 
    const { data: page, isLoading } = trpc.pages.getByPageNumber.useQuery({
       documentId: documentId!,
@@ -75,22 +97,17 @@ function PageDetails() {
    });
 
    const { data: collection } = trpc.collections.getById.useQuery(
-      {
-         id: document?.collectionId!,
-      },
-      {
-         enabled: !!document?.collectionId,
-      },
+      { id: doc?.collectionId! },
+      { enabled: !!doc?.collectionId },
    );
 
    const { data: transcription } = trpc.transcriptions.getByPage.useQuery(
       { pageId: page?.id! },
-      {
-         enabled: canTranscribe && !!page?.id,
-      },
+      { enabled: canTranscribe && !!page?.id },
    );
 
-   const isMyPage = document?.uploadedBy === user?.id;
+   const isMyPage = doc?.uploadedBy === user?.id;
+   const pageCount = Number(doc?.pageCount ?? 0);
 
    const editPage = trpc.pages.update.useMutation({
       onSuccess: () => {
@@ -109,18 +126,12 @@ function PageDetails() {
    });
 
    const deletePage = trpc.pages.delete.useMutation({
-      onSuccess: () => {
-         navigate(`/documents/${documentId}`, { replace: true });
-      },
+      onSuccess: () => navigate(`/documents/${documentId}`, { replace: true }),
       onError: (err: TRPCClientErrorLike<AppRouter>) => {
          resetViewerState(page?.id!);
          setDeleteError(err.message);
       },
    });
-
-   const handleDelete = async () => {
-      deletePage.mutate({ pageId: page?.id as string });
-   };
 
    function handleTabChange(value: string) {
       setSearchParams(
@@ -135,138 +146,152 @@ function PageDetails() {
    }
 
    if (isLoading) return <p>Loading...</p>;
-
    if (!page) return <p>Page not found</p>;
 
    return (
-      <div className="max-w-full mx-auto py-3 px-20">
-         <div className="mt-2">
-            <Breadcrumb>
-               <BreadcrumbList>
-                  {collection && (
-                     <>
-                        {' '}
+      <div
+         className={
+            focusMode
+               ? 'flex h-full flex-col px-6 pt-3 pb-4'
+               : 'max-w-full mx-auto py-3 px-20'
+         }
+      >
+         {!focusMode && (
+            <>
+               <div className="mt-2">
+                  <Breadcrumb>
+                     <BreadcrumbList>
+                        {collection && (
+                           <>
+                              <BreadcrumbItem>
+                                 <BreadcrumbLink
+                                    render={
+                                       <Link
+                                          to={`/collections/${doc?.collectionId}`}
+                                       >
+                                          {truncate(collection.title)}
+                                       </Link>
+                                    }
+                                 />
+                              </BreadcrumbItem>
+                              <BreadcrumbSeparator />
+                           </>
+                        )}
                         <BreadcrumbItem>
                            <BreadcrumbLink
                               render={
-                                 <Link
-                                    to={`${window.location.origin}/collections/${document?.collectionId}`}
-                                 >
-                                    {collection?.title.length > 50
-                                       ? `${collection?.title.slice(0, 50)}...`
-                                       : collection?.title}
+                                 <Link to={`/documents/${doc?.id}`}>
+                                    {truncate(doc?.title)}
                                  </Link>
                               }
                            />
                         </BreadcrumbItem>
                         <BreadcrumbSeparator />
-                     </>
-                  )}
-
-                  <BreadcrumbItem>
-                     <BreadcrumbLink
-                        render={
-                           <Link
-                              to={`${window.location.origin}/documents/${document?.id}`}
-                           >
-                              {document?.title.length! > 50
-                                 ? `${document?.title.slice(0, 50)}...`
-                                 : document?.title}
-                           </Link>
-                        }
-                     />
-                  </BreadcrumbItem>
-
-                  <BreadcrumbSeparator />
-
-                  <BreadcrumbItem>
-                     <BreadcrumbPage>
-                        {' '}
-                        {page?.title.length > 50
-                           ? `${page?.title.slice(0, 50)}...`
-                           : page?.title}
-                     </BreadcrumbPage>
-                  </BreadcrumbItem>
-               </BreadcrumbList>
-            </Breadcrumb>
-         </div>
-
-         <h1 className="text-2xl font-semibold py-2" data-testid="page-title">
-            {page.title}
-         </h1>
-
-         {page.id && (
-            <PageTabs
-               tab={tab}
-               onTabChange={handleTabChange}
-               transcription={transcription}
-            >
-               <div className="flex items-center justify-center gap-3 text-sm">
-                  <Pagination className="border rounded-md border-gray-300 py-1 px-2">
-                     <PaginationContent>
-                        <PaginationItem className="flex items-center border-r border-gray-300 pr-2 py-0.5">
-                           <button
-                              onClick={(e) => {
-                                 e.preventDefault();
-                                 if (page.pageNumber > 1)
-                                    navigate(
-                                       `/documents/${documentId}/pages/${page.pageNumber - 1}`,
-                                    );
-                              }}
-                              aria-disabled={page.pageNumber === 1}
-                              className={
-                                 page.pageNumber === 1
-                                    ? 'pointer-events-none opacity-30'
-                                    : ''
-                              }
-                           >
-                              <ChevronLeft size={22} />
-                           </button>
-                        </PaginationItem>
-
-                        <span className="px-2">
-                           Page {page.pageNumber} of {+document?.pageCount!}
-                        </span>
-
-                        <PaginationItem className="flex items-center border-l border-gray-300 pl-2">
-                           <button
-                              onClick={(e) => {
-                                 e.preventDefault();
-                                 if (page.pageNumber < +document?.pageCount!)
-                                    navigate(
-                                       `/documents/${documentId}/pages/${page.pageNumber + 1}`,
-                                    );
-                              }}
-                              aria-disabled={
-                                 page.pageNumber === +document?.pageCount!
-                              }
-                              className={
-                                 page.pageNumber === +document?.pageCount!
-                                    ? 'pointer-events-none opacity-30'
-                                    : ''
-                              }
-                           >
-                              <ChevronRight size={22} />
-                           </button>
-                        </PaginationItem>
-                     </PaginationContent>
-                  </Pagination>
-
-                  <ActionsMenu
-                     show={canTranscribe && (isMyPage || editor)}
-                     onReplaceImage={() => setIsReplaceImageOpen(true)}
-                     onEdit={() => setIsEditOpen(true)}
-                     onDelete={() => setIsDeleteOpen(true)}
-                     isMyPage={isMyPage}
-                     editor={editor}
-                  />
+                        <BreadcrumbItem>
+                           <BreadcrumbPage>
+                              {truncate(page.title)}
+                           </BreadcrumbPage>
+                        </BreadcrumbItem>
+                     </BreadcrumbList>
+                  </Breadcrumb>
                </div>
-            </PageTabs>
+
+               <h1
+                  className="text-2xl font-semibold py-2"
+                  data-testid="page-title"
+               >
+                  {page.title}
+               </h1>
+            </>
          )}
 
-         {tab !== 'versions' &&
-            tab !== 'revision-history' &&
-            tab !== 'guidelines' && <NotesAndQuestions pageId={page.id} />}
+         {page.id && (
+            <div
+               className={
+                  focusMode ? 'flex min-h-0 flex-1 flex-col' : undefined
+               }
+            >
+               <PageTabs
+                  tab={tab}
+                  onTabChange={handleTabChange}
+                  transcription={transcription}
+                  focusMode={focusMode}
+                  pageTitle={page.title}
+               >
+                  <div className="flex items-center justify-center gap-3 text-sm">
+                     {canFocus && (
+                        <Button
+                           variant="outline"
+                           onClick={() => setFocusMode(!focusMode)}
+                        >
+                           {focusMode ? 'Exit focus' : 'Focus mode'}
+                        </Button>
+                     )}
+
+                     <Pagination className="border rounded-md border-gray-300 py-1 px-2">
+                        <PaginationContent>
+                           <PaginationItem className="flex items-center border-r border-gray-300 pr-2 py-0.5">
+                              <button
+                                 onClick={(e) => {
+                                    e.preventDefault();
+                                    if (page.pageNumber > 1)
+                                       navigate(
+                                          `/documents/${documentId}/pages/${page.pageNumber - 1}`,
+                                       );
+                                 }}
+                                 aria-disabled={page.pageNumber === 1}
+                                 className={
+                                    page.pageNumber === 1
+                                       ? 'pointer-events-none opacity-30'
+                                       : ''
+                                 }
+                              >
+                                 <ChevronLeft size={22} />
+                              </button>
+                           </PaginationItem>
+
+                           <span className="px-2">
+                              Page {page.pageNumber} of {pageCount}
+                           </span>
+
+                           <PaginationItem className="flex items-center border-l border-gray-300 pl-2">
+                              <button
+                                 onClick={(e) => {
+                                    e.preventDefault();
+                                    if (page.pageNumber < pageCount)
+                                       navigate(
+                                          `/documents/${documentId}/pages/${page.pageNumber + 1}`,
+                                       );
+                                 }}
+                                 aria-disabled={page.pageNumber === pageCount}
+                                 className={
+                                    page.pageNumber === pageCount
+                                       ? 'pointer-events-none opacity-30'
+                                       : ''
+                                 }
+                              >
+                                 <ChevronRight size={22} />
+                              </button>
+                           </PaginationItem>
+                        </PaginationContent>
+                     </Pagination>
+
+                     {!focusMode && (
+                        <ActionsMenu
+                           show={canTranscribe && (isMyPage || editor)}
+                           onReplaceImage={() => setIsReplaceImageOpen(true)}
+                           onEdit={() => setIsEditOpen(true)}
+                           onDelete={() => setIsDeleteOpen(true)}
+                           isMyPage={isMyPage}
+                           editor={editor}
+                        />
+                     )}
+                  </div>
+               </PageTabs>
+            </div>
+         )}
+
+         {!focusMode && canFocus && <NotesAndQuestions pageId={page.id} />}
 
          {isEditOpen && (
             <EditModal
@@ -288,7 +313,7 @@ function PageDetails() {
                heading="Delete Page"
                error={deleteError}
                isPending={deletePage.isPending}
-               onDelete={handleDelete}
+               onDelete={() => deletePage.mutate({ pageId: page.id })}
                onClose={() => {
                   setIsDeleteOpen(false);
                   setDeleteError('');
@@ -296,7 +321,7 @@ function PageDetails() {
             />
          )}
 
-         {isReplaceImageOpen && page && (
+         {isReplaceImageOpen && (
             <ReplaceImageModal
                pageId={page.id}
                documentId={documentId!}

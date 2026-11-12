@@ -128,15 +128,16 @@ function UserTranscriptionsTab({ userId }: { userId: string }) {
                                  : t.pageTitle}{' '}
                            </Link>
                            <span>•</span>{' '}
-                           <span className="mr-2">
-                              {formatDate(t.approvedAt)}
-                           </span>{' '}
+                           <span>{formatDate(t.approvedAt)}</span>{' '}
                            {t.isCurrent ? (
                               ''
                            ) : (
-                              <span className="text-sm capitalize  bg-gray-900 rounded-md text-white px-2 py-1">
-                                 Replaced
-                              </span>
+                              <>
+                                 •{' '}
+                                 <span className="text-sm border border-gray-300 capitalize  bg-muted rounded-md text-gray-500 px-2 py-1">
+                                    Replaced
+                                 </span>
+                              </>
                            )}
                         </div>
 

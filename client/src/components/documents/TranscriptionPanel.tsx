@@ -12,6 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import TranscriptionText from '@/components/documents/TranscriptionText';
 import { useParams } from 'react-router-dom';
 import GuestTranscriptionPanel from '@/components/documents/GuestTranscriptionPanel';
+import { useViewerStore } from '@/store/useViewerStore';
 
 function TranscriptionPanel({
    canTranscribe,
@@ -25,6 +26,8 @@ function TranscriptionPanel({
    const [transcriptionContent, setTranscriptionContent] = useState('');
    const [isBlank, setIsBlank] = useState(false);
    const [preview, setPreview] = useState(false);
+
+   const { focusMode } = useViewerStore();
 
    const { id: documentId, pageNumber } = useParams<{
       id: string;
@@ -145,7 +148,12 @@ function TranscriptionPanel({
       );
 
    return (
-      <div className="space-y-3 border rounded-md px-4 py-3 h-full">
+      <div
+         className={`border rounded-md px-4 py-3 h-full ${
+            focusMode ? 'flex flex-col gap-3 min-h-0' : 'space-y-3'
+         }`}
+      >
+         {' '}
          <div className="flex gap-6 justify-between items-center">
             <div className="flex items-center gap-6">
                <h2 className="text-lg font-medium pt-1">Transcription</h2>
@@ -191,7 +199,6 @@ function TranscriptionPanel({
                </div>
             )}
          </div>
-
          {!transcription ? (
             <button
                className="text-sm underline"
@@ -219,7 +226,11 @@ function TranscriptionPanel({
                   </div>
                ) : (
                   <Textarea
-                     className="min-h-90 font-mono resize-y disabled:opacity-60 leading-6 disabled:caret-transparent"
+                     className={`font-mono resize-y disabled:opacity-60 leading-6 disabled:caret-transparent ${
+                        focusMode
+                           ? 'flex-1 min-h-0 resize-none overflow-y-auto field-sizing-fixed'
+                           : 'min-h-90'
+                     }`}
                      value={transcriptionContent}
                      ref={textareaRef}
                      readOnly={isBlank}

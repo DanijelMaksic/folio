@@ -12,59 +12,85 @@ function PageTabs({
    tab,
    onTabChange,
    transcription,
+   focusMode,
+   pageTitle,
 }: {
    children: ReactElement;
    tab: string;
    onTabChange: (tab: string) => void;
    transcription?: Transcription;
+   focusMode: boolean;
+   pageTitle: string;
 }) {
    return (
-      <Tabs value={tab} onValueChange={(value) => onTabChange(String(value))}>
+      <Tabs
+         value={tab}
+         onValueChange={(value) => onTabChange(String(value))}
+         className={focusMode ? 'flex h-full min-h-0 flex-col' : undefined}
+      >
          <div className="flex justify-between items-center gap-3 mt-1 mb-2">
-            <TabsList>
-               <TabsTrigger value="overview">Overview</TabsTrigger>
-               <TabsTrigger value="versions" data-testid="versions-tab-btn">
-                  Versions
-               </TabsTrigger>
+            {!focusMode ? (
+               <TabsList>
+                  <TabsTrigger value="overview">Overview</TabsTrigger>
+                  <TabsTrigger value="versions" data-testid="versions-tab-btn">
+                     Versions
+                  </TabsTrigger>
 
-               <TabsTrigger
-                  value="transcribe"
-                  data-testid="transcribe-tab-btn"
-                  className={`relative ${transcription?.status === 'rejected' ? 'text-destructive' : ''}`}
-               >
-                  Transcribe
-                  {transcription?.status === 'rejected' && (
-                     <span
-                        role="img"
-                        aria-label="Transcription rejected"
-                        className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold leading-none text-white z-10"
-                     >
-                        !
-                     </span>
-                  )}
-               </TabsTrigger>
+                  <TabsTrigger
+                     value="transcribe"
+                     data-testid="transcribe-tab-btn"
+                     className={`relative ${transcription?.status === 'rejected' ? 'text-destructive' : ''}`}
+                  >
+                     Transcribe
+                     {transcription?.status === 'rejected' && (
+                        <span
+                           role="img"
+                           aria-label="Transcription rejected"
+                           className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold leading-none text-white z-10"
+                        >
+                           !
+                        </span>
+                     )}
+                  </TabsTrigger>
 
-               <TabsTrigger
-                  value="revision-history"
-                  data-testid="revision-tab-btn"
-               >
-                  My Revisions
-               </TabsTrigger>
-               <TabsTrigger value="guidelines" data-testid="guidelines-tab-btn">
-                  Guidelines
-               </TabsTrigger>
-            </TabsList>
+                  <TabsTrigger
+                     value="revision-history"
+                     data-testid="revision-tab-btn"
+                  >
+                     My Revisions
+                  </TabsTrigger>
+                  <TabsTrigger
+                     value="guidelines"
+                     data-testid="guidelines-tab-btn"
+                  >
+                     Guidelines
+                  </TabsTrigger>
+               </TabsList>
+            ) : (
+               <h1 className="text-2xl font-semibold">
+                  {' '}
+                  {pageTitle.length > 80
+                     ? `${pageTitle.slice(0, 80)}...`
+                     : pageTitle}
+               </h1>
+            )}
 
             {children}
          </div>
 
-         <TabsContent value="overview">
+         <TabsContent
+            value="overview"
+            className={focusMode ? 'min-h-0 flex-1' : undefined}
+         >
             <OverviewTab />
          </TabsContent>
          <TabsContent value="versions">
             <VersionsTab />
          </TabsContent>
-         <TabsContent value="transcribe">
+         <TabsContent
+            value="transcribe"
+            className={focusMode ? 'min-h-0 flex-1' : undefined}
+         >
             <TranscribeTab />
          </TabsContent>
          <TabsContent value="revision-history">

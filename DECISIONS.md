@@ -645,6 +645,8 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Added Transcriptions tab on public user profile, which displays a list of approved transcriptions
 
+- Included Focus mode which hides the everything but page viewer and transcription panel
+
 **Decisions:**
 
 - Move "Add Pages" button to `ActionsMenu.tsx`

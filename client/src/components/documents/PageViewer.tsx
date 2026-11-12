@@ -52,11 +52,15 @@ function PageViewer({ page }: { page: PageBase | undefined }) {
    const savedState = viewers[page?.id ?? ''];
    const [isHovered, setIsHovered] = useState(false);
 
+   const { focusMode } = useViewerStore();
+
    if (!page) return null;
 
    return (
       <div
-         className="bg-gray-200 min-h-130 flex justify-center items-center rounded-md overflow-hidden relative"
+         className={`bg-gray-200 flex justify-center items-center rounded-md overflow-hidden relative ${
+            focusMode ? 'h-full min-h-0' : 'min-h-130'
+         }`}
          onMouseEnter={() => setIsHovered(true)}
          onMouseLeave={() => setIsHovered(false)}
       >
@@ -77,6 +81,19 @@ function PageViewer({ page }: { page: PageBase | undefined }) {
                disabled: false,
                step: 0.003,
                smoothStep: 0.002,
+            }}
+            wrapperStyle={{
+               width: '100%',
+               height: '100%',
+               minHeight: focusMode ? 0 : '520px',
+            }}
+            contentStyle={{
+               width: '100%',
+               height: '100%',
+               minHeight: focusMode ? 0 : '520px',
+               display: 'flex',
+               alignItems: 'center',
+               justifyContent: 'center',
             }}
          >
             {isHovered && <Controls pageId={page.id} />}
@@ -100,7 +117,7 @@ function PageViewer({ page }: { page: PageBase | undefined }) {
                <img
                   src={page.imageUrl}
                   alt={page.title}
-                  className="w-fit max-h-[70vh] shadow-sm"
+                  className={`w-fit shadow-sm ${focusMode ? 'max-h-full' : 'max-h-[70vh]'}`}
                />
             </TransformComponent>
          </TransformWrapper>

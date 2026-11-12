@@ -9,8 +9,10 @@ interface ViewerState {
 
 interface ViewerStore {
    viewers: Record<string, ViewerState>;
+   focusMode: boolean;
    setViewerState: (documentId: string, state: ViewerState) => void;
    resetViewerState: (documentId: string) => void;
+   setFocusMode: (value: boolean) => void;
 }
 
 const DEFAULT_STATE: ViewerState = {
@@ -23,6 +25,7 @@ export const useViewerStore = create<ViewerStore>()(
    persist(
       (set) => ({
          viewers: {},
+         focusMode: false,
 
          setViewerState: (documentId, state) =>
             set((store) => ({
@@ -33,6 +36,8 @@ export const useViewerStore = create<ViewerStore>()(
             set((store) => ({
                viewers: { ...store.viewers, [documentId]: DEFAULT_STATE },
             })),
+
+         setFocusMode: (value) => set({ focusMode: value }),
       }),
       {
          name: 'folio-viewer',
