@@ -113,7 +113,9 @@ function UserTranscriptionsTab({ userId }: { userId: string }) {
                               to={`/documents/${t.documentId}`}
                               className="hover:underline"
                            >
-                              {t.documentTitle}
+                              {t.documentTitle.length > 40
+                                 ? `${t.documentTitle.slice(0, 40)}...`
+                                 : t.documentTitle}
                            </Link>{' '}
                            <span>•</span>
                            <Link
@@ -121,10 +123,21 @@ function UserTranscriptionsTab({ userId }: { userId: string }) {
                               to={`/documents/${t.documentId}/pages/${t.pageNumber}`}
                            >
                               {' '}
-                              {t.pageTitle}{' '}
+                              {t.pageTitle.length > 20
+                                 ? `${t.pageTitle.slice(0, 20)}...`
+                                 : t.pageTitle}{' '}
                            </Link>
                            <span>•</span>{' '}
-                           <span>{formatDate(t.approvedAt)}</span>
+                           <span className="mr-2">
+                              {formatDate(t.approvedAt)}
+                           </span>{' '}
+                           {t.isCurrent ? (
+                              ''
+                           ) : (
+                              <span className="text-sm capitalize  bg-gray-900 rounded-md text-white px-2 py-1">
+                                 Replaced
+                              </span>
+                           )}
                         </div>
 
                         <div>

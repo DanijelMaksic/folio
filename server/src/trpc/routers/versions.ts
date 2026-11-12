@@ -2,12 +2,13 @@ import { db } from '@/db/index.js';
 import { user } from '@/db/schema/auth.js';
 import { documents } from '@/db/schema/documents.js';
 import { pages } from '@/db/schema/pages.js';
+import { transcriptions } from '@/db/schema/transcriptions.js';
 import { versions } from '@/db/schema/versions.js';
 import { documentVisibility } from '@/lib/document-visibility.js';
 import { publicProcedure, router } from '@/trpc/trpc.js';
 import { listUserVersionsSchema, listVersionsSchema } from '@folio/shared';
 import { TRPCError } from '@trpc/server';
-import { and, asc, count, desc, eq } from 'drizzle-orm';
+import { and, asc, count, desc, eq, sql } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 
 const author = alias(user, 'author');
@@ -85,9 +86,17 @@ export const versionsRouter = router({
                   documentTitle: documents.title,
                   pageTitle: pages.title,
                   pageNumber: pages.pageNumber,
+                  isCurrent: sql<boolean>`${transcriptions.id} is not null`,
                })
                .from(versions)
                .leftJoin(user, eq(user.id, versions.approvedBy))
+               .leftJoin(
+                  transcriptions,
+                  and(
+                     eq(transcriptions.id, versions.transcriptionId),
+                     eq(transcriptions.status, 'approved'),
+                  ),
+               )
                .innerJoin(pages, eq(pages.id, versions.pageId))
                .innerJoin(documents, eq(documents.id, pages.documentId))
                .where(where)
