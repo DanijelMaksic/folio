@@ -4,7 +4,7 @@ function TranscriptionPlaceholder({ type }: { type: string }) {
    // type prop represents the role of the user who looks at the placeholder
 
    return (
-      <div className="flex items-center justify-center flex-col gap-6 border rounded-md h-full">
+      <div className="flex items-center justify-center flex-col gap-6 border rounded-md h-full py-32">
          <span>Icon Placeholder</span>
          <div className="flex flex-col gap-3 justify-center items-center opacity-50">
             <h2 className="text-lg">No transcriptions yet...</h2>

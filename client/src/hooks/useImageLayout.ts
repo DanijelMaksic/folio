@@ -1,56 +1,65 @@
-import { useViewerStore, type ImagePosition } from '@/store/useViewerStore';
-
-const SIDE_FOCUS = 'grid-cols-2 grid-rows-[minmax(0,1fr)]';
-const STACK_FOCUS = 'grid-cols-1 grid-rows-[minmax(0,1fr)_minmax(0,1fr)]';
-
-const LAYOUTS: Record<
-   ImagePosition,
-   { cols: string; focusCols: string; image: string; stacked: boolean }
-> = {
-   default: {
-      cols: 'grid-cols-2',
-      focusCols: SIDE_FOCUS,
-      image: 'order-first',
-      stacked: false,
-   },
-   left: {
-      cols: 'grid-cols-2',
-      focusCols: SIDE_FOCUS,
-      image: 'order-first',
-      stacked: false,
-   },
-   right: {
-      cols: 'grid-cols-2',
-      focusCols: SIDE_FOCUS,
-      image: 'order-last',
-      stacked: false,
-   },
-   top: {
-      cols: 'grid-cols-1',
-      focusCols: STACK_FOCUS,
-      image: 'order-first',
-      stacked: true,
-   },
-   bottom: {
-      cols: 'grid-cols-1',
-      focusCols: STACK_FOCUS,
-      image: 'order-last',
-      stacked: true,
-   },
-};
+import { useRef, type CSSProperties, type PointerEvent } from 'react';
+import { useViewerStore } from '@/store/useViewerStore';
 
 export function useImageLayout() {
-   const { imagePosition, focusMode } = useViewerStore();
-   const l = LAYOUTS[imagePosition];
+   const { imagePosition, focusMode, imageWidth, setImageWidth } =
+      useViewerStore();
+
+   const gridRef = useRef<HTMLDivElement>(null);
+
+   const stacked = imagePosition === 'top' || imagePosition === 'bottom';
+   const imageFirst = imagePosition !== 'right' && imagePosition !== 'bottom';
+
+   // full literal class strings so Tailwind sees them
+   const cols = stacked ? 'grid-cols-1' : 'grid-cols-2';
+   const focusRows = stacked
+      ? 'grid-rows-[minmax(0,1fr)_minmax(0,1fr)]'
+      : 'grid-rows-[minmax(0,1fr)]';
+
+   const gridStyle: CSSProperties | undefined = stacked
+      ? undefined
+      : {
+           gridTemplateColumns: imageFirst
+              ? `${imageWidth}% auto minmax(0,1fr)`
+              : `minmax(0,1fr) auto ${imageWidth}%`,
+        };
+
+   const onHandlePointerDown = (e: PointerEvent<HTMLDivElement>) => {
+      e.currentTarget.setPointerCapture(e.pointerId);
+   };
+
+   const onHandlePointerMove = (e: PointerEvent<HTMLDivElement>) => {
+      if (!e.currentTarget.hasPointerCapture(e.pointerId)) return;
+      const rect = gridRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const pct = ((e.clientX - rect.left) / rect.width) * 100;
+      setImageWidth(imageFirst ? pct : 100 - pct);
+   };
 
    return {
       focusMode,
-      grid: focusMode
-         ? `h-full min-h-0 ${l.focusCols}`
-         : `items-start ${l.cols}`,
-      imageCell: `${l.image} ${
-         focusMode ? 'h-full min-h-0' : l.stacked ? '' : 'sticky top-24'
+      gridRef,
+      gridStyle,
+      showHandle: !stacked,
+      grid: `grid ${stacked ? 'gap-4' : 'gap-0'} ${cols} ${
+         focusMode ? `h-full min-h-0 ${focusRows}` : ''
       }`,
-      panelCell: focusMode ? 'h-full min-h-0' : '',
+      imageCell: `${imageFirst ? 'order-1' : 'order-3'} ${
+         focusMode
+            ? 'h-full min-h-0'
+            : stacked
+              ? ''
+              : 'sticky top-24 self-start'
+      }`,
+      panelCell: `${imageFirst ? 'order-3' : 'order-1'} ${
+         focusMode
+            ? 'h-full min-h-0 flex flex-col'
+            : 'self-stretch flex flex-col'
+      }`,
+      handleProps: {
+         onPointerDown: onHandlePointerDown,
+         onPointerMove: onHandlePointerMove,
+         onDoubleClick: () => setImageWidth(50),
+      },
    };
 }

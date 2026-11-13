@@ -27,7 +27,7 @@ function TranscriptionPanel({
    const [isBlank, setIsBlank] = useState(false);
    const [preview, setPreview] = useState(false);
 
-   const { focusMode } = useViewerStore();
+   const { focusMode, imagePosition } = useViewerStore();
 
    const { id: documentId, pageNumber } = useParams<{
       id: string;
@@ -136,6 +136,11 @@ function TranscriptionPanel({
 
    const hasContent = isBlank || !!transcriptionContent.trim();
 
+   const isHorizontal =
+      imagePosition === 'default' ||
+      imagePosition === 'left' ||
+      imagePosition === 'right';
+
    if (!canTranscribe)
       return (
          <GuestTranscriptionPanel
@@ -143,16 +148,16 @@ function TranscriptionPanel({
             wrapSelection={(tag) => wrapSelection(`<${tag}>`, `</${tag}>`)}
             approvedTranscriptionContent={approvedTranscription?.content!}
             transcriptionContent={transcriptionContent}
+            isHorizontal={isHorizontal}
          />
       );
 
    return (
       <div
-         className={`border rounded-md px-4 py-3 h-full ${
-            focusMode ? 'flex flex-col gap-3 min-h-0' : 'space-y-3'
+         className={`border rounded-md px-4 py-3 flex-1 h-full flex flex-col gap-3 ${
+            focusMode ? 'min-h-0' : ''
          }`}
       >
-         {' '}
          <div className="flex gap-6 justify-between items-center shrink-0">
             <div className="flex items-center gap-6">
                <h2 className="text-lg font-medium pt-1">Transcription</h2>
@@ -164,83 +169,41 @@ function TranscriptionPanel({
                      onIllegible={insertIllegible}
                   />
                )}
+
+               {transcription?.status && !preview && !isHorizontal && (
+                  <div className="text-sm text-muted-foreground capitalize flex gap-2">
+                     <div className="italic self-end">
+                        <span>Status: </span>
+                        <span data-testid="transcription-status">
+                           {transcription?.status}
+                        </span>
+                     </div>
+
+                     {transcription?.status === 'submitted' && (
+                        <Tooltip>
+                           <TooltipTrigger
+                              render={
+                                 <button
+                                    type="button"
+                                    className="border border-gray-300 rounded-full px-2 text-gray-600"
+                                 >
+                                    ?
+                                 </button>
+                              }
+                           />
+                           <TooltipContent>
+                              <p className="max-w-44">
+                                 Submitted transcriptions are reviewed by an
+                                 editor before they’re published.
+                              </p>
+                           </TooltipContent>
+                        </Tooltip>
+                     )}
+                  </div>
+               )}
             </div>
 
-            {transcription?.status && (
-               <div className="text-sm text-muted-foreground capitalize flex gap-2">
-                  <div className="italic self-end">
-                     <span>Status: </span>
-                     <span data-testid="transcription-status">
-                        {transcription?.status}
-                     </span>
-                  </div>
-
-                  {transcription?.status === 'submitted' && (
-                     <Tooltip>
-                        <TooltipTrigger
-                           render={
-                              <button
-                                 type="button"
-                                 className="border border-gray-300 rounded-full px-2 text-gray-600"
-                              >
-                                 ?
-                              </button>
-                           }
-                        />
-                        <TooltipContent>
-                           <p className="max-w-44">
-                              Submitted transcriptions are reviewed by an editor
-                              before they’re published.
-                           </p>
-                        </TooltipContent>
-                     </Tooltip>
-                  )}
-               </div>
-            )}
-         </div>
-         {!transcription ? (
-            <button
-               className="text-sm underline"
-               onClick={() => createMutation.mutate({ pageId: pageId! })}
-               disabled={createMutation.isPending}
-            >
-               {approvedTranscription
-                  ? 'Suggest a correction'
-                  : 'Start transcribing'}
-            </button>
-         ) : (
-            <>
-               {transcription?.status === 'rejected' &&
-                  transcription.rejectionReason && (
-                     <p className="text-sm text-destructive mt-1 border border-destructive px-4 py-2 rounded-md shrink-0 max-h-24 overflow-y-auto">
-                        {' '}
-                        Rejection reason: {transcription.rejectionReason}
-                     </p>
-                  )}
-
-               {preview ? (
-                  <div className="flex flex-col gap-3 border rounded-md p-4 min-h-90 overflow-y-auto">
-                     <p className="text-[1rem] whitespace-pre-wrap leading-7">
-                        <TranscriptionText content={transcriptionContent} />
-                     </p>
-                  </div>
-               ) : (
-                  <Textarea
-                     className={`font-mono resize-y disabled:opacity-60 leading-6 disabled:caret-transparent ${
-                        focusMode
-                           ? 'flex-1 min-h-0 resize-none overflow-y-auto field-sizing-fixed'
-                           : 'min-h-90'
-                     }`}
-                     value={transcriptionContent}
-                     ref={textareaRef}
-                     readOnly={isBlank}
-                     data-testid="transcription-content"
-                     onChange={(e) => setTranscriptionContent(e.target.value)}
-                     disabled={isSubmitted || isBlank}
-                     placeholder="Type your transcription here..."
-                  />
-               )}
-
+            {!isHorizontal && (
                <div className="flex gap-2 items-center justify-end shrink-0">
                   {' '}
                   {!isSubmitted && (
@@ -290,6 +253,139 @@ function TranscriptionPanel({
                      </>
                   )}
                </div>
+            )}
+
+            {transcription?.status && isHorizontal && (
+               <div className="text-sm text-muted-foreground capitalize flex gap-2">
+                  <div className="italic self-end">
+                     <span>Status: </span>
+                     <span data-testid="transcription-status">
+                        {transcription?.status}
+                     </span>
+                  </div>
+
+                  {transcription?.status === 'submitted' && (
+                     <Tooltip>
+                        <TooltipTrigger
+                           render={
+                              <button
+                                 type="button"
+                                 className="border border-gray-300 rounded-full px-2 text-gray-600"
+                              >
+                                 ?
+                              </button>
+                           }
+                        />
+                        <TooltipContent>
+                           <p className="max-w-44">
+                              Submitted transcriptions are reviewed by an editor
+                              before they’re published.
+                           </p>
+                        </TooltipContent>
+                     </Tooltip>
+                  )}
+               </div>
+            )}
+         </div>
+         {!transcription ? (
+            <button
+               className="text-sm underline"
+               onClick={() => createMutation.mutate({ pageId: pageId! })}
+               disabled={createMutation.isPending}
+            >
+               {approvedTranscription
+                  ? 'Suggest a correction'
+                  : 'Start transcribing'}
+            </button>
+         ) : (
+            <>
+               {transcription?.status === 'rejected' &&
+                  transcription.rejectionReason && (
+                     <p className="text-sm text-destructive border border-destructive px-4 py-2 rounded-md shrink-0 max-h-24 overflow-y-auto">
+                        {' '}
+                        Rejection reason: {transcription.rejectionReason}
+                     </p>
+                  )}
+
+               {preview ? (
+                  <div className="relative flex-1 min-h-90 border rounded-md">
+                     <div className="absolute inset-0 overflow-y-auto p-4">
+                        <TranscriptionText
+                           className="text-[1rem] leading-7"
+                           content={transcriptionContent}
+                        />
+                     </div>
+                  </div>
+               ) : (
+                  <Textarea
+                     className={`font-mono leading-6 disabled:opacity-60 disabled:caret-transparent flex-1 field-sizing-fixed! ${
+                        focusMode
+                           ? 'min-h-0 resize-none overflow-y-auto'
+                           : 'min-h-90 resize-y'
+                     }`}
+                     value={transcriptionContent}
+                     ref={textareaRef}
+                     readOnly={isBlank}
+                     data-testid="transcription-content"
+                     onChange={(e) => setTranscriptionContent(e.target.value)}
+                     disabled={isSubmitted || isBlank}
+                     placeholder="Type your transcription here..."
+                  />
+               )}
+
+               {isHorizontal && (
+                  <div className="flex gap-2 items-center justify-end shrink-0">
+                     {' '}
+                     {!isSubmitted && (
+                        <>
+                           {!preview && (
+                              <div className="flex items-center gap-2 mr-4">
+                                 <span>Mark as blank</span>
+                                 <Checkbox
+                                    onCheckedChange={(v) =>
+                                       setIsBlank(v === true)
+                                    }
+                                    className="border-gray-400"
+                                    id="blank-checkbox"
+                                    name="blank-checkbox"
+                                    checked={isBlank}
+                                 />
+                              </div>
+                           )}
+
+                           <button
+                              className="px-3 py-1 text-sm border disabled:pointer-events-none rounded hover:bg-muted disabled:opacity-50"
+                              onClick={() => setPreview(!preview)}
+                              disabled={
+                                 updateMutation.isPending ||
+                                 !transcriptionContent.trim() ||
+                                 isBlank
+                              }
+                           >
+                              {preview ? 'Edit' : 'Preview'}
+                           </button>
+
+                           <button
+                              className="px-3 py-1 text-sm border disabled:pointer-events-none rounded hover:bg-muted disabled:opacity-50"
+                              onClick={handleSave}
+                              disabled={updateMutation.isPending || !hasContent}
+                           >
+                              {updateMutation.isPending ? 'Saving...' : 'Save'}
+                           </button>
+
+                           <button
+                              className="px-3 py-1 text-sm bg-primary text-primary-foreground disabled:pointer-events-none rounded  hover:opacity-90 disabled:opacity-50"
+                              onClick={handleSubmit}
+                              disabled={submitMutation.isPending || !hasContent}
+                           >
+                              {submitMutation.isPending
+                                 ? 'Submitting...'
+                                 : 'Submit'}
+                           </button>
+                        </>
+                     )}
+                  </div>
+               )}
             </>
          )}
       </div>

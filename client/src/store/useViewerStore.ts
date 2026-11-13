@@ -13,10 +13,12 @@ interface ViewerStore {
    viewers: Record<string, ViewerState>;
    focusMode: boolean;
    imagePosition: ImagePosition;
+   imageWidth: number;
    setViewerState: (documentId: string, state: ViewerState) => void;
    resetViewerState: (documentId: string) => void;
    setFocusMode: (value: boolean) => void;
    setImagePosition: (value: ImagePosition) => void;
+   setImageWidth: (value: number) => void;
 }
 
 const DEFAULT_STATE: ViewerState = {
@@ -31,6 +33,7 @@ export const useViewerStore = create<ViewerStore>()(
          viewers: {},
          focusMode: false,
          imagePosition: 'default',
+         imageWidth: 50,
          setViewerState: (documentId, state) =>
             set((store) => ({
                viewers: { ...store.viewers, [documentId]: state },
@@ -43,6 +46,8 @@ export const useViewerStore = create<ViewerStore>()(
 
          setFocusMode: (value) => set({ focusMode: value }),
          setImagePosition: (value) => set({ imagePosition: value }),
+         setImageWidth: (value) =>
+            set({ imageWidth: Math.min(75, Math.max(25, value)) }),
       }),
 
       {
@@ -50,6 +55,7 @@ export const useViewerStore = create<ViewerStore>()(
          partialize: (s) => ({
             viewers: s.viewers,
             imagePosition: s.imagePosition,
+            imageWidth: s.imageWidth,
          }),
       },
    ),

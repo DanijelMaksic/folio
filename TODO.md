@@ -1,6 +1,5 @@
 ## Things to add
 
-- Change panel width
 - Overview and preview show line numbers on the left of panel
 - "Fully transcribed" label in `DocumentCard.tsx`, and maybe in `DocumentPages.tsx` add "All pages as fully transcribed"
 - Audit table on role management route
@@ -30,5 +29,6 @@
 - On sign up, navigate user to `/dashboard` instead of `/`
 - Potentially fix list flashing a loading screen when paginating/filtering/sorting by using placeholderData in trpc procedure call
 - Find a way to disable filter in `ListControls.tsx` when `{data?.length! < 2}`
+- In `TranscriptionPanel.tsx` and `GuestTranscriptionPanel.tsx` refactor the duplicate components
 
 ## Things to refactor

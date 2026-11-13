@@ -42,6 +42,12 @@ import {
    ChevronLeft,
    ChevronRight,
    Fullscreen,
+   Maximize2,
+   Minimize2,
+   PanelBottom,
+   PanelLeft,
+   PanelRight,
+   PanelTop,
 } from 'lucide-react';
 import NotesAndQuestions from '@/components/documents/NotesAndQuestions';
 import { Button } from '@/components/ui/button';
@@ -245,19 +251,35 @@ function PageDetails() {
                               render={
                                  <Button
                                     variant="outline"
-                                    className="capitalize justify-between min-w-40"
+                                    className="justify-between min-w-40"
                                  >
                                     {imagePosition === 'default' && (
                                        <span>Layout</span>
                                     )}
-                                    {imagePosition === 'left' &&
-                                       'Image at the left'}
-                                    {imagePosition === 'right' &&
-                                       'Image at the right'}
-                                    {imagePosition === 'top' &&
-                                       'Image at the top'}
-                                    {imagePosition === 'bottom' &&
-                                       'Image at the bottom'}
+                                    {imagePosition === 'left' && (
+                                       <div className="flex items-center gap-2">
+                                          <PanelLeft />
+                                          Image at the left
+                                       </div>
+                                    )}
+                                    {imagePosition === 'right' && (
+                                       <div className="flex items-center gap-2">
+                                          <PanelRight />
+                                          Image at the right
+                                       </div>
+                                    )}
+                                    {imagePosition === 'top' && (
+                                       <div className="flex items-center gap-2">
+                                          <PanelTop />
+                                          Image at the top
+                                       </div>
+                                    )}
+                                    {imagePosition === 'bottom' && (
+                                       <div className="flex items-center gap-2">
+                                          <PanelBottom />
+                                          Image at the bottom
+                                       </div>
+                                    )}
                                     <ChevronDown className="size-4 text-muted-foreground" />
                                  </Button>
                               }
@@ -307,8 +329,15 @@ function PageDetails() {
                            variant="outline"
                            onClick={() => setFocusMode(!focusMode)}
                         >
-                           <Fullscreen />{' '}
-                           {focusMode ? 'Exit focus' : 'Focus mode'}
+                           {focusMode ? (
+                              <>
+                                 <Minimize2 /> Minimize
+                              </>
+                           ) : (
+                              <>
+                                 <Maximize2 /> Maximize
+                              </>
+                           )}
                         </Button>
                      )}
 

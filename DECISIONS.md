@@ -651,6 +651,8 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Added the option to change layout of the panels in `OverviewTab.tsx` and `TranscriptionTab.tsx`
 
+- Implemented a custom resize handle to change panel sizes (restricted to horizontal layout)
+
 **Decisions:**
 
 - Move "Add Pages" button to `ActionsMenu.tsx`
