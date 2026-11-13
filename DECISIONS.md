@@ -647,6 +647,8 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Included Focus mode which hides the everything but page viewer and transcription panel
 
+- Implemented Fullscreen button in `PageViewer.tsx`, which can be used to enter into browser fullscreen mode to see the enlarged page image
+
 **Decisions:**
 
 - Move "Add Pages" button to `ActionsMenu.tsx`

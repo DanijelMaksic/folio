@@ -1,6 +1,7 @@
 import { useViewerStore } from '@/store/useViewerStore';
 import type { PageBase } from '@shared';
-import { useState } from 'react';
+import { Maximize, Minimize } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import {
    TransformWrapper,
    TransformComponent,
@@ -8,12 +9,20 @@ import {
    useTransformEffect,
 } from 'react-zoom-pan-pinch';
 
-const Controls = ({ pageId }: { pageId: string }) => {
+const Controls = ({
+   pageId,
+   isFullscreen,
+   onToggleFullscreen,
+}: {
+   pageId: string;
+   isFullscreen: boolean;
+   onToggleFullscreen: () => void;
+}) => {
    const { zoomIn, zoomOut, resetTransform } = useControls();
    const { resetViewerState } = useViewerStore();
 
    return (
-      <div className="tools absolute left-[43%] top-4 z-10 bg-white/80 flex items-center justify-center gap-6 py-1 px-3 rounded-md shadow-md">
+      <div className="tools absolute left-1/2 -translate-x-1/2 top-4 z-10 bg-white/80 flex items-center justify-center gap-6 py-1 px-3 rounded-md shadow-md">
          <button type="button" onClick={() => zoomIn()}>
             +
          </button>
@@ -29,6 +38,21 @@ const Controls = ({ pageId }: { pageId: string }) => {
          >
             x
          </button>
+         {document.fullscreenEnabled && (
+            <button
+               type="button"
+               onClick={onToggleFullscreen}
+               aria-label={
+                  isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'
+               }
+            >
+               {isFullscreen ? (
+                  <Minimize className="size-4" />
+               ) : (
+                  <Maximize className="size-4" />
+               )}
+            </button>
+         )}
       </div>
    );
 };
@@ -48,18 +72,45 @@ const TransformTracker = ({ pageId }: { pageId: string }) => {
 };
 
 function PageViewer({ page }: { page: PageBase | undefined }) {
-   const { viewers } = useViewerStore();
+   const { viewers, focusMode } = useViewerStore();
    const savedState = viewers[page?.id ?? ''];
    const [isHovered, setIsHovered] = useState(false);
+   const [isFullscreen, setIsFullscreen] = useState(false);
+   const containerRef = useRef<HTMLDivElement>(null);
 
-   const { focusMode } = useViewerStore();
+   useEffect(() => {
+      const el = containerRef.current;
+      const onChange = () => setIsFullscreen(document.fullscreenElement === el);
+      document.addEventListener('fullscreenchange', onChange);
+      return () => {
+         document.removeEventListener('fullscreenchange', onChange);
+         if (document.fullscreenElement === el) {
+            document.exitFullscreen().catch(() => {});
+         }
+      };
+   }, []);
+
+   function toggleFullscreen() {
+      if (document.fullscreenElement) {
+         document.exitFullscreen().catch(() => {});
+      } else {
+         containerRef.current?.requestFullscreen().catch(() => {});
+      }
+   }
 
    if (!page) return null;
 
+   const fill = focusMode || isFullscreen;
+
    return (
       <div
+         ref={containerRef}
          className={`bg-gray-200 flex justify-center items-center rounded-md overflow-hidden relative ${
-            focusMode ? 'h-full min-h-0' : 'min-h-130'
+            isFullscreen
+               ? 'h-screen w-full'
+               : focusMode
+                 ? 'h-full min-h-0'
+                 : 'min-h-130'
          }`}
          onMouseEnter={() => setIsHovered(true)}
          onMouseLeave={() => setIsHovered(false)}
@@ -77,38 +128,40 @@ function PageViewer({ page }: { page: PageBase | undefined }) {
                animationType: 'easeOut',
             }}
             doubleClick={{ disabled: false, step: 0.3, animationTime: 300 }}
-            wheel={{
-               disabled: false,
-               step: 0.003,
-               smoothStep: 0.002,
-            }}
+            wheel={{ disabled: false, step: 0.003, smoothStep: 0.002 }}
             wrapperStyle={{
                width: '100%',
                height: '100%',
-               minHeight: focusMode ? 0 : '520px',
+               minHeight: fill ? 0 : '520px',
             }}
             contentStyle={{
                width: '100%',
                height: '100%',
-               minHeight: focusMode ? 0 : '520px',
+               minHeight: fill ? 0 : '520px',
                display: 'flex',
                alignItems: 'center',
                justifyContent: 'center',
             }}
          >
-            {isHovered && <Controls pageId={page.id} />}
+            {isHovered && (
+               <Controls
+                  pageId={page.id}
+                  isFullscreen={isFullscreen}
+                  onToggleFullscreen={toggleFullscreen}
+               />
+            )}
 
             <TransformTracker pageId={page.id} />
             <TransformComponent
                wrapperStyle={{
                   width: '100%',
                   height: '100%',
-                  minHeight: '520px',
+                  minHeight: fill ? 0 : '520px',
                }}
                contentStyle={{
                   width: '100%',
                   height: '100%',
-                  minHeight: '520px',
+                  minHeight: fill ? 0 : '520px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -117,7 +170,7 @@ function PageViewer({ page }: { page: PageBase | undefined }) {
                <img
                   src={page.imageUrl}
                   alt={page.title}
-                  className={`w-fit shadow-sm ${focusMode ? 'max-h-full' : 'max-h-[70vh]'}`}
+                  className={`w-fit shadow-sm ${fill ? 'max-h-full' : 'max-h-[70vh]'}`}
                />
             </TransformComponent>
          </TransformWrapper>
