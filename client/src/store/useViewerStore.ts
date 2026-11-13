@@ -7,12 +7,16 @@ interface ViewerState {
    positionY: number;
 }
 
+export type ImagePosition = 'default' | 'left' | 'right' | 'top' | 'bottom';
+
 interface ViewerStore {
    viewers: Record<string, ViewerState>;
    focusMode: boolean;
+   imagePosition: ImagePosition;
    setViewerState: (documentId: string, state: ViewerState) => void;
    resetViewerState: (documentId: string) => void;
    setFocusMode: (value: boolean) => void;
+   setImagePosition: (value: ImagePosition) => void;
 }
 
 const DEFAULT_STATE: ViewerState = {
@@ -26,7 +30,7 @@ export const useViewerStore = create<ViewerStore>()(
       (set) => ({
          viewers: {},
          focusMode: false,
-
+         imagePosition: 'default',
          setViewerState: (documentId, state) =>
             set((store) => ({
                viewers: { ...store.viewers, [documentId]: state },
@@ -38,9 +42,15 @@ export const useViewerStore = create<ViewerStore>()(
             })),
 
          setFocusMode: (value) => set({ focusMode: value }),
+         setImagePosition: (value) => set({ imagePosition: value }),
       }),
+
       {
          name: 'folio-viewer',
+         partialize: (s) => ({
+            viewers: s.viewers,
+            imagePosition: s.imagePosition,
+         }),
       },
    ),
 );

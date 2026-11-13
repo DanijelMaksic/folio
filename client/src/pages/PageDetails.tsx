@@ -25,11 +25,24 @@ import {
    BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import {
+   DropdownMenu,
+   DropdownMenuContent,
+   DropdownMenuItem,
+   DropdownMenuGroup,
+   DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
    Pagination,
    PaginationContent,
    PaginationItem,
 } from '@/components/ui/pagination';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+   Check,
+   ChevronDown,
+   ChevronLeft,
+   ChevronRight,
+   Fullscreen,
+} from 'lucide-react';
 import NotesAndQuestions from '@/components/documents/NotesAndQuestions';
 import { Button } from '@/components/ui/button';
 
@@ -53,7 +66,14 @@ function PageDetails() {
    const [deleteError, setDeleteError] = useState('');
    const [searchParams, setSearchParams] = useSearchParams();
 
-   const { resetViewerState, focusMode, setFocusMode } = useViewerStore();
+   const {
+      resetViewerState,
+      focusMode,
+      setFocusMode,
+      imagePosition,
+      setImagePosition,
+   } = useViewerStore();
+
    const { id: documentId, pageNumber } = useParams<{
       id: string;
       pageNumber: string;
@@ -220,10 +240,74 @@ function PageDetails() {
                >
                   <div className="flex items-center justify-center gap-3 text-sm">
                      {canFocus && (
+                        <DropdownMenu modal={false}>
+                           <DropdownMenuTrigger
+                              render={
+                                 <Button
+                                    variant="outline"
+                                    className="capitalize justify-between min-w-40"
+                                 >
+                                    {imagePosition === 'default' && (
+                                       <span>Layout</span>
+                                    )}
+                                    {imagePosition === 'left' &&
+                                       'Image at the left'}
+                                    {imagePosition === 'right' &&
+                                       'Image at the right'}
+                                    {imagePosition === 'top' &&
+                                       'Image at the top'}
+                                    {imagePosition === 'bottom' &&
+                                       'Image at the bottom'}
+                                    <ChevronDown className="size-4 text-muted-foreground" />
+                                 </Button>
+                              }
+                           />
+
+                           <DropdownMenuContent>
+                              <DropdownMenuGroup>
+                                 <DropdownMenuItem
+                                    onClick={() => setImagePosition('left')}
+                                 >
+                                    Image at the left
+                                    {imagePosition === 'left' && (
+                                       <Check className="ml-auto size-4" />
+                                    )}
+                                 </DropdownMenuItem>
+                                 <DropdownMenuItem
+                                    onClick={() => setImagePosition('right')}
+                                 >
+                                    Image at the right
+                                    {imagePosition === 'right' && (
+                                       <Check className="ml-auto size-4" />
+                                    )}
+                                 </DropdownMenuItem>
+                                 <DropdownMenuItem
+                                    onClick={() => setImagePosition('top')}
+                                 >
+                                    Image at the top
+                                    {imagePosition === 'top' && (
+                                       <Check className="ml-auto size-4" />
+                                    )}
+                                 </DropdownMenuItem>
+                                 <DropdownMenuItem
+                                    onClick={() => setImagePosition('bottom')}
+                                 >
+                                    Image at the bottom
+                                    {imagePosition === 'bottom' && (
+                                       <Check className="ml-auto size-4" />
+                                    )}
+                                 </DropdownMenuItem>
+                              </DropdownMenuGroup>
+                           </DropdownMenuContent>
+                        </DropdownMenu>
+                     )}
+
+                     {canFocus && (
                         <Button
                            variant="outline"
                            onClick={() => setFocusMode(!focusMode)}
                         >
+                           <Fullscreen />{' '}
                            {focusMode ? 'Exit focus' : 'Focus mode'}
                         </Button>
                      )}

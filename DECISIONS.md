@@ -649,6 +649,8 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Implemented Fullscreen button in `PageViewer.tsx`, which can be used to enter into browser fullscreen mode to see the enlarged page image
 
+- Added the option to change layout of the panels in `OverviewTab.tsx` and `TranscriptionTab.tsx`
+
 **Decisions:**
 
 - Move "Add Pages" button to `ActionsMenu.tsx`
