@@ -253,9 +253,6 @@ function PageDetails() {
                                     variant="outline"
                                     className="justify-between min-w-40"
                                  >
-                                    {imagePosition === 'default' && (
-                                       <span>Layout</span>
-                                    )}
                                     {imagePosition === 'left' && (
                                        <div className="flex items-center gap-2">
                                           <PanelLeft />

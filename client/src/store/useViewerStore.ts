@@ -7,7 +7,7 @@ interface ViewerState {
    positionY: number;
 }
 
-export type ImagePosition = 'default' | 'left' | 'right' | 'top' | 'bottom';
+export type ImagePosition = 'left' | 'right' | 'top' | 'bottom';
 
 interface ViewerStore {
    viewers: Record<string, ViewerState>;
@@ -32,7 +32,7 @@ export const useViewerStore = create<ViewerStore>()(
       (set) => ({
          viewers: {},
          focusMode: false,
-         imagePosition: 'default',
+         imagePosition: 'left',
          imageWidth: 50,
          setViewerState: (documentId, state) =>
             set((store) => ({

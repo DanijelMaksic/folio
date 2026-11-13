@@ -136,10 +136,7 @@ function TranscriptionPanel({
 
    const hasContent = isBlank || !!transcriptionContent.trim();
 
-   const isHorizontal =
-      imagePosition === 'default' ||
-      imagePosition === 'left' ||
-      imagePosition === 'right';
+   const isHorizontal = imagePosition === 'left' || imagePosition === 'right';
 
    if (!canTranscribe)
       return (
