@@ -105,7 +105,7 @@ function PageViewer({ page }: { page: PageBase | undefined }) {
    return (
       <div
          ref={containerRef}
-         className={`bg-gray-200 flex justify-center items-center rounded-md overflow-hidden relative ${
+         className={`bg-gray-200 flex justify-center border items-center rounded-md overflow-hidden relative ${
             isFullscreen
                ? 'h-screen w-full'
                : focusMode

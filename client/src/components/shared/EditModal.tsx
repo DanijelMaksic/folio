@@ -64,9 +64,6 @@ function EditModal({
                <DialogTitle className="text-lg font-semibold">
                   {heading}
                </DialogTitle>
-               <DialogDescription>
-                  Update the title and description.
-               </DialogDescription>
             </DialogHeader>
 
             <form
