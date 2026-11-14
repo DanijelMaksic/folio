@@ -12,15 +12,19 @@ import {
    DropdownMenuItem,
    DropdownMenuSeparator,
    DropdownMenuTrigger,
+   DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
 import { signOut, useSession } from '@/lib/auth-client';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
+import { isEditor } from '@shared';
 
 function Nav() {
    const { data: session } = useSession();
    const user = session?.user;
    const navigate = useNavigate();
+
+   const isAdmin = session?.user.globalRole === 'admin';
 
    return (
       <NavigationMenu>
@@ -89,18 +93,39 @@ function Nav() {
                      />
                      <DropdownMenuContent>
                         <DropdownMenuGroup>
+                           <DropdownMenuLabel>My Account</DropdownMenuLabel>
                            <DropdownMenuItem
                               onClick={() =>
                                  navigate(`/users/${user.username}`)
                               }
                            >
-                              My profile
+                              Profile
                            </DropdownMenuItem>
                            <DropdownMenuItem
                               onClick={() => navigate('/settings')}
                            >
                               Settings
                            </DropdownMenuItem>
+                           {isEditor(user.globalRole) && (
+                              <>
+                                 <DropdownMenuSeparator />
+
+                                 <DropdownMenuItem
+                                    onClick={() => navigate('/review')}
+                                 >
+                                    Review queue
+                                 </DropdownMenuItem>
+                              </>
+                           )}
+
+                           {isAdmin && (
+                              <DropdownMenuItem
+                                 onClick={() => navigate('/role-management')}
+                              >
+                                 Role management
+                              </DropdownMenuItem>
+                           )}
+
                            <DropdownMenuSeparator />
                            <DropdownMenuItem
                               onClick={() =>
