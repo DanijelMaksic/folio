@@ -1,6 +1,5 @@
 ## Things to add
 
-- Sorting in `/role-requests`
 - Role downgrade
 - Audit table on role management route
 - Overview and preview show line numbers on the left of panel
@@ -33,4 +32,3 @@
 ## Things to refactor
 
 - Make functions like `handleTabChange()` a separate component
-- Refactor mapped role request item into separate component (from `RoleRequestsTab.tsx`)

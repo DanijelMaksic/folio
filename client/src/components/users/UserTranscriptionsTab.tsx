@@ -61,15 +61,14 @@ function UserTranscriptionsTab({ userId }: { userId: string }) {
                List of approved transcriptions
             </h3>
 
-            <div className="flex items-center gap-2 border rounded-md">
+            <div
+               className={`flex items-center gap-2 border rounded-md ${data?.versions?.length! < 2 ? 'opacity-50 pointer-events-none' : ''}`}
+            >
                <span className="pl-3">
                   <ArrowUpDown className="text-gray-500" />
                </span>
 
-               <DropdownMenu
-                  modal={false}
-                  disabled={data?.versions.length! < 2}
-               >
+               <DropdownMenu modal={false}>
                   <DropdownMenuTrigger
                      render={
                         <Button

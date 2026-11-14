@@ -1,10 +1,11 @@
 import { z } from 'zod';
-import { and, asc, eq } from 'drizzle-orm';
+import { and, asc, desc, eq } from 'drizzle-orm';
 import { router, adminProcedure } from '@/trpc/trpc.js';
 import { TRPCError } from '@trpc/server';
 import {
    adminRoleRequestSchema,
    isEditor,
+   listRoleRequestsSchema,
    reviewRoleRequestSchema,
    userRoleSchema,
 } from '@folio/shared';
@@ -93,8 +94,14 @@ export const adminRouter = router({
    }),
 
    listRoleRequests: adminProcedure
+      .input(listRoleRequestsSchema)
       .output(z.array(adminRoleRequestSchema))
-      .query(async () => {
+      .query(async ({ ctx, input }) => {
+         const order =
+            input.sort === 'newest'
+               ? desc(roleRequests.createdAt)
+               : asc(roleRequests.createdAt);
+
          const rows = await db
             .select({
                id: roleRequests.id,
@@ -113,7 +120,7 @@ export const adminRouter = router({
             .from(roleRequests)
             .innerJoin(user, eq(roleRequests.userId, user.id))
             .where(eq(roleRequests.status, 'pending'))
-            .orderBy(asc(roleRequests.createdAt));
+            .orderBy(order, asc(roleRequests.id));
 
          return rows.map((r) => ({
             ...r,

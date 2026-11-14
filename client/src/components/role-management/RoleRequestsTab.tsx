@@ -3,23 +3,46 @@ import { trpc } from '@/lib/trpc';
 import { AppRouter } from '@server/trpc/router';
 import { TRPCClientErrorLike } from '@trpc/client';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import {
+   DropdownMenu,
+   DropdownMenuContent,
+   DropdownMenuItem,
+   DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { ArrowUpDown, Check, ChevronDown } from 'lucide-react';
 
 const dateFormatter = new Intl.DateTimeFormat(undefined, {
    dateStyle: 'medium',
    timeStyle: 'short',
 });
 
+type RequestSort = 'newest' | 'oldest';
+
+const SORTS: RequestSort[] = ['newest', 'oldest'];
+
+const SORT_LABELS: Record<RequestSort, string> = {
+   newest: 'Newest',
+   oldest: 'Oldest',
+};
+
 function RoleRequestsTab() {
    const [approvingId, setApprovingId] = useState<string | null>(null);
    const [listError, setListError] = useState('');
    const [rejectingId, setRejectingId] = useState<string | null>(null);
    const [rejectError, setRejectError] = useState('');
+   const [searchParams, setSearchParams] = useSearchParams();
 
    const utils = trpc.useUtils();
 
-   const { data, isLoading, isError } = trpc.admin.listRoleRequests.useQuery();
+   const rawSort = searchParams.get('sort') as RequestSort | null;
+   const sort: RequestSort =
+      rawSort && SORTS.includes(rawSort) ? rawSort : 'newest';
+
+   const { data, isLoading, isError } = trpc.admin.listRoleRequests.useQuery({
+      sort,
+   });
 
    const approve = trpc.admin.approveRoleRequest.useMutation({
       onSuccess: () => utils.admin.listRoleRequests.invalidate(),
@@ -40,6 +63,16 @@ function RoleRequestsTab() {
          setRejectError(err.message);
       },
    });
+
+   const handleSetSort = (newSort: RequestSort) => {
+      setSearchParams((prev) => {
+         const next = new URLSearchParams(prev);
+         if (newSort === 'newest') next.delete('sort');
+         else next.set('sort', newSort);
+         next.set('page', '1');
+         return next;
+      });
+   };
 
    if (isLoading) {
       return (
@@ -71,6 +104,52 @@ function RoleRequestsTab() {
                {listError}
             </p>
          )}
+
+         <div className="flex items-center justify-between gap-3 mb-3">
+            <div className="flex items-center gap-3">
+               <h3 className="text-xl font-semibold">Pending requests</h3>
+               <span className="text-gray-600 text-lg bg-gray-100 px-2.5 rounded-md">
+                  {data.length}
+               </span>
+            </div>
+
+            {data && (
+               <div
+                  className={`flex items-center gap-2 border rounded-md ${data?.length! < 2 ? 'opacity-50 pointer-events-none' : ''}`}
+               >
+                  <span className="pl-3">
+                     <ArrowUpDown className="text-gray-500" />
+                  </span>
+
+                  <DropdownMenu modal={false}>
+                     <DropdownMenuTrigger
+                        render={
+                           <Button
+                              variant="outline"
+                              className="justify-between min-w-26"
+                           >
+                              {SORT_LABELS[sort]}
+                              <ChevronDown className="size-4 text-muted-foreground" />
+                           </Button>
+                        }
+                     />
+                     <DropdownMenuContent align="end">
+                        {SORTS.map((s) => (
+                           <DropdownMenuItem
+                              key={s}
+                              onClick={() => handleSetSort(s)}
+                           >
+                              {SORT_LABELS[s]}
+                              {s === sort && (
+                                 <Check className="ml-auto size-4" />
+                              )}
+                           </DropdownMenuItem>
+                        ))}
+                     </DropdownMenuContent>
+                  </DropdownMenu>
+               </div>
+            )}
+         </div>
 
          {data.length === 0 ? (
             <div className="rounded-lg p-10 text-center">
