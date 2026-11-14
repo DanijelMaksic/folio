@@ -194,7 +194,7 @@ export const adminRoleRequestSchema = roleRequestSchema.extend({
    userId: z.string(),
    username: z.string().nullable(),
    name: z.string().nullable(),
-   email: z.string(),
+   userAvatar: z.string().nullable(),
    currentRole: z.enum(GLOBAL_ROLES),
 });
 

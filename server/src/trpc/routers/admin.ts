@@ -114,7 +114,7 @@ export const adminRouter = router({
                reviewedAt: roleRequests.reviewedAt,
                username: user.username,
                name: user.name,
-               email: user.email,
+               userAvatar: user.image,
                currentRole: user.globalRole,
             })
             .from(roleRequests)

@@ -105,7 +105,7 @@ function RoleRequestsTab() {
             </p>
          )}
 
-         <div className="flex items-center justify-between gap-3 mb-3">
+         <div className="flex items-center justify-between gap-3 mb-3   ">
             <div className="flex items-center gap-3">
                <h3 className="text-xl font-medium">Pending requests</h3>
                <span className="text-gray-600 text-lg bg-gray-100 px-2.5 rounded-md">
@@ -170,18 +170,36 @@ function RoleRequestsTab() {
                         className="space-y-4 rounded-lg border p-4"
                      >
                         <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
-                           <div className="min-w-0">
-                              <p className="font-semibold text-lg">
+                           <div className="min-w-0 flex items-center gap-3">
+                              {request.userAvatar ? (
+                                 <Link to={`/users/${request.username}`}>
+                                    <img
+                                       src={request.userAvatar}
+                                       alt={`${request.username}'s avatar`}
+                                       className="group relative size-12 overflow-hidden rounded-full focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none border-2"
+                                    />
+                                 </Link>
+                              ) : (
                                  <Link
-                                    className="hover:underline"
+                                    to={`/users/${request.userAvatar}`}
+                                    className="flex size-10 shrink-0 items-center justify-center rounded-full border bg-muted text-sm font-medium uppercase"
+                                 >
+                                    {request.userAvatar[0]}
+                                 </Link>
+                              )}
+
+                              <div>
+                                 <Link
+                                    className="hover:underline font-medium text-lg"
                                     to={`/users/${request.username}`}
                                  >
                                     {request.name}
                                  </Link>
-                              </p>
-                              <p className="break-all text-sm text-muted-foreground">
-                                 @{request.username} • {request.email}
-                              </p>
+
+                                 <p className="break-all text-sm text-muted-foreground">
+                                    @{request.username}
+                                 </p>
+                              </div>
                            </div>
                            <p className="text-sm text-muted-foreground">
                               {dateFormatter.format(
