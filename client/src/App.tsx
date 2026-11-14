@@ -18,7 +18,7 @@ import ReviewPage from '@/pages/ReviewPage';
 import Dashboard from '@/pages/Dashboard';
 import UserPage from '@/pages/UserPage';
 import Settings from '@/pages/Settings';
-import RoleRequests from '@/pages/RoleRequests';
+import RoleManagementPage from '@/pages/RoleManagementPage';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
    const { data: session, isPending } = useSession();
@@ -100,10 +100,10 @@ export default function App() {
                />
 
                <Route
-                  path="/role-requests"
+                  path="/role-management"
                   element={
                      <ProtectedRoute>
-                        <RoleRequests />
+                        <RoleManagementPage />
                      </ProtectedRoute>
                   }
                />

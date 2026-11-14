@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import EditModal from '@/components/shared/EditModal';
-import { Button } from '@/components/ui/button';
 import { useSession } from '@/lib/auth-client';
 import { trpc } from '@/lib/trpc';
 import { Collection, isEditor } from '@shared';

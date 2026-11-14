@@ -653,6 +653,8 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Implemented a custom resize handle to change panel sizes (restricted to horizontal layout)
 
+- Role Requests is now Role Management and includes tabs: role requests, promote admins, demote users and audit table
+
 **Decisions:**
 
 - Move "Add Pages" button to `ActionsMenu.tsx`
@@ -669,7 +671,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Change `/profile` to `/settings`, and `profile` router to `settings` router
 
-- Made a separate route for managing role requests, removed role request management from `/settings` to `/dashboard`, which has a link to `/role-requests`
+- Made a separate route for managing role requests, removed role request management from `/settings` to `/dashboard`, which has a link to `/role-management`
 
 - Removed tabs from `/settings`, now Profile settings only contain settings, while role requests and stats are moved to `/dashboard`
 

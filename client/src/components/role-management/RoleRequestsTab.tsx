@@ -1,27 +1,25 @@
-import { useState } from 'react';
-import type { TRPCClientErrorLike } from '@trpc/client';
-import { AppRouter } from '@server/trpc/router';
+import RejectRoleRequestModal from '@/components/role-management/RejectRoleRequestModal';
 import { trpc } from '@/lib/trpc';
-import { Button } from '@/components/ui/button';
-import RejectRoleRequestModal from '@/components/settings/RejectRoleRequestModal';
+import { AppRouter } from '@server/trpc/router';
+import { TRPCClientErrorLike } from '@trpc/client';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import PromoteEditors from '@/components/settings/PromoteEditors';
-import { useSession } from '@/lib/auth-client';
+import { Button } from '@/components/ui/button';
 
 const dateFormatter = new Intl.DateTimeFormat(undefined, {
    dateStyle: 'medium',
    timeStyle: 'short',
 });
 
-function RoleManagement() {
-   const utils = trpc.useUtils();
-   const { data, isLoading, isError } = trpc.admin.listRoleRequests.useQuery();
-   const { data: session } = useSession();
-
+function RoleRequestsTab() {
    const [approvingId, setApprovingId] = useState<string | null>(null);
-   const [rejectingId, setRejectingId] = useState<string | null>(null);
    const [listError, setListError] = useState('');
+   const [rejectingId, setRejectingId] = useState<string | null>(null);
    const [rejectError, setRejectError] = useState('');
+
+   const utils = trpc.useUtils();
+
+   const { data, isLoading, isError } = trpc.admin.listRoleRequests.useQuery();
 
    const approve = trpc.admin.approveRoleRequest.useMutation({
       onSuccess: () => utils.admin.listRoleRequests.invalidate(),
@@ -67,9 +65,7 @@ function RoleManagement() {
    const rejecting = data.find((r) => r.id === rejectingId);
 
    return (
-      <div className="max-w-3xl mx-auto py-8 px-4 space-y-3">
-         <h1 className="text-2xl font-semibold">Role Requests</h1>
-
+      <>
          {listError && (
             <p role="alert" className="text-sm text-destructive">
                {listError}
@@ -157,8 +153,6 @@ function RoleManagement() {
             </ul>
          )}
 
-         {session?.user.globalRole === 'admin' && <PromoteEditors />}
-
          <RejectRoleRequestModal
             open={!!rejecting}
             applicant={
@@ -176,8 +170,8 @@ function RoleManagement() {
                setRejectError('');
             }}
          />
-      </div>
+      </>
    );
 }
 
-export default RoleManagement;
+export default RoleRequestsTab;

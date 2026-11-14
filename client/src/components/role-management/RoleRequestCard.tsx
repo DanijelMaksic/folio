@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Clock, Sparkles } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
-import RequestRoleModal from '@/components/settings/RequestRoleModal';
+import RequestRoleModal from '@/components/role-management/RequestRoleModal';
 
 interface RoleRequestCardProps {
    globalRole: string;

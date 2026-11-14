@@ -55,8 +55,10 @@ function DocumentTabs({
          >
             <div className="flex justify-between items-center gap-3 mt-1 mb-2">
                <TabsList>
-                  <TabsTrigger value="pages">Pages</TabsTrigger>
-                  <TabsTrigger value="about" data-testid="pages-tab-btn">
+                  <TabsTrigger value="pages" data-testid="pages-tab-btn">
+                     Pages
+                  </TabsTrigger>
+                  <TabsTrigger value="about" data-testid="about-tab-btn">
                      About
                   </TabsTrigger>
                   <TabsTrigger

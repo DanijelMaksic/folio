@@ -2,11 +2,11 @@ import { Navigate, useSearchParams } from 'react-router-dom';
 import { useSession } from '@/lib/auth-client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ProfileAvatar from '@/components/settings/ProfileAvatar';
-import ContributionStats from '@/components/settings/ContributionStats';
+import ContributionStats from '@/components/dashboard/ContributionStats';
 import ProfileSettings from '@/components/settings/ProfileSettings';
-import RoleRequestCard from '@/components/settings/RoleRequestCard';
+import RoleRequestCard from '@/components/role-management/RoleRequestCard';
 import { trpc } from '@/lib/trpc';
-import RoleManagement from '@/components/settings/RoleManagement';
+import RoleManagement from '@/components/role-management/RoleManagement';
 
 const TABS = ['stats', 'settings', 'roles'] as const;
 type ProfileTab = (typeof TABS)[number];

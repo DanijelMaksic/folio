@@ -1,7 +1,7 @@
-import RoleManagement from '@/components/settings/RoleManagement';
+import RoleManagement from '@/components/role-management/RoleManagement';
 import { useSession } from '@/lib/auth-client';
 
-function RoleRequests() {
+function RoleManagementPage() {
    const { data: session } = useSession();
 
    const isAdmin = session?.user.globalRole === 'admin';
@@ -9,4 +9,4 @@ function RoleRequests() {
    return <div>{isAdmin && <RoleManagement />}</div>;
 }
 
-export default RoleRequests;
+export default RoleManagementPage;

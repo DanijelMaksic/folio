@@ -9,10 +9,11 @@ import {
    DialogHeader,
    DialogTitle,
 } from '@/components/ui/dialog';
+import { Link } from 'react-router-dom';
 
 type Editor = { id: string; username: string; name: string };
 
-function PromoteEditors() {
+function PromoteAdmins() {
    const utils = trpc.useUtils();
    const [selected, setSelected] = useState<Editor | null>(null);
 
@@ -34,8 +35,8 @@ function PromoteEditors() {
    if (isLoading) return null;
 
    return (
-      <section className="space-y-3 mt-8">
-         <h2 className="text-xl font-medium">Promote editors to admin</h2>
+      <section className="space-y-3">
+         <h2 className="text-xl font-medium">Promote editors to admin role</h2>
 
          {!editors?.length ? (
             <p className="text-sm text-muted-foreground">No editors.</p>
@@ -46,18 +47,45 @@ function PromoteEditors() {
                      key={e.id}
                      className="flex items-center justify-between gap-3 p-3"
                   >
-                     <div className="text-sm">
-                        <p className="font-medium">{e.name}</p>
-                        <p className="text-muted-foreground">@{e.username}</p>
+                     <div className="flex items-center gap-3 text-sm">
+                        {e.image ? (
+                           <Link to={`/users/${e.username}`}>
+                              <img
+                                 src={e.image}
+                                 alt={`${e.username}'s avatar`}
+                                 className="group relative size-12 overflow-hidden rounded-full focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none border-2"
+                              />
+                           </Link>
+                        ) : (
+                           <Link
+                              to={`/users/${e.username}`}
+                              className="flex size-10 shrink-0 items-center justify-center rounded-full border bg-muted text-sm font-medium uppercase"
+                           >
+                              {e.username[0]}
+                           </Link>
+                        )}
+
+                        <div className="flex flex-col text-sm">
+                           <Link
+                              to={`/users/${e.username}`}
+                              className="font-medium text-[1rem] hover:underline"
+                           >
+                              {e.name}
+                           </Link>
+                        </div>
                      </div>
 
-                     <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setSelected(e)}
-                     >
-                        Make admin
-                     </Button>
+                     <div className="flex items-center gap-3">
+                        <Link
+                           to={`/users/${e.username}`}
+                           className="border rounded-md px-3 py-1 font-medium hover:bg-gray-50"
+                        >
+                           View profile
+                        </Link>
+                        <Button size="sm" onClick={() => setSelected(e)}>
+                           Make admin
+                        </Button>
+                     </div>
                   </li>
                ))}
             </ul>
@@ -106,4 +134,4 @@ function PromoteEditors() {
    );
 }
 
-export default PromoteEditors;
+export default PromoteAdmins;
