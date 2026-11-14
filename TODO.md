@@ -1,14 +1,14 @@
 ## Things to add
 
 - Role downgrade
-- Audit table on role management route
+- Audit table
 - Overview and preview show line numbers on the left of panel
 - "Fully transcribed" label in `DocumentCard.tsx`, and maybe in `DocumentPages.tsx` add "All pages as fully transcribed"
-
-- Categories
-- Home page (general info, FAQ)
 - Save transcription with ctrl + s shortcut (add into about this in guidelines)
+- Categories
+
 - In `DocumentCard.tsx` add completion %, but only if it's above 0%
+- Home page (general info, FAQ)
 
 ## Things to fix
 
