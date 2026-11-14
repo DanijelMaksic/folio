@@ -1,15 +1,8 @@
-import { Navigate, useSearchParams } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { useSession } from '@/lib/auth-client';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ProfileAvatar from '@/components/settings/ProfileAvatar';
-import ContributionStats from '@/components/dashboard/ContributionStats';
 import ProfileSettings from '@/components/settings/ProfileSettings';
 import RoleRequestCard from '@/components/role-management/RoleRequestCard';
-import { trpc } from '@/lib/trpc';
-import RoleManagement from '@/components/role-management/RoleManagement';
-
-const TABS = ['stats', 'settings', 'roles'] as const;
-type ProfileTab = (typeof TABS)[number];
 
 const dateFormatter = new Intl.DateTimeFormat(undefined, {
    year: 'numeric',
@@ -19,37 +12,6 @@ const dateFormatter = new Intl.DateTimeFormat(undefined, {
 
 function Settings() {
    const { data: session, isPending } = useSession();
-   const [searchParams, setSearchParams] = useSearchParams();
-
-   const isAdmin = session?.user.globalRole === 'admin';
-
-   const rawTab = searchParams.get('tab') as ProfileTab | null;
-   const tab: ProfileTab =
-      rawTab && TABS.includes(rawTab) && (rawTab !== 'roles' || isAdmin)
-         ? rawTab
-         : 'stats';
-
-   // Same query RoleManagement uses, so React Query dedupes it
-   const { data: pendingRequests } = trpc.admin.listRoleRequests.useQuery(
-      undefined,
-      { enabled: isAdmin },
-   );
-   const pendingCount = pendingRequests?.length ?? 0;
-
-   const handleTabChange = (value: string) => {
-      setSearchParams(
-         (prev) => {
-            const next = new URLSearchParams(prev);
-            if (value === 'stats') {
-               next.delete('tab');
-            } else {
-               next.set('tab', value);
-            }
-            return next;
-         },
-         { replace: true },
-      );
-   };
 
    if (isPending) {
       return (
