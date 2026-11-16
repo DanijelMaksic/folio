@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { and, asc, desc, eq, or } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, or } from 'drizzle-orm';
 import { router, adminProcedure } from '@/trpc/trpc.js';
 import { TRPCError } from '@trpc/server';
 import {
@@ -93,16 +93,27 @@ export const adminRouter = router({
       return editors;
    }),
 
-   listStaff: adminProcedure.query(async () => {
-      const staff = await db
-         .select()
-         .from(user)
-         .where(
-            or(eq(user.globalRole, 'editor'), eq(user.globalRole, 'admin')),
-         );
+   listStaff: adminProcedure
+      .input(z.object({ role: z.enum(['all', 'editor', 'admin']) }))
+      .query(async ({ ctx, input }) => {
+         const where =
+            input.role === 'all'
+               ? inArray(user.globalRole, ['editor', 'admin'])
+               : eq(user.globalRole, input.role);
 
-      return staff;
-   }),
+         const staff = await db
+            .select({
+               id: user.id,
+               username: user.username,
+               name: user.name,
+               image: user.image,
+               globalRole: user.globalRole,
+            })
+            .from(user)
+            .where(where);
+
+         return staff;
+      }),
 
    listRoleRequests: adminProcedure
       .input(listRoleRequestsSchema)

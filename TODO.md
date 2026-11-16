@@ -1,6 +1,5 @@
 ## Things to add
 
-- Role downgrade
 - Audit table
 - Overview and preview show line numbers on the left of panel
 - "Fully transcribed" label in `DocumentCard.tsx`, and maybe in `DocumentPages.tsx` add "All pages as fully transcribed"

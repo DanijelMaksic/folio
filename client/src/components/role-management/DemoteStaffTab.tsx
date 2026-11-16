@@ -9,7 +9,7 @@ import {
    DialogHeader,
    DialogTitle,
 } from '@/components/ui/dialog';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
    DropdownMenu,
    DropdownMenuContent,
@@ -24,6 +24,7 @@ import {
    TooltipContent,
    TooltipTrigger,
 } from '@/components/ui/tooltip';
+import RoleFilter from '@/components/role-management/RoleFilter';
 
 type Staff = {
    id: string;
@@ -32,9 +33,15 @@ type Staff = {
    globalRole: string;
 };
 
+export type RoleType = 'all' | 'editor' | 'admin';
+
+const VALID_ROLES: RoleType[] = ['all', 'editor', 'admin'];
+
 function DemoteStaffTab() {
    const { data: session } = useSession();
    const currentUser = session?.user;
+
+   const [searchParams, setSearchParams] = useSearchParams();
 
    const utils = trpc.useUtils();
    const [selectedUser, setSelectedUser] = useState<Staff | null>(null);
@@ -42,7 +49,11 @@ function DemoteStaffTab() {
       'contributor' | 'editor' | 'admin'
    >('editor');
 
-   const { data: staff, isLoading } = trpc.admin.listStaff.useQuery();
+   const rawRole = searchParams.get('role') as RoleType | null;
+   const role: RoleType =
+      rawRole && VALID_ROLES.includes(rawRole) ? rawRole : 'all';
+
+   const { data: staff, isLoading } = trpc.admin.listStaff.useQuery({ role });
 
    const demote = trpc.admin.setUserRole.useMutation({
       onSuccess: () => {
@@ -58,11 +69,32 @@ function DemoteStaffTab() {
       setSelectedRole('editor');
    }
 
+   const handleSetRole = (newRole: RoleType) => {
+      setSearchParams((prev) => {
+         const next = new URLSearchParams(prev);
+         if (newRole === 'all') {
+            next.delete('role');
+         } else {
+            next.set('role', newRole);
+         }
+         return next;
+      });
+   };
+
    if (isLoading) return null;
 
    return (
       <section className="space-y-3">
-         <h3 className="text-xl font-medium">Editors and admins</h3>
+         <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+               <h3 className="text-xl font-medium">Editors and admins</h3>
+               <span className="text-gray-600 text-lg bg-gray-100 px-2.5 rounded-md">
+                  {staff?.length}
+               </span>
+            </div>
+
+            <RoleFilter onSetRole={handleSetRole} role={role} />
+         </div>
 
          {!staff?.length ? (
             <p className="text-sm text-muted-foreground">No staff.</p>

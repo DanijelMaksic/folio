@@ -105,7 +105,7 @@ function RoleRequestsTab() {
             </p>
          )}
 
-         <div className="flex items-center justify-between gap-3 mb-3   ">
+         <div className="flex items-center justify-between gap-3 mb-3">
             <div className="flex items-center gap-3">
                <h3 className="text-xl font-medium">Pending requests</h3>
                <span className="text-gray-600 text-lg bg-gray-100 px-2.5 rounded-md">
@@ -181,10 +181,10 @@ function RoleRequestsTab() {
                                  </Link>
                               ) : (
                                  <Link
-                                    to={`/users/${request.userAvatar}`}
+                                    to={`/users/${request.username}`}
                                     className="flex size-10 shrink-0 items-center justify-center rounded-full border bg-muted text-sm font-medium uppercase"
                                  >
-                                    {request.userAvatar[0]}
+                                    {request?.username?.[0]}
                                  </Link>
                               )}
 
@@ -252,11 +252,7 @@ function RoleRequestsTab() {
 
          <RejectRoleRequestModal
             open={!!rejecting}
-            applicant={
-               rejecting
-                  ? rejecting.name || rejecting.username || rejecting.email
-                  : ''
-            }
+            applicant={rejecting ? rejecting.name || rejecting.username : ''}
             isPending={reject.isPending}
             error={rejectError}
             onConfirm={(reason) =>
