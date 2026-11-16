@@ -69,27 +69,33 @@ function QueueItem({ item }: { item: QueueItemProps }) {
                </p>
             </div>
 
-            <Tooltip>
-               <TooltipTrigger
-                  render={
-                     <span className="inline-block w-fit">
-                        <Button
-                           onClick={() =>
-                              navigate(
-                                 `/review/${item.documentId}/pages/${item.pageNumber}?userId=${item.userId}`,
-                              )
-                           }
-                           disabled={session?.user.id === item.userId}
-                        >
-                           Review
-                        </Button>
-                     </span>
+            {session?.user.id === item.userId ? (
+               <Tooltip>
+                  <TooltipTrigger
+                     render={
+                        <span className="inline-block w-fit">
+                           <Button disabled={session?.user.id === item.userId}>
+                              Review
+                           </Button>
+                        </span>
+                     }
+                  />
+                  <TooltipContent>
+                     <p>You cannot review your own transcription</p>
+                  </TooltipContent>
+               </Tooltip>
+            ) : (
+               <Button
+                  onClick={() =>
+                     navigate(
+                        `/review/${item.documentId}/pages/${item.pageNumber}?userId=${item.userId}`,
+                     )
                   }
-               />
-               <TooltipContent>
-                  <p>You cannot review your own transcription</p>
-               </TooltipContent>
-            </Tooltip>
+                  disabled={session?.user.id === item.userId}
+               >
+                  Review
+               </Button>
+            )}
          </CardContent>
       </Card>
    );

@@ -1,4 +1,4 @@
-import PromoteAdminsTab f@/components/role-management/DemoteStaffTabeAdminsTab';
+import PromoteAdminsTab from '@/components/role-management/PromoteAdminsTab';
 import RoleRequestsTab from '@/components/role-management/RoleRequestsTab';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import DemoteStaffTab from './DemoteStaffTab';
@@ -32,10 +32,10 @@ function RoleManagementTabs({ tab, onTabChange }: RoleManagementTabsProps) {
                      Demote staff
                   </TabsTrigger>
                   <TabsTrigger
-                     value="audit-table"
-                     data-testid="audit-table-tab-btn"
+                     value="audit-log"
+                     data-testid="audit-log-tab-btn"
                   >
-                     Audit table
+                     Audit log
                   </TabsTrigger>
                </TabsList>
             </div>
@@ -49,8 +49,8 @@ function RoleManagementTabs({ tab, onTabChange }: RoleManagementTabsProps) {
             <TabsContent value="demote-staff">
                <DemoteStaffTab />
             </TabsContent>
-            <TabsContent value="audit-table">
-               <span>Audit table tab</span>
+            <TabsContent value="audit-log">
+               <span>Audit log tab</span>
             </TabsContent>
          </Tabs>
       </div>

@@ -36,7 +36,7 @@ function PromoteAdmins() {
 
    return (
       <section className="space-y-3">
-         <h2 className="text-xl font-medium">Promote editors to admin role</h2>
+         <h3 className="text-xl font-medium">Promote editors to admin role</h3>
 
          {!editors?.length ? (
             <p className="text-sm text-muted-foreground">No editors.</p>
@@ -100,7 +100,7 @@ function PromoteAdmins() {
                   <DialogDescription>
                      Admins can change roles and review role requests. They will
                      be signed out and must sign in again with an email code.
-                     The change is recorded in the role log.
+                     The change is recorded in the audit log.
                   </DialogDescription>
                </DialogHeader>
 

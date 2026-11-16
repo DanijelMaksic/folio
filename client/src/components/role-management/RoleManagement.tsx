@@ -5,7 +5,7 @@ const TABS = [
    'requests',
    'promote-admins',
    'demote-staff',
-   'audit-table',
+   'audit-log',
 ] as const;
 
 type Tab = (typeof TABS)[number];

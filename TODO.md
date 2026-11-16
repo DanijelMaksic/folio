@@ -28,6 +28,7 @@
 - Potentially fix list flashing a loading screen when paginating/filtering/sorting by using placeholderData in trpc procedure call
 - Find a way to disable filter in `ListControls.tsx` when `{data?.length! < 2}`
 - In `TranscriptionPanel.tsx` and `GuestTranscriptionPanel.tsx` refactor the duplicate components
+- When a blank transcription is approved, and user suggests a correction, textarea is locked due to blank checkbox being pre-checked
 
 ## Things to refactor
 
