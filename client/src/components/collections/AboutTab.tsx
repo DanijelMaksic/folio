@@ -35,12 +35,6 @@ function AboutTab({ collection }: { collection: Collection }) {
       },
    });
 
-   console.log(
-      collection.createdBy,
-      collection.creatorName,
-      collection.creatorUsername,
-   );
-
    const details: { label: string; value: React.ReactNode }[] = [
       {
          label: 'Description',

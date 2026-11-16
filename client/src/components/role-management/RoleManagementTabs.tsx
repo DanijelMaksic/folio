@@ -1,6 +1,7 @@
-import PromoteAdminsTab from '@/components/role-management/PromoteAdminsTab';
+import PromoteAdminsTab f@/components/role-management/DemoteStaffTabeAdminsTab';
 import RoleRequestsTab from '@/components/role-management/RoleRequestsTab';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import DemoteStaffTab from './DemoteStaffTab';
 
 export interface RoleManagementTabsProps {
    tab: string;
@@ -25,10 +26,10 @@ function RoleManagementTabs({ tab, onTabChange }: RoleManagementTabsProps) {
                      Promote admins
                   </TabsTrigger>
                   <TabsTrigger
-                     value="demote-users"
-                     data-testid="demote-users-tab-btn"
+                     value="demote-staff"
+                     data-testid="demote-staff-tab-btn"
                   >
-                     Demote users
+                     Demote staff
                   </TabsTrigger>
                   <TabsTrigger
                      value="audit-table"
@@ -45,8 +46,8 @@ function RoleManagementTabs({ tab, onTabChange }: RoleManagementTabsProps) {
             <TabsContent value="promote-admins">
                <PromoteAdminsTab />
             </TabsContent>
-            <TabsContent value="demote-users">
-               <span>Demote users</span>
+            <TabsContent value="demote-staff">
+               <DemoteStaffTab />
             </TabsContent>
             <TabsContent value="audit-table">
                <span>Audit table tab</span>

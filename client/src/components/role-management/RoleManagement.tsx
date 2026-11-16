@@ -4,7 +4,7 @@ import RoleManagementTabs from '@/components/role-management/RoleManagementTabs'
 const TABS = [
    'requests',
    'promote-admins',
-   'demote-users',
+   'demote-staff',
    'audit-table',
 ] as const;
 

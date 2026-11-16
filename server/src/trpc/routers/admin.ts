@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { and, asc, desc, eq } from 'drizzle-orm';
+import { and, asc, desc, eq, or } from 'drizzle-orm';
 import { router, adminProcedure } from '@/trpc/trpc.js';
 import { TRPCError } from '@trpc/server';
 import {
@@ -91,6 +91,17 @@ export const adminRouter = router({
          .where(eq(user.globalRole, 'editor'));
 
       return editors;
+   }),
+
+   listStaff: adminProcedure.query(async () => {
+      const staff = await db
+         .select()
+         .from(user)
+         .where(
+            or(eq(user.globalRole, 'editor'), eq(user.globalRole, 'admin')),
+         );
+
+      return staff;
    }),
 
    listRoleRequests: adminProcedure

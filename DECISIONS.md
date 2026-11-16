@@ -653,7 +653,7 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Implemented a custom resize handle to change panel sizes (restricted to horizontal layout)
 
-- Role Requests is now Role Management and includes tabs: role requests, promote admins, demote users and audit table
+- Role Requests is now Role Management and includes tabs: role requests, promote admins, demote staff and audit table
 
 **Decisions:**
 
