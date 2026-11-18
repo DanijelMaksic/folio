@@ -9,6 +9,7 @@ import {
    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { ArrowUpDown, Check, ChevronDown } from 'lucide-react';
+import AppPagination from '@/components/shared/AppPagination';
 
 type RoleChangesSort = 'newest' | 'oldest';
 
@@ -21,16 +22,19 @@ const SORT_LABELS: Record<RoleChangesSort, string> = {
 
 function AuditLogTab() {
    const [searchParams, setSearchParams] = useSearchParams();
-
-   const utils = trpc.useUtils();
+   const PAGE_SIZE = 9;
 
    const rawSort = searchParams.get('sort') as RoleChangesSort | null;
    const sort: RoleChangesSort =
       rawSort && SORTS.includes(rawSort) ? rawSort : 'newest';
 
-   const { data: roleChanges, isLoading } = trpc.admin.listRoleChanges.useQuery(
-      { sort },
-   );
+   const page = Math.max(Number(searchParams.get('page')) || 1, 1);
+
+   const { data, isLoading } = trpc.admin.listRoleChanges.useQuery({
+      limit: 20,
+      sort,
+      page,
+   });
 
    const handleSetSort = (newSort: RoleChangesSort) => {
       setSearchParams((prev) => {
@@ -38,6 +42,14 @@ function AuditLogTab() {
          if (newSort === 'newest') next.delete('sort');
          else next.set('sort', newSort);
          next.set('page', '1');
+         return next;
+      });
+   };
+
+   const handlePageChange = (newPage: number) => {
+      setSearchParams((prev) => {
+         const next = new URLSearchParams(prev);
+         next.set('page', String(newPage));
          return next;
       });
    };
@@ -55,7 +67,7 @@ function AuditLogTab() {
       );
    }
 
-   if (!roleChanges) {
+   if (!data?.roleChanges) {
       return (
          <p className="text-sm text-destructive">
             Could not load role changes.
@@ -69,7 +81,7 @@ function AuditLogTab() {
             <h3 className="text-xl font-medium">Role changes</h3>
 
             <div
-               className={`flex items-center gap-2 border rounded-md ${roleChanges?.length! < 2 ? 'opacity-50 pointer-events-none' : ''}`}
+               className={`flex items-center gap-2 border rounded-md ${!data.roleChanges ? 'opacity-50 pointer-events-none' : ''}`}
             >
                <span className="pl-3">
                   <ArrowUpDown className="text-gray-500" />
@@ -103,7 +115,7 @@ function AuditLogTab() {
          </div>
 
          <ul className="mt-4">
-            {roleChanges.map((c) => (
+            {data.roleChanges.map((c) => (
                <li
                   key={c.id}
                   className="border-t py-3 last:border-b flex items-center gap-3 justify-between"
@@ -149,6 +161,14 @@ function AuditLogTab() {
                </li>
             ))}
          </ul>
+
+         {!!data.roleChanges?.length && (
+            <AppPagination
+               currentPage={page}
+               totalPages={data.totalPages ?? 1}
+               onPageChange={handlePageChange}
+            />
+         )}
       </>
    );
 }

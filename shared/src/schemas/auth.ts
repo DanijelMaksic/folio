@@ -203,6 +203,8 @@ export const listRoleRequestsSchema = z.object({
 });
 
 export const listRoleChangesSchema = z.object({
+   page: z.number().min(1).default(1),
+   limit: z.number().min(1).max(100).default(20),
    sort: z.enum(['newest', 'oldest']).default('oldest'),
 });
 

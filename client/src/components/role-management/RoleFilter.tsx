@@ -26,7 +26,7 @@ function RoleFilter({ onSetRole, role }: RoleFilterProps) {
                render={
                   <Button
                      variant="outline"
-                     className="capitalize justify-between min-w-40"
+                     className="capitalize justify-between min-w-22"
                   >
                      {role === 'all' && 'all'}
                      {role === 'editor' && 'editor'}
@@ -38,7 +38,7 @@ function RoleFilter({ onSetRole, role }: RoleFilterProps) {
             <DropdownMenuContent>
                <DropdownMenuGroup>
                   <DropdownMenuItem onClick={() => onSetRole('all')}>
-                     All Pages{' '}
+                     All{' '}
                      {role === 'all' && <Check className="ml-auto size-4" />}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => onSetRole('editor')}>

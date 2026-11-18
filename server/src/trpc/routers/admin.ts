@@ -1,10 +1,11 @@
 import { z } from 'zod';
-import { and, asc, desc, eq, inArray, or } from 'drizzle-orm';
+import { and, asc, count, desc, eq, inArray, or } from 'drizzle-orm';
 import { router, adminProcedure } from '@/trpc/trpc.js';
 import { TRPCError } from '@trpc/server';
 import {
    adminRoleRequestSchema,
    isEditor,
+   listRoleChangesSchema,
    listRoleRequestsSchema,
    reviewRoleRequestSchema,
    userRoleSchema,
@@ -304,28 +305,38 @@ export const adminRouter = router({
       }),
 
    listRoleChanges: adminProcedure
-      .input(listRoleRequestsSchema)
+      .input(listRoleChangesSchema)
       .query(async ({ ctx, input }) => {
+         const offset = (input.page - 1) * input.limit;
+
          const order =
             input.sort === 'newest'
                ? desc(roleChanges.createdAt)
                : asc(roleChanges.createdAt);
 
-         const rows = await db
-            .select({
-               id: roleChanges.id,
-               actorId: roleChanges.actorId,
-               targetId: roleChanges.targetId,
-               actorUsername: roleChanges.actorUsername,
-               targetUsername: roleChanges.targetUsername,
-               oldRole: roleChanges.oldRole,
-               newRole: roleChanges.newRole,
-               source: roleChanges.source,
-               createdAt: roleChanges.createdAt,
-            })
-            .from(roleChanges)
-            .orderBy(order, desc(roleChanges.createdAt));
+         const [results, [{ total }]] = await Promise.all([
+            db
+               .select({
+                  id: roleChanges.id,
+                  actorId: roleChanges.actorId,
+                  targetId: roleChanges.targetId,
+                  actorUsername: roleChanges.actorUsername,
+                  targetUsername: roleChanges.targetUsername,
+                  oldRole: roleChanges.oldRole,
+                  newRole: roleChanges.newRole,
+                  source: roleChanges.source,
+                  createdAt: roleChanges.createdAt,
+               })
+               .from(roleChanges)
+               .limit(input.limit)
+               .offset(offset)
+               .orderBy(order, desc(roleChanges.createdAt)),
+            db.select({ total: count() }).from(roleChanges).limit(input.limit),
+         ]);
 
-         return rows;
+         return {
+            roleChanges: results,
+            totalPages: Math.ceil(Number(total) / input.limit),
+         };
       }),
 });

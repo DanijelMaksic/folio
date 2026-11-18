@@ -62,7 +62,7 @@ function VersionsTab() {
          <div className="flex items-center justify-between">
             <h2 className="text-lg font-medium">Versions</h2>
 
-            <DropdownMenu modal={false} disabled={versions?.length! < 2}>
+            <DropdownMenu modal={false} disabled={!versions}>
                <DropdownMenuTrigger
                   render={
                      <Button

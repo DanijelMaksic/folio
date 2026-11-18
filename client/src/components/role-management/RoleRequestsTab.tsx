@@ -115,7 +115,7 @@ function RoleRequestsTab() {
 
             {data && (
                <div
-                  className={`flex items-center gap-2 border rounded-md ${data?.length! < 2 ? 'opacity-50 pointer-events-none' : ''}`}
+                  className={`flex items-center gap-2 border rounded-md ${!data?.length ? 'opacity-50 pointer-events-none' : ''}`}
                >
                   <span className="pl-3">
                      <ArrowUpDown className="text-gray-500" />

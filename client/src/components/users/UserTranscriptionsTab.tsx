@@ -62,7 +62,7 @@ function UserTranscriptionsTab({ userId }: { userId: string }) {
             </h3>
 
             <div
-               className={`flex items-center gap-2 border rounded-md ${data?.versions?.length! < 2 ? 'opacity-50 pointer-events-none' : ''}`}
+               className={`flex items-center gap-2 border rounded-md ${!data?.versions ? 'opacity-50 pointer-events-none' : ''}`}
             >
                <span className="pl-3">
                   <ArrowUpDown className="text-gray-500" />
