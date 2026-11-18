@@ -171,6 +171,33 @@ function PageDetails() {
       );
    }
 
+   useEffect(() => {
+      const onKey = (e: KeyboardEvent) => {
+         const t = e.target as HTMLElement;
+         const typing =
+            t.tagName === 'INPUT' ||
+            t.tagName === 'TEXTAREA' ||
+            t.isContentEditable;
+
+         let dir = 0;
+         if (e.ctrlKey && e.altKey && e.key === 'ArrowLeft') dir = -1;
+         else if (e.ctrlKey && e.altKey && e.key === 'ArrowRight') dir = 1;
+         else if (!typing && !e.ctrlKey && !e.metaKey && !e.altKey) {
+            if (e.key === '[') dir = -1;
+            else if (e.key === ']') dir = 1;
+         }
+         if (!dir || !page) return;
+
+         const next = page.pageNumber + dir;
+         if (next < 1 || next > pageCount) return;
+         e.preventDefault();
+         navigate(`/documents/${documentId}/pages/${next}`);
+      };
+
+      window.addEventListener('keydown', onKey);
+      return () => window.removeEventListener('keydown', onKey);
+   }, [page, pageCount, documentId, navigate]);
+
    if (isLoading) return <p>Loading...</p>;
    if (!page) return <p>Page not found</p>;
 

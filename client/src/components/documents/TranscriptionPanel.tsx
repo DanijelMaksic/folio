@@ -125,6 +125,24 @@ function TranscriptionPanel({
       pendingSelection.current = [pos, pos];
    }
 
+   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+      if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
+      if (isSubmitted || isBlank) return;
+
+      const key = e.key.toLowerCase();
+
+      if (key === 's') {
+         e.preventDefault();
+         if (hasContent && !updateMutation.isPending) handleSave();
+      } else if (key === 'i') {
+         e.preventDefault();
+         wrapSelection('<i>', '</i>');
+      } else if (key === 'u') {
+         e.preventDefault();
+         wrapSelection('<u>', '</u>');
+      }
+   }
+
    useLayoutEffect(() => {
       const sel = pendingSelection.current;
       const el = textareaRef.current;
@@ -230,13 +248,30 @@ function TranscriptionPanel({
                            {preview ? 'Edit' : 'Preview'}
                         </button>
 
-                        <button
-                           className="px-3 py-1 text-sm border disabled:pointer-events-none rounded hover:bg-muted disabled:opacity-50"
-                           onClick={handleSave}
-                           disabled={updateMutation.isPending || !hasContent}
-                        >
-                           {updateMutation.isPending ? 'Saving...' : 'Save'}
-                        </button>
+                        <Tooltip>
+                           <TooltipTrigger
+                              render={
+                                 <button
+                                    className="px-3 py-1 text-sm border disabled:pointer-events-none rounded hover:bg-muted disabled:opacity-50"
+                                    onClick={handleSave}
+                                    disabled={
+                                       updateMutation.isPending || !hasContent
+                                    }
+                                 >
+                                    {updateMutation.isPending
+                                       ? 'Saving...'
+                                       : 'Save'}
+                                 </button>
+                              }
+                           />
+                           <TooltipContent>
+                              <p className="max-w-44">
+                                 {navigator.platform === 'Win32'
+                                    ? 'Ctrl+S'
+                                    : 'Cmd+S'}
+                              </p>
+                           </TooltipContent>
+                        </Tooltip>
 
                         <button
                            className="px-3 py-1 text-sm bg-primary text-primary-foreground disabled:pointer-events-none rounded  hover:opacity-90 disabled:opacity-50"
@@ -321,6 +356,7 @@ function TranscriptionPanel({
                            : 'min-h-90 resize-y'
                      }`}
                      value={transcriptionContent}
+                     onKeyDown={handleKeyDown}
                      ref={textareaRef}
                      readOnly={isBlank}
                      data-testid="transcription-content"
@@ -362,13 +398,32 @@ function TranscriptionPanel({
                               {preview ? 'Edit' : 'Preview'}
                            </button>
 
-                           <button
-                              className="px-3 py-1 text-sm border disabled:pointer-events-none rounded hover:bg-muted disabled:opacity-50"
-                              onClick={handleSave}
-                              disabled={updateMutation.isPending || !hasContent}
-                           >
-                              {updateMutation.isPending ? 'Saving...' : 'Save'}
-                           </button>
+                           <Tooltip>
+                              <TooltipTrigger
+                                 render={
+                                    <button
+                                       className="px-3 py-1 text-sm border disabled:pointer-events-none rounded hover:bg-muted disabled:opacity-50"
+                                       onClick={handleSave}
+                                       disabled={
+                                          updateMutation.isPending ||
+                                          !hasContent
+                                       }
+                                    >
+                                       {updateMutation.isPending
+                                          ? 'Saving...'
+                                          : 'Save'}
+                                    </button>
+                                 }
+                              />
+                              <TooltipContent>
+                                 <p className="max-w-44">
+                                    {' '}
+                                    {navigator.platform === 'Win32'
+                                       ? 'Ctrl+S'
+                                       : 'Cmd+S'}
+                                 </p>
+                              </TooltipContent>
+                           </Tooltip>
 
                            <button
                               className="px-3 py-1 text-sm bg-primary text-primary-foreground disabled:pointer-events-none rounded  hover:opacity-90 disabled:opacity-50"

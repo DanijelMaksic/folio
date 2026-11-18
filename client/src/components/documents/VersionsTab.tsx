@@ -60,7 +60,7 @@ function VersionsTab() {
    return (
       <div className="space-y-3 border rounded-md px-4 py-3">
          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-medium">Versions</h2>
+            <h2 className="text-lg font-medium">Version history</h2>
 
             <DropdownMenu modal={false} disabled={!versions}>
                <DropdownMenuTrigger
