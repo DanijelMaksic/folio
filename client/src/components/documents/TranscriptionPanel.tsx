@@ -13,6 +13,7 @@ import TranscriptionText from '@/components/documents/TranscriptionText';
 import { useParams } from 'react-router-dom';
 import GuestTranscriptionPanel from '@/components/documents/GuestTranscriptionPanel';
 import { useViewerStore } from '@/store/useViewerStore';
+import SubmitModal from '@/components/documents/SubmitModal';
 
 function TranscriptionPanel({
    canTranscribe,
@@ -26,6 +27,7 @@ function TranscriptionPanel({
    const [transcriptionContent, setTranscriptionContent] = useState('');
    const [isBlank, setIsBlank] = useState(false);
    const [preview, setPreview] = useState(false);
+   const [isSubmitOpen, setIsSubmitOpen] = useState(false);
 
    const { focusMode, imagePosition } = useViewerStore();
 
@@ -82,6 +84,7 @@ function TranscriptionPanel({
 
    function handleSave() {
       if (!transcription) return;
+
       updateMutation.mutate({
          transcriptionId: transcription.id,
          content: transcriptionContent,
@@ -96,6 +99,7 @@ function TranscriptionPanel({
          content: transcriptionContent,
          isBlank: isBlank,
       });
+      setIsSubmitOpen(false);
    }
 
    function wrapSelection(open: string, close: string) {
@@ -131,6 +135,12 @@ function TranscriptionPanel({
 
       const key = e.key.toLowerCase();
 
+      if (e.shiftKey && key === 'x') {
+         e.preventDefault();
+         wrapSelection('<del>', '</del>');
+         return;
+      }
+
       if (key === 's') {
          e.preventDefault();
          if (hasContent && !updateMutation.isPending) handleSave();
@@ -140,6 +150,12 @@ function TranscriptionPanel({
       } else if (key === 'u') {
          e.preventDefault();
          wrapSelection('<u>', '</u>');
+      } else if (key === 'enter') {
+         e.preventDefault();
+         setIsSubmitOpen(true);
+      } else if (key === 'p') {
+         e.preventDefault();
+         setPreview(true);
       }
    }
 
@@ -427,7 +443,7 @@ function TranscriptionPanel({
 
                            <button
                               className="px-3 py-1 text-sm bg-primary text-primary-foreground disabled:pointer-events-none rounded  hover:opacity-90 disabled:opacity-50"
-                              onClick={handleSubmit}
+                              onClick={() => setIsSubmitOpen(true)}
                               disabled={submitMutation.isPending || !hasContent}
                            >
                               {submitMutation.isPending
@@ -439,6 +455,15 @@ function TranscriptionPanel({
                   </div>
                )}
             </>
+         )}
+
+         {isSubmitOpen && (
+            <SubmitModal
+               onSubmit={handleSubmit}
+               onClose={() => setIsSubmitOpen(false)}
+               isPending={submitMutation.isPending}
+               hasContent={hasContent}
+            />
          )}
       </div>
    );

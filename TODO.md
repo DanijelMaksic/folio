@@ -29,3 +29,4 @@
 ## Things to refactor
 
 - Make functions like `handleTabChange()` a separate component
+- Parts of UI (save and submit buttons) are used twice (`TranscriptionPanel.tsx`)
