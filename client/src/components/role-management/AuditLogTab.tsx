@@ -1,6 +1,14 @@
 import { timeAgo } from '@/lib/helpers';
 import { trpc } from '@/lib/trpc';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import {
+   DropdownMenu,
+   DropdownMenuContent,
+   DropdownMenuItem,
+   DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { ArrowUpDown, Check, ChevronDown } from 'lucide-react';
 
 type RoleChangesSort = 'newest' | 'oldest';
 
@@ -14,8 +22,25 @@ const SORT_LABELS: Record<RoleChangesSort, string> = {
 function AuditLogTab() {
    const [searchParams, setSearchParams] = useSearchParams();
 
-   const { data: roleChanges, isLoading } =
-      trpc.admin.listRoleChanges.useQuery();
+   const utils = trpc.useUtils();
+
+   const rawSort = searchParams.get('sort') as RoleChangesSort | null;
+   const sort: RoleChangesSort =
+      rawSort && SORTS.includes(rawSort) ? rawSort : 'newest';
+
+   const { data: roleChanges, isLoading } = trpc.admin.listRoleChanges.useQuery(
+      { sort },
+   );
+
+   const handleSetSort = (newSort: RoleChangesSort) => {
+      setSearchParams((prev) => {
+         const next = new URLSearchParams(prev);
+         if (newSort === 'newest') next.delete('sort');
+         else next.set('sort', newSort);
+         next.set('page', '1');
+         return next;
+      });
+   };
 
    if (isLoading) {
       return (
@@ -43,7 +68,38 @@ function AuditLogTab() {
          <div className="flex items-center justify-between gap-3">
             <h3 className="text-xl font-medium">Role changes</h3>
 
-            <p className="text-[1rem]">Sort by: Newest</p>
+            <div
+               className={`flex items-center gap-2 border rounded-md ${roleChanges?.length! < 2 ? 'opacity-50 pointer-events-none' : ''}`}
+            >
+               <span className="pl-3">
+                  <ArrowUpDown className="text-gray-500" />
+               </span>
+
+               <DropdownMenu modal={false}>
+                  <DropdownMenuTrigger
+                     render={
+                        <Button
+                           variant="outline"
+                           className="justify-between min-w-26"
+                        >
+                           {SORT_LABELS[sort]}
+                           <ChevronDown className="size-4 text-muted-foreground" />
+                        </Button>
+                     }
+                  />
+                  <DropdownMenuContent align="end">
+                     {SORTS.map((s) => (
+                        <DropdownMenuItem
+                           key={s}
+                           onClick={() => handleSetSort(s)}
+                        >
+                           {SORT_LABELS[s]}
+                           {s === sort && <Check className="ml-auto size-4" />}
+                        </DropdownMenuItem>
+                     ))}
+                  </DropdownMenuContent>
+               </DropdownMenu>
+            </div>
          </div>
 
          <ul className="mt-4">
@@ -53,18 +109,24 @@ function AuditLogTab() {
                   className="border-t py-3 last:border-b flex items-center gap-3 justify-between"
                >
                   <div className="flex items-center gap-1.5">
-                     <span className="font-medium underline">
-                        {c.actorUsername ?? 'Delete user'}
-                     </span>
+                     <Link
+                        to={`/users/${c.actorUsername}`}
+                        className="font-medium underline hover:text-gray-700"
+                     >
+                        {c.actorUsername ?? 'Deleted user'}
+                     </Link>
                      {(c.oldRole === 'contributor' && c.newRole === 'editor') ||
                      (c.oldRole === 'editor' && c.newRole === 'admin') ? (
                         <span>promoted</span>
                      ) : (
                         <span>demoted</span>
                      )}
-                     <span className="font-medium underline">
-                        {c.targetUsername ?? 'Delete user'}
-                     </span>
+                     <Link
+                        to={`/users/${c.targetUsername}`}
+                        className="font-medium underline hover:text-gray-700"
+                     >
+                        {c.targetUsername ?? 'Deleted user'}
+                     </Link>
                      <span>from</span>
                      <span className="border border-gray-300 rounded-full px-2.5">
                         {c.oldRole}

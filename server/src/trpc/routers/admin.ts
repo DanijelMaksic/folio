@@ -304,12 +304,12 @@ export const adminRouter = router({
       }),
 
    listRoleChanges: adminProcedure
-      // .input(listRoleRequestsSchema)
+      .input(listRoleRequestsSchema)
       .query(async ({ ctx, input }) => {
-         // const order =
-         //    input.sort === 'newest'
-         //       ? desc(roleChanges.createdAt)
-         //       : asc(roleChanges.createdAt);
+         const order =
+            input.sort === 'newest'
+               ? desc(roleChanges.createdAt)
+               : asc(roleChanges.createdAt);
 
          const rows = await db
             .select({
@@ -324,7 +324,7 @@ export const adminRouter = router({
                createdAt: roleChanges.createdAt,
             })
             .from(roleChanges)
-            .orderBy(desc(roleChanges.createdAt));
+            .orderBy(order, desc(roleChanges.createdAt));
 
          return rows;
       }),
