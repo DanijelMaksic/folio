@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { ArrowUpDown, Check, ChevronDown } from 'lucide-react';
 import AppPagination from '@/components/shared/AppPagination';
+import RoleChangeTypeFilter from '@/components/role-management/RoleChangeTypeFilter';
 
 type RoleChangesSort = 'newest' | 'oldest';
 
@@ -19,6 +20,10 @@ const SORT_LABELS: Record<RoleChangesSort, string> = {
    newest: 'Newest',
    oldest: 'Oldest',
 };
+
+export type RoleChangeType = 'all' | 'promotion' | 'demotion';
+
+const VALID_ROLES: RoleChangeType[] = ['all', 'promotion', 'demotion'];
 
 function AuditLogTab() {
    const [searchParams, setSearchParams] = useSearchParams();
@@ -30,10 +35,15 @@ function AuditLogTab() {
 
    const page = Math.max(Number(searchParams.get('page')) || 1, 1);
 
+   const rawType = searchParams.get('role') as RoleChangeType | null;
+   const type: RoleChangeType =
+      rawType && VALID_ROLES.includes(rawType) ? rawType : 'all';
+
    const { data, isLoading } = trpc.admin.listRoleChanges.useQuery({
       limit: 20,
       sort,
       page,
+      type,
    });
 
    const handleSetSort = (newSort: RoleChangesSort) => {
@@ -50,6 +60,18 @@ function AuditLogTab() {
       setSearchParams((prev) => {
          const next = new URLSearchParams(prev);
          next.set('page', String(newPage));
+         return next;
+      });
+   };
+
+   const handleSetType = (newType: RoleChangeType) => {
+      setSearchParams((prev) => {
+         const next = new URLSearchParams(prev);
+         if (newType === 'all') {
+            next.delete('role');
+         } else {
+            next.set('role', newType);
+         }
          return next;
       });
    };
@@ -80,37 +102,43 @@ function AuditLogTab() {
          <div className="flex items-center justify-between gap-3">
             <h3 className="text-xl font-medium">Role changes</h3>
 
-            <div
-               className={`flex items-center gap-2 border rounded-md ${!data.roleChanges ? 'opacity-50 pointer-events-none' : ''}`}
-            >
-               <span className="pl-3">
-                  <ArrowUpDown className="text-gray-500" />
-               </span>
+            <div className="flex items-center gap-3">
+               <RoleChangeTypeFilter onSetType={handleSetType} type={type} />
 
-               <DropdownMenu modal={false}>
-                  <DropdownMenuTrigger
-                     render={
-                        <Button
-                           variant="outline"
-                           className="justify-between min-w-26"
-                        >
-                           {SORT_LABELS[sort]}
-                           <ChevronDown className="size-4 text-muted-foreground" />
-                        </Button>
-                     }
-                  />
-                  <DropdownMenuContent align="end">
-                     {SORTS.map((s) => (
-                        <DropdownMenuItem
-                           key={s}
-                           onClick={() => handleSetSort(s)}
-                        >
-                           {SORT_LABELS[s]}
-                           {s === sort && <Check className="ml-auto size-4" />}
-                        </DropdownMenuItem>
-                     ))}
-                  </DropdownMenuContent>
-               </DropdownMenu>
+               <div
+                  className={`flex items-center gap-2 border rounded-md ${!data.roleChanges ? 'opacity-50 pointer-events-none' : ''}`}
+               >
+                  <span className="pl-3">
+                     <ArrowUpDown className="text-gray-500" />
+                  </span>
+
+                  <DropdownMenu modal={false}>
+                     <DropdownMenuTrigger
+                        render={
+                           <Button
+                              variant="outline"
+                              className="justify-between min-w-26"
+                           >
+                              {SORT_LABELS[sort]}
+                              <ChevronDown className="size-4 text-muted-foreground" />
+                           </Button>
+                        }
+                     />
+                     <DropdownMenuContent align="end">
+                        {SORTS.map((s) => (
+                           <DropdownMenuItem
+                              key={s}
+                              onClick={() => handleSetSort(s)}
+                           >
+                              {SORT_LABELS[s]}
+                              {s === sort && (
+                                 <Check className="ml-auto size-4" />
+                              )}
+                           </DropdownMenuItem>
+                        ))}
+                     </DropdownMenuContent>
+                  </DropdownMenu>
+               </div>
             </div>
          </div>
 

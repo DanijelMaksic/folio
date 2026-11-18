@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { and, asc, count, desc, eq, inArray, or } from 'drizzle-orm';
+import { and, asc, count, desc, eq, inArray, not, or, sql } from 'drizzle-orm';
 import { router, adminProcedure } from '@/trpc/trpc.js';
 import { TRPCError } from '@trpc/server';
 import {
@@ -309,6 +309,15 @@ export const adminRouter = router({
       .query(async ({ ctx, input }) => {
          const offset = (input.page - 1) * input.limit;
 
+         const promotion = sql`(case ${roleChanges.newRole} when 'admin' then 3 when 'editor' then 2 else 1 end) > (case ${roleChanges.oldRole} when 'admin' then 3 when 'editor' then 2 else 1 end)`;
+
+         const where =
+            input.type === 'promotion'
+               ? promotion
+               : input.type === 'demotion'
+                 ? not(promotion)
+                 : undefined;
+
          const order =
             input.sort === 'newest'
                ? desc(roleChanges.createdAt)
@@ -328,10 +337,11 @@ export const adminRouter = router({
                   createdAt: roleChanges.createdAt,
                })
                .from(roleChanges)
+               .where(where)
                .limit(input.limit)
                .offset(offset)
-               .orderBy(order, desc(roleChanges.createdAt)),
-            db.select({ total: count() }).from(roleChanges).limit(input.limit),
+               .orderBy(order, desc(roleChanges.id)),
+            db.select({ total: count() }).from(roleChanges),
          ]);
 
          return {
