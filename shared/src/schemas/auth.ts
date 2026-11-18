@@ -202,6 +202,10 @@ export const listRoleRequestsSchema = z.object({
    sort: z.enum(['newest', 'oldest']).default('oldest'),
 });
 
+export const listRoleChangesSchema = z.object({
+   sort: z.enum(['newest', 'oldest']).default('oldest'),
+});
+
 export const userRoleSchema = z.object({
    userId: z.string(),
    role: z.enum(GLOBAL_ROLES),
@@ -227,3 +231,4 @@ export type RejectRoleRequestInput = z.infer<
 >;
 export type AdminRoleRequestOutput = z.infer<typeof adminRoleRequestSchema>;
 export type ListRoleRequestsInput = z.infer<typeof listRoleRequestsSchema>;
+export type ListRoleChangesInput = z.infer<typeof listRoleChangesSchema>;

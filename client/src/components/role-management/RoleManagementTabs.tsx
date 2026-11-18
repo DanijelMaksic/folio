@@ -2,6 +2,7 @@ import PromoteAdminsTab from '@/components/role-management/PromoteAdminsTab';
 import RoleRequestsTab from '@/components/role-management/RoleRequestsTab';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import DemoteStaffTab from './DemoteStaffTab';
+import AuditLogTab from './AuditLogTab';
 
 export interface RoleManagementTabsProps {
    tab: string;
@@ -50,7 +51,7 @@ function RoleManagementTabs({ tab, onTabChange }: RoleManagementTabsProps) {
                <DemoteStaffTab />
             </TabsContent>
             <TabsContent value="audit-log">
-               <span>Audit log tab</span>
+               <AuditLogTab />
             </TabsContent>
          </Tabs>
       </div>

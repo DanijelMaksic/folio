@@ -302,4 +302,30 @@ export const adminRouter = router({
 
          return { success: true };
       }),
+
+   listRoleChanges: adminProcedure
+      // .input(listRoleRequestsSchema)
+      .query(async ({ ctx, input }) => {
+         // const order =
+         //    input.sort === 'newest'
+         //       ? desc(roleChanges.createdAt)
+         //       : asc(roleChanges.createdAt);
+
+         const rows = await db
+            .select({
+               id: roleChanges.id,
+               actorId: roleChanges.actorId,
+               targetId: roleChanges.targetId,
+               actorUsername: roleChanges.actorUsername,
+               targetUsername: roleChanges.targetUsername,
+               oldRole: roleChanges.oldRole,
+               newRole: roleChanges.newRole,
+               source: roleChanges.source,
+               createdAt: roleChanges.createdAt,
+            })
+            .from(roleChanges)
+            .orderBy(desc(roleChanges.createdAt));
+
+         return rows;
+      }),
 });

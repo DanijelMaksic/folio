@@ -1,6 +1,5 @@
 ## Things to add
 
-- Audit table
 - Overview and preview show line numbers on the left of panel
 - "Fully transcribed" label in `DocumentCard.tsx`, and maybe in `DocumentPages.tsx` add "All pages as fully transcribed"
 - Save transcription with ctrl + s shortcut (add into about this in guidelines)

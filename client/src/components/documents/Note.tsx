@@ -16,27 +16,10 @@ import { useSession } from '@/lib/auth-client';
 import { trpc } from '@/lib/trpc';
 import { zodResolver } from '@/lib/zod-resolver';
 import { Link } from 'react-router-dom';
+import { timeAgo } from '@/lib/helpers';
 
 type NoteData =
    inferRouterOutputs<AppRouter>['notes']['listByPage']['notes'][number];
-
-const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' });
-
-function timeAgo(date: string | Date) {
-   const seconds = Math.round((new Date(date).getTime() - Date.now()) / 1000);
-   const units: [Intl.RelativeTimeFormatUnit, number][] = [
-      ['year', 31536000],
-      ['month', 2592000],
-      ['day', 86400],
-      ['hour', 3600],
-      ['minute', 60],
-   ];
-   for (const [unit, size] of units) {
-      if (Math.abs(seconds) >= size)
-         return rtf.format(Math.round(seconds / size), unit);
-   }
-   return 'just now';
-}
 
 function Note({ note }: { note: NoteData }) {
    const { data: session } = useSession();
