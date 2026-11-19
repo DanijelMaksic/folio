@@ -46,7 +46,7 @@ export function DocumentCard({ document }: { document: Document }) {
             </h2>
          </div>
 
-         {stats?.totalPages === stats?.transcribedPages && (
+         {stats?.percent === 100 && (
             <div className="absolute top-2 right-2 z-10">
                <Check className="bg-gray-100 rounded-full p-0.5 shadow-md" />
             </div>

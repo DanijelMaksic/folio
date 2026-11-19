@@ -21,8 +21,11 @@ function StatisticsTab({ collectionId }: { collectionId: string }) {
          percent={stats.percent}
          items={[
             { label: 'Documents', value: stats.totalDocuments },
-            { label: 'Total pages', value: stats.totalPages },
-            { label: 'Transcribed', value: stats.transcribedPages },
+            {
+               label: 'Transcribed documents',
+               value: stats.transcribedDocuments,
+            },
+            { label: 'Transcribed pages', value: stats.transcribedPages },
             { label: 'Awaiting review', value: stats.submittedPages },
             { label: 'Not started', value: stats.notStartedPages },
             { label: 'Contributors', value: stats.contributors },

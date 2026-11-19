@@ -75,6 +75,20 @@ export async function getCollectionProgress(collectionId: string) {
             SELECT COUNT(*) FROM documents
             WHERE collection_id = ${collectionId} AND status = 'ready'
          )`.mapWith(Number),
+         transcribedDocuments: sql<number>`(
+            SELECT COUNT(*) FROM documents d
+            WHERE d.collection_id = ${collectionId}
+            AND d.status = 'ready'
+            AND EXISTS (SELECT 1 FROM document_pages p WHERE p.document_id = d.id)
+            AND NOT EXISTS (
+            SELECT 1 FROM document_pages p
+            WHERE p.document_id = d.id
+            AND NOT EXISTS (
+               SELECT 1 FROM transcriptions t
+               WHERE t.page_id = p.id AND t.status = 'approved'
+          )
+     )
+)`.mapWith(Number),
       })
       .from(pages)
       .innerJoin(documents, eq(documents.id, pages.documentId))
@@ -91,6 +105,7 @@ export async function getCollectionProgress(collectionId: string) {
 
    return {
       totalDocuments: row?.totalDocuments ?? 0,
+      transcribedDocuments: row?.transcribedDocuments ?? 0,
       totalPages,
       transcribedPages,
       submittedPages,
