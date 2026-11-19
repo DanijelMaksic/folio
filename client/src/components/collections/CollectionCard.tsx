@@ -1,9 +1,15 @@
 import { useCloudinaryUrl } from '@/hooks/useCloudinaryUrl';
+import { trpc } from '@/lib/trpc';
 import { Collection } from '@shared';
+import { Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export function CollectionCard({ collection }: { collection: Collection }) {
    const { id, title, creatorName, coverImageUrl } = collection;
+
+   const { data: stats } = trpc.collections.getStats.useQuery({
+      id: collection.id,
+   });
 
    const { detail } = useCloudinaryUrl();
 
@@ -36,11 +42,15 @@ export function CollectionCard({ collection }: { collection: Collection }) {
                className="text-gray-50 text-xl font-medium font-title leading-9.5 2xl:leading-9 lg:leading-8 md:leading-10"
                style={{ textShadow: '2px 2px 12px rgba(0, 0, 0, 1)' }}
             >
-               {collection?.title.length > 35
-                  ? `${collection?.title.slice(0, 35)}...`
-                  : collection?.title}
+               {title.length > 35 ? `${title.slice(0, 35)}...` : title}
             </h2>
          </div>
+
+         {stats?.percent === 100 && (
+            <div className="absolute top-2 right-2 z-10">
+               <Check className="bg-gray-100 rounded-full p-0.5 shadow-md" />
+            </div>
+         )}
       </Link>
    );
 }
