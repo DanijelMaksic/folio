@@ -2,6 +2,7 @@ import { pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 import { documentStatusEnum } from './enums.js';
 import { user } from './auth.js';
 import { collections } from './collections.js';
+import { categories } from '@/db/schema/categories.js';
 
 export const documents = pgTable('documents', {
    id: text()
@@ -18,4 +19,7 @@ export const documents = pgTable('documents', {
    }),
    createdAt: timestamp().notNull().defaultNow(),
    updatedAt: timestamp().notNull().defaultNow(),
+   categoryId: text('category_id').references(() => categories.id, {
+      onDelete: 'set null',
+   }),
 });

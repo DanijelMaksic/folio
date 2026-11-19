@@ -9,3 +9,4 @@ export * from './roleRequests.js';
 export * from './roleChanges.js';
 export * from './notes.js';
 export * from './versions.js';
+export * from './categories.js';

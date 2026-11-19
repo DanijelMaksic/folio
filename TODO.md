@@ -1,6 +1,5 @@
 ## Things to add
 
-- Categories
 - Home page (general info, FAQ)
 
 ## Things to fix

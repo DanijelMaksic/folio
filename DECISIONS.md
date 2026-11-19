@@ -463,6 +463,8 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Added shortcuts to the trancription panel (Ctrl+S, Ctrl+I, Ctrl+U) and to the `PageDetails.tsx` (Alt+Left Arrow, Alt+Right Arrow)
 
+- Add categories to `/documents` and `/collections`
+
 **Decisions:**
 
 - Dashboard gets its own router and route rather than living under `settings`, since it is a separate page in the client with a different purpose
