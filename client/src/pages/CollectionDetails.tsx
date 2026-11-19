@@ -218,13 +218,19 @@ function CollectionDetails() {
             <EditModal
                heading="Edit Collection"
                isPending={editCollection.isPending}
+               hasCategory
+               initialCategoryId={collection.categoryId}
+               onEdit={(values, categoryId) =>
+                  editCollection.mutate({
+                     id: collectionId!,
+                     ...values,
+                     categoryId,
+                  })
+               }
                initialTitle={collection.title}
                initialDescription={collection.description ?? ''}
                serverError={serverError}
                hasDescription={true}
-               onEdit={(values) =>
-                  editCollection.mutate({ id: collectionId!, ...values })
-               }
                onClose={() => {
                   setIsEditOpen(false);
                   setServerError('');

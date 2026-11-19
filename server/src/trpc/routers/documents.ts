@@ -1,6 +1,11 @@
 import { z } from 'zod';
 import { protectedProcedure, publicProcedure, router } from '@/trpc/trpc.js';
-import { documents, pages, transcriptions } from '@/db/schema/index.js';
+import {
+   categories,
+   documents,
+   pages,
+   transcriptions,
+} from '@/db/schema/index.js';
 import { user } from '@/db/schema/index.js';
 import { and, asc, count, desc, eq, ilike, or, sql } from 'drizzle-orm';
 import cloudinary from '@/lib/cloudinary.js';
@@ -18,6 +23,17 @@ import { escapeLike } from '@/lib/search.js';
 import { documentVisibility } from '@/lib/document-visibility.js';
 import { getDocumentProgress } from '@/lib/transcription-progress.js';
 
+export async function assertCategoryExists(categoryId?: string | null) {
+   if (!categoryId) return;
+   const [row] = await db
+      .select({ id: categories.id })
+      .from(categories)
+      .where(eq(categories.id, categoryId))
+      .limit(1);
+   if (!row)
+      throw new TRPCError({ code: 'BAD_REQUEST', message: 'Unknown category' });
+}
+
 export const documentsRouter = router({
    upload: protectedProcedure
       .input(uploadDocumentSchema)
@@ -28,6 +44,8 @@ export const documentsRouter = router({
                message: 'Only contributors and above can upload documents',
             });
          }
+
+         assertCategoryExists(input.categoryId);
 
          if (input.fileType === 'pdf') {
             if (!input.fileBase64) {
@@ -44,6 +62,7 @@ export const documentsRouter = router({
                   description: input.description ?? null,
                   uploadedBy: ctx.user.id,
                   status: 'processing',
+                  categoryId: input.categoryId ?? null,
                })
                .returning();
 
@@ -63,6 +82,7 @@ export const documentsRouter = router({
                   description: input.description ?? null,
                   uploadedBy: ctx.user.id,
                   status: 'ready',
+                  categoryId: input.categoryId ?? null,
                })
                .returning();
 
@@ -134,6 +154,7 @@ export const documentsRouter = router({
                description: input.description ?? null,
                uploadedBy: ctx.user.id,
                status: 'ready',
+               categoryId: input.categoryId ?? null,
             })
             .returning();
 
@@ -223,6 +244,12 @@ export const documentsRouter = router({
             documentVisibility(ctx.user),
             searchFilter,
             transcribedFilter,
+            input.categoryId
+               ? eq(documents.categoryId, input.categoryId)
+               : undefined,
+            input.categorySlug
+               ? eq(categories.slug, input.categorySlug)
+               : undefined,
             input.collectionId
                ? eq(documents.collectionId, input.collectionId)
                : undefined,
@@ -240,6 +267,7 @@ export const documentsRouter = router({
                   status: documents.status,
                   createdAt: documents.createdAt,
                   updatedAt: documents.updatedAt,
+                  categoryId: documents.categoryId,
                   uploaderName: user.name,
                   uploaderUsername: user.username,
                   coverImageUrl: sql<string | null>`(
@@ -255,6 +283,7 @@ export const documentsRouter = router({
                })
                .from(documents)
                .leftJoin(user, eq(user.id, documents.uploadedBy))
+               .leftJoin(categories, eq(categories.id, documents.categoryId))
                .where(where)
                .limit(input.limit)
                .offset(offset)
@@ -264,6 +293,7 @@ export const documentsRouter = router({
                .select({ total: count() })
                .from(documents)
                .leftJoin(user, eq(user.id, documents.uploadedBy))
+               .leftJoin(categories, eq(categories.id, documents.categoryId))
                .where(where),
          ]);
 
@@ -287,6 +317,7 @@ export const documentsRouter = router({
                status: documents.status,
                createdAt: documents.createdAt,
                updatedAt: documents.updatedAt,
+               categoryId: documents.categoryId,
                uploaderName: user.name,
                uploaderUsername: user.username,
                coverImageUrl: sql<string | null>`(
@@ -334,6 +365,8 @@ export const documentsRouter = router({
                message: 'Only contributors and above can edit documents',
             });
          }
+
+         await assertCategoryExists(input.categoryId);
 
          // A user cannot edit another user's document
          const [existing] = await db

@@ -9,6 +9,7 @@ import { notesRouter } from '@/trpc/routers/notes.js';
 import { usersRouter } from '@/trpc/routers/users.js';
 import { settingsRouter } from '@/trpc/routers/settings.js';
 import { versionsRouter } from '@/trpc/routers/versions.js';
+import { categoriesRouter } from '@/trpc/routers/categories.js';
 
 // API endpoints
 export const appRouter = router({
@@ -22,6 +23,7 @@ export const appRouter = router({
    notes: notesRouter,
    users: usersRouter,
    versions: versionsRouter,
+   categories: categoriesRouter,
 });
 
 // This line ensures type safety across client and server, and it is this AppRouter type that we'll use in client

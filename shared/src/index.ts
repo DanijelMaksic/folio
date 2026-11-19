@@ -8,3 +8,4 @@ export * from './schemas/notes.js';
 export * from './schemas/users.js';
 export * from './schemas/versions.js';
 export * from './transcription-parser.js';
+export * from './schemas/categories.js';

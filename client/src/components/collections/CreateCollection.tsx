@@ -7,12 +7,14 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { TRPCClientErrorLike } from '@trpc/client';
 import type { AppRouter } from '@server/trpc/router';
+import CategorySelect from '@/components/shared/CategorySelect';
 
 export default function CreateCollection() {
    const navigate = useNavigate();
    const [title, setTitle] = useState('');
    const [description, setDescription] = useState('');
    const [error, setError] = useState('');
+   const [categoryId, setCategoryId] = useState('');
 
    const createCollection = trpc.collections.create.useMutation({
       onSuccess: (collection) => navigate(`/collections/${collection.id}`),
@@ -23,6 +25,7 @@ export default function CreateCollection() {
       createCollection.mutate({
          title,
          description,
+         categoryId: categoryId || null,
       });
    };
 
@@ -45,6 +48,15 @@ export default function CreateCollection() {
                id="description"
                value={description}
                onChange={(e) => setDescription(e.target.value)}
+            />
+         </div>
+
+         <div className="space-y-2">
+            <Label htmlFor="category">Category</Label>
+            <CategorySelect
+               id="category"
+               value={categoryId}
+               onChange={setCategoryId}
             />
          </div>
 

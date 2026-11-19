@@ -401,13 +401,19 @@ function DocumentPages() {
                isPending={editDocument.isPending}
                serverError={serverError}
                hasDescription={true}
-               onEdit={(values) =>
-                  editDocument.mutate({ id: documentId!, ...values })
+               onEdit={(values, categoryId) =>
+                  editDocument.mutate({
+                     id: documentId!,
+                     ...values,
+                     categoryId,
+                  })
                }
                onClose={() => {
                   setIsEditOpen(false);
                   setServerError('');
                }}
+               hasCategory
+               initialCategoryId={document.categoryId}
             />
          )}
 

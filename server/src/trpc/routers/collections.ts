@@ -14,6 +14,8 @@ import { and, asc, count, desc, eq, ilike, or, sql } from 'drizzle-orm';
 import z from 'zod';
 import { escapeLike } from '@/lib/search.js';
 import { getCollectionProgress } from '@/lib/transcription-progress.js';
+import { categories } from '@/db/schema/categories.js';
+import { assertCategoryExists } from '@/trpc/routers/documents.js';
 
 export const collectionsRouter = router({
    create: protectedProcedure
@@ -26,11 +28,14 @@ export const collectionsRouter = router({
             });
          }
 
+         await assertCategoryExists(input.categoryId);
+
          const [collection] = await db
             .insert(collections)
             .values({
                title: input.title,
                description: input.description ?? null,
+               categoryId: input.categoryId ?? null,
                createdBy: ctx.user.id,
             })
             .returning();
@@ -105,7 +110,13 @@ export const collectionsRouter = router({
          const where = and(
             input.userId ? eq(collections.createdBy, input.userId) : undefined,
             searchWhere,
+            input.categorySlug
+               ? eq(categories.slug, input.categorySlug)
+               : undefined,
             transcribedFilter,
+            input.categoryId
+               ? eq(collections.categoryId, input.categoryId)
+               : undefined,
          );
 
          const [results, [{ total }]] = await Promise.all([
@@ -130,6 +141,7 @@ export const collectionsRouter = router({
                })
                .from(collections)
                .leftJoin(user, eq(user.id, collections.createdBy))
+               .leftJoin(categories, eq(categories.id, collections.categoryId))
                .where(where)
                .limit(input.limit)
                .offset(offset)
@@ -139,6 +151,7 @@ export const collectionsRouter = router({
                .select({ total: count() })
                .from(collections)
                .leftJoin(user, eq(user.id, collections.createdBy))
+               .leftJoin(categories, eq(categories.id, collections.categoryId))
                .where(where),
          ]);
 
@@ -162,6 +175,7 @@ export const collectionsRouter = router({
                title: collections.title,
                description: collections.description,
                createdBy: collections.createdBy,
+               categoryId: collections.categoryId,
                creatorName: user.name,
                creatorUsername: user.username,
                createdAt: collections.createdAt,
@@ -237,6 +251,8 @@ export const collectionsRouter = router({
                message: 'Only contributors and above can edit collections',
             });
          }
+         await assertCategoryExists(input.categoryId);
+
          const { id, ...fields } = input;
 
          const [existing] = await db

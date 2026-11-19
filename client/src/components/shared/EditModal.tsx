@@ -13,6 +13,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { EditFormInput, editFormSchema } from '@shared';
 import { zodResolver } from '@/lib/zod-resolver';
+import { useState } from 'react';
+import CategorySelect from '@/components/shared/CategorySelect';
 
 interface EditModalProps {
    heading: string;
@@ -21,8 +23,10 @@ interface EditModalProps {
    isPending: boolean;
    serverError?: string;
    hasDescription: boolean;
-   onEdit: (values: EditFormInput) => void;
+   onEdit: (values: EditFormInput, categoryId: string | null) => void;
    onClose: () => void;
+   hasCategory?: boolean;
+   initialCategoryId?: string | null;
 }
 
 function EditModal({
@@ -34,6 +38,8 @@ function EditModal({
    onEdit,
    onClose,
    hasDescription,
+   hasCategory,
+   initialCategoryId,
 }: EditModalProps) {
    const {
       register,
@@ -48,6 +54,10 @@ function EditModal({
          description: initialDescription,
       },
    });
+
+   const [categoryId, setCategoryId] = useState(initialCategoryId ?? '');
+   const categoryDirty =
+      hasCategory && categoryId !== (initialCategoryId ?? '');
 
    const titleLength = watch('title')?.length ?? 0;
    const descriptionLength = watch('description')?.length ?? 0;
@@ -67,7 +77,7 @@ function EditModal({
             </DialogHeader>
 
             <form
-               onSubmit={handleSubmit(onEdit)}
+               onSubmit={handleSubmit((v) => onEdit(v, categoryId || null))}
                className="space-y-4"
                noValidate
             >
@@ -116,6 +126,17 @@ function EditModal({
                   </div>
                )}
 
+               {hasCategory && (
+                  <div className="space-y-2">
+                     <Label htmlFor="edit-category-field">Category</Label>
+                     <CategorySelect
+                        id="edit-category-field"
+                        value={categoryId}
+                        onChange={setCategoryId}
+                     />
+                  </div>
+               )}
+
                {serverError && (
                   <p className="text-sm text-destructive">{serverError}</p>
                )}
@@ -133,6 +154,7 @@ function EditModal({
                      type="submit"
                      disabled={
                         !isDirty ||
+                        !categoryDirty ||
                         isPending ||
                         descriptionLength! > 1000 ||
                         titleLength > 250

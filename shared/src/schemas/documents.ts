@@ -23,6 +23,7 @@ export const uploadDocumentSchema = z
          .optional(),
 
       files: z.array(z.string()).optional(),
+      categoryId: z.string().nullable().optional(),
    })
    .refine((d) => d.fileType !== 'pdf' || !!d.fileBase64, {
       message: 'A PDF file is required',
@@ -48,6 +49,8 @@ export const listDocumentsSchema = z.object({
       ])
       .default('newest'),
    userId: z.string().optional(),
+   categoryId: z.string().nullable().optional(),
+   categorySlug: z.string().optional(),
 });
 
 export const searchDocumentsSchema = z.object({
@@ -68,6 +71,7 @@ export const updateDocumentSchema = z.object({
       .max(1000, 'Description cannot be longer than 1000 characters')
       .optional(),
    collectionId: z.string().nullable().optional(),
+   categoryId: z.string().nullable().optional(),
 });
 
 export const editFormSchema = z.object({

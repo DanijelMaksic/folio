@@ -24,13 +24,12 @@ import {
    IMAGES_MAX_TOTAL_BYTES,
    PDF_MAX_BYTES,
 } from '@shared';
+import CategorySelect from '@/components/shared/CategorySelect';
 
 interface SelectedFile {
    file: File;
    previewUrl: string | null; // object URL for images, null for PDF
 }
-
-const DESCRIPTION_MAX = 1000;
 
 const formatSize = (bytes: number) => {
    if (bytes < 1024) return `${bytes} B`;
@@ -52,6 +51,7 @@ export default function UploadDocument() {
    const [fileType, setFileType] = useState<'image' | 'pdf'>('image');
    const [fileError, setFileError] = useState('');
    const fileInputRef = useRef<HTMLInputElement>(null);
+   const [categoryId, setCategoryId] = useState('');
 
    const {
       register,
@@ -145,17 +145,19 @@ export default function UploadDocument() {
    const onSubmit = async ({ title, description }: EditFormInput) => {
       setFileError('');
 
+      const base = { title, description, categoryId: categoryId || null };
+
       try {
          if (selectedFiles.length === 0) {
-            upload.mutate({ title, description });
+            upload.mutate(base);
          } else if (fileType === 'pdf') {
             const fileBase64 = await toBase64(selectedFiles[0].file);
-            upload.mutate({ fileType: 'pdf', title, description, fileBase64 });
+            upload.mutate({ ...base, fileType: 'pdf', fileBase64 });
          } else {
             const files = await Promise.all(
                selectedFiles.map((sf) => toBase64(sf.file)),
             );
-            upload.mutate({ fileType: 'image', title, description, files });
+            upload.mutate({ ...base, fileType: 'image', files });
          }
       } catch {
          setFileError('Failed to read file(s). Please try again.');
@@ -212,6 +214,15 @@ export default function UploadDocument() {
                   </span>
                )}
             </div>
+         </div>
+
+         <div className="space-y-2">
+            <Label htmlFor="category">Category</Label>
+            <CategorySelect
+               id="category"
+               value={categoryId}
+               onChange={setCategoryId}
+            />
          </div>
 
          <div className="space-y-2">

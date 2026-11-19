@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import TranscriptionFilter from '@/components/documents/TranscriptionFilter';
 import DocTranscribedFilter from '@/components/documents/DocTranscribedFilter';
+import CategorySidebar from '@/components/shared/CategorySidebar';
 
 export type DocumentSort = 'newest' | 'oldest' | 'title-asc' | 'title-desc';
 
@@ -60,6 +61,8 @@ export default function Documents() {
          ? rawStatus
          : 'all-documents';
 
+   const category = searchParams.get('cat') ?? '';
+
    const { data, isLoading } = trpc.documents.list.useQuery(
       {
          page,
@@ -67,6 +70,7 @@ export default function Documents() {
          search: search || undefined,
          sort,
          status,
+         categorySlug: category || undefined,
       },
       {
          placeholderData: (prev) => prev,
@@ -100,6 +104,16 @@ export default function Documents() {
          } else {
             next.set('status', newStatus);
          }
+         next.set('page', '1');
+         return next;
+      });
+   };
+
+   const handleSetCategory = (slug: string) => {
+      setSearchParams((prev) => {
+         const next = new URLSearchParams(prev);
+         if (slug) next.set('cat', slug);
+         else next.delete('cat');
          next.set('page', '1');
          return next;
       });
@@ -195,10 +209,8 @@ export default function Documents() {
             </div>
          </div>
 
-         <div className="grid grid-cols-[2fr_8fr] gap-12">
-            <div className="flex gap-6 flex-col">
-               <h3 className="font-medium text-xl">Categories</h3>
-            </div>
+         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[14rem_minmax(0,1fr)] lg:gap-12">
+            <CategorySidebar value={category} onChange={handleSetCategory} />
 
             <div>
                {isLoading ? (

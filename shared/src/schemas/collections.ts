@@ -10,6 +10,7 @@ export const createCollectionSchema = z.object({
       .string()
       .max(1000, 'Description cannot be longer than 1000 characters')
       .optional(),
+   categoryId: z.string().nullable().optional(),
 });
 
 export const listCollectionsSchema = z.object({
@@ -23,6 +24,8 @@ export const listCollectionsSchema = z.object({
       .enum(['newest', 'oldest', 'title-asc', 'title-desc', 'most-documents'])
       .default('newest'),
    userId: z.string().optional(),
+   categoryId: z.string().nullable().optional(),
+   categorySlug: z.string().optional(),
 });
 
 export const updateCollectionSchema = createCollectionSchema
