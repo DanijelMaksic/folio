@@ -1,10 +1,7 @@
 ## Things to add
 
-- Warning modal window when submitting transcription
 - "Fully transcribed" label in `DocumentCard.tsx`, and maybe in `DocumentPages.tsx` add "All pages as fully transcribed"
 - Categories
-
-- In `DocumentCard.tsx` add completion %, but only if it's above 0%
 - Home page (general info, FAQ)
 
 ## Things to fix
