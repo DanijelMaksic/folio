@@ -207,9 +207,22 @@ export const documentsRouter = router({
             : undefined;
          // processing/failed ones (so they can follow progress or delete)
 
+         const fullyTranscribedSql = sql`(${pageCountSql} > 0 AND ${pageCountSql} = ${transcribedCountSql})`;
+
+         const transcribedFilter =
+            input.status === 'transcribed'
+               ? and(eq(documents.status, 'ready'), fullyTranscribedSql)
+               : input.status === 'not-transcribed'
+                 ? and(
+                      eq(documents.status, 'ready'),
+                      sql`NOT ${fullyTranscribedSql}`,
+                   )
+                 : undefined;
+
          const where = and(
             documentVisibility(ctx.user),
             searchFilter,
+            transcribedFilter,
             input.collectionId
                ? eq(documents.collectionId, input.collectionId)
                : undefined,

@@ -29,11 +29,11 @@ function TranscriptionFilter({
                render={
                   <Button
                      variant="outline"
-                     className="capitalize justify-between min-w-40"
+                     className="justify-between min-w-40"
                   >
-                     {status === 'all-pages' && 'all pages'}
-                     {status === 'transcribed' && 'transcribed'}
-                     {status === 'not-transcribed' && 'not transcribed'}
+                     {status === 'all-pages' && 'All pages'}
+                     {status === 'transcribed' && 'Transcribed'}
+                     {status === 'not-transcribed' && 'Not transcribed'}
                      <ChevronDown className="size-4 text-muted-foreground" />
                   </Button>
                }
@@ -41,7 +41,7 @@ function TranscriptionFilter({
             <DropdownMenuContent>
                <DropdownMenuGroup>
                   <DropdownMenuItem onClick={() => onSetStatus('all-pages')}>
-                     All Pages{' '}
+                     All pages{' '}
                      {status === 'all-pages' && (
                         <Check className="ml-auto size-4" />
                      )}
@@ -55,7 +55,7 @@ function TranscriptionFilter({
                   <DropdownMenuItem
                      onClick={() => onSetStatus('not-transcribed')}
                   >
-                     Not Transcribed
+                     Not transcribed
                      {status === 'not-transcribed' && (
                         <Check className="ml-auto size-4" />
                      )}

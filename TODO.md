@@ -1,6 +1,5 @@
 ## Things to add
 
-- "Fully transcribed" label in `DocumentCard.tsx`, and maybe in `DocumentPages.tsx` add "All pages as fully transcribed"
 - Categories
 - Home page (general info, FAQ)
 

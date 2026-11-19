@@ -14,6 +14,8 @@ import {
    DropdownMenuItem,
    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import TranscriptionFilter from '@/components/documents/TranscriptionFilter';
+import DocTranscribedFilter from '@/components/documents/DocTranscribedFilter';
 
 export type DocumentSort = 'newest' | 'oldest' | 'title-asc' | 'title-desc';
 
@@ -25,6 +27,17 @@ const SORT_LABELS: Record<DocumentSort, string> = {
    'title-asc': 'Title A–Z',
    'title-desc': 'Title Z–A',
 };
+
+export type DocumentStatusType =
+   | 'all-documents'
+   | 'transcribed'
+   | 'not-transcribed';
+
+const VALID_STATUSES: DocumentStatusType[] = [
+   'all-documents',
+   'transcribed',
+   'not-transcribed',
+];
 
 export default function Documents() {
    const navigate = useNavigate();
@@ -41,6 +54,26 @@ export default function Documents() {
    const sort: DocumentSort =
       rawSort && SORTS.includes(rawSort) ? rawSort : 'newest';
 
+   const rawStatus = searchParams.get('status') as DocumentStatusType | null;
+   const status: DocumentStatusType =
+      rawStatus && VALID_STATUSES.includes(rawStatus)
+         ? rawStatus
+         : 'all-documents';
+
+   const { data, isLoading } = trpc.documents.list.useQuery(
+      {
+         page,
+         limit: 20,
+         search: search || undefined,
+         sort,
+         status,
+      },
+      {
+         placeholderData: (prev) => prev,
+         staleTime: 1000,
+      },
+   );
+
    const handlePageChange = (newPage: number) => {
       setSearchParams((prev) => {
          const next = new URLSearchParams(prev);
@@ -54,6 +87,19 @@ export default function Documents() {
          const next = new URLSearchParams(prev);
          if (newSort === 'newest') next.delete('sort');
          else next.set('sort', newSort);
+         next.set('page', '1');
+         return next;
+      });
+   };
+
+   const handleSetStatus = (newStatus: DocumentStatusType) => {
+      setSearchParams((prev) => {
+         const next = new URLSearchParams(prev);
+         if (newStatus === 'all-documents') {
+            next.delete('status');
+         } else {
+            next.set('status', newStatus);
+         }
          next.set('page', '1');
          return next;
       });
@@ -78,25 +124,12 @@ export default function Documents() {
       return () => clearTimeout(t);
    }, [inputValue]);
 
-   const { data, isLoading } = trpc.documents.list.useQuery(
-      {
-         page,
-         limit: 20,
-         search: search || undefined,
-         sort,
-      },
-      {
-         placeholderData: (prev) => prev,
-         staleTime: 1000,
-      },
-   );
-
    const documents = data?.documents ?? [];
    const totalPages = data?.totalPages ?? 1;
 
    return (
-      <div className="max-w-4xl mx-auto p-6">
-         <div className="flex items-center justify-between gap-3 mb-7.5">
+      <div className="py-6 px-20">
+         <div className="flex items-center justify-between gap-3 border-b pb-3 mb-4">
             <h1
                data-testid="documents-label"
                className="text-2xl font-semibold"
@@ -104,13 +137,18 @@ export default function Documents() {
                Documents
             </h1>
 
-            <SearchBar
-               placeholder="Search documents..."
-               value={inputValue}
-               onChange={setInputValue}
-            />
-
             <div className="flex items-center gap-3">
+               <SearchBar
+                  placeholder="Search documents..."
+                  value={inputValue}
+                  onChange={setInputValue}
+               />
+
+               <DocTranscribedFilter
+                  onSetStatus={handleSetStatus}
+                  status={status}
+               />
+
                <div className="flex items-center gap-3 border rounded-md">
                   <span className="pl-3">
                      <ArrowUpDown className="text-gray-500" />
@@ -157,29 +195,37 @@ export default function Documents() {
             </div>
          </div>
 
-         {isLoading ? (
-            <p>Loading...</p>
-         ) : !documents.length ? (
-            <p className="text-muted-foreground">
-               {search
-                  ? 'No results found for your search.'
-                  : 'No documents found.'}
-            </p>
-         ) : (
-            <div className="grid grid-cols-3 gap-4 transition-opacity duration-150">
-               {documents.map((document) => (
-                  <DocumentCard document={document} key={document.id} />
-               ))}
+         <div className="grid grid-cols-[2fr_8fr] gap-12">
+            <div className="flex gap-6 flex-col">
+               <h3 className="font-medium text-xl">Categories</h3>
             </div>
-         )}
 
-         {!documents.length ? null : (
-            <AppPagination
-               currentPage={page}
-               totalPages={totalPages}
-               onPageChange={handlePageChange}
-            />
-         )}
+            <div>
+               {isLoading ? (
+                  <p>Loading...</p>
+               ) : !documents.length ? (
+                  <p className="text-muted-foreground">
+                     {search
+                        ? 'No results found for your search.'
+                        : 'No documents found.'}
+                  </p>
+               ) : (
+                  <div className="grid grid-cols-4 gap-4 transition-opacity duration-150">
+                     {documents.map((document) => (
+                        <DocumentCard document={document} key={document.id} />
+                     ))}
+                  </div>
+               )}
+
+               {!documents.length ? null : (
+                  <AppPagination
+                     currentPage={page}
+                     totalPages={totalPages}
+                     onPageChange={handlePageChange}
+                  />
+               )}
+            </div>
+         </div>
       </div>
    );
 }
