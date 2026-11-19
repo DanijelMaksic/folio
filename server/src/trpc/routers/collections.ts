@@ -78,9 +78,34 @@ export const collectionsRouter = router({
               )
             : undefined;
 
+         const transcribedDocumentCountSql = sql<number>`(
+            SELECT COUNT(*) FROM documents d
+            WHERE d.collection_id = ${collections.id}
+            AND d.status = 'ready'
+            AND EXISTS (SELECT 1 FROM document_pages p WHERE p.document_id = d.id)
+            AND NOT EXISTS (
+            SELECT 1 FROM document_pages p
+            WHERE p.document_id = d.id
+            AND NOT EXISTS (
+                SELECT 1 FROM transcriptions t
+                WHERE t.page_id = p.id AND t.status = 'approved'
+                )
+                )
+            )`;
+
+         const fullyTranscribedSql = sql`(${documentCountSql} > 0 AND ${documentCountSql} = ${transcribedDocumentCountSql})`;
+
+         const transcribedFilter =
+            input.status === 'transcribed'
+               ? fullyTranscribedSql
+               : input.status === 'not-transcribed'
+                 ? sql`NOT ${fullyTranscribedSql}`
+                 : undefined;
+
          const where = and(
             input.userId ? eq(collections.createdBy, input.userId) : undefined,
             searchWhere,
+            transcribedFilter,
          );
 
          const [results, [{ total }]] = await Promise.all([

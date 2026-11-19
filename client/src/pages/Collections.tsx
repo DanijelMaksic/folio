@@ -15,6 +15,7 @@ import {
    DropdownMenuItem,
    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import ColTranscribedFilter from '@/components/collections/ColTranscribedFilter';
 
 export type CollectionSort =
    | 'newest'
@@ -39,6 +40,17 @@ const SORT_LABELS: Record<CollectionSort, string> = {
    'most-documents': 'Most documents',
 };
 
+export type CollectionStatusType =
+   | 'all-collections'
+   | 'transcribed'
+   | 'not-transcribed';
+
+const VALID_STATUSES: CollectionStatusType[] = [
+   'all-collections',
+   'transcribed',
+   'not-transcribed',
+];
+
 export default function Collections() {
    const navigate = useNavigate();
    const [searchParams, setSearchParams] = useSearchParams();
@@ -54,6 +66,12 @@ export default function Collections() {
    const sort: CollectionSort =
       rawSort && SORTS.includes(rawSort) ? rawSort : 'newest';
 
+   const rawStatus = searchParams.get('status') as CollectionStatusType | null;
+   const status: CollectionStatusType =
+      rawStatus && VALID_STATUSES.includes(rawStatus)
+         ? rawStatus
+         : 'all-collections';
+
    const handlePageChange = (newPage: number) => {
       setSearchParams((prev) => {
          const next = new URLSearchParams(prev);
@@ -67,6 +85,19 @@ export default function Collections() {
          const next = new URLSearchParams(prev);
          if (newSort === 'newest') next.delete('sort');
          else next.set('sort', newSort);
+         next.set('page', '1');
+         return next;
+      });
+   };
+
+   const handleSetStatus = (newStatus: CollectionStatusType) => {
+      setSearchParams((prev) => {
+         const next = new URLSearchParams(prev);
+         if (newStatus === 'all-collections') {
+            next.delete('status');
+         } else {
+            next.set('status', newStatus);
+         }
          next.set('page', '1');
          return next;
       });
@@ -98,6 +129,7 @@ export default function Collections() {
          limit: 20,
          search: search || undefined,
          sort,
+         status,
       },
       {
          placeholderData: (prev) => prev,
@@ -109,84 +141,102 @@ export default function Collections() {
    const totalPages = data?.totalPages ?? 1;
 
    return (
-      <div className="max-w-4xl mx-auto p-6">
-         <div className="flex justify-between gap-3 items-center mb-6">
+      <div className="py-6 px-20">
+         <div className="flex items-center justify-between gap-3 border-b pb-3 mb-4">
             <h1 className="text-2xl font-semibold">Collections</h1>
 
-            <SearchBar
-               placeholder="Search collections..."
-               value={inputValue}
-               onChange={setInputValue}
-            />
-
             <div className="flex items-center gap-3">
-               <div className="flex items-center gap-2 border rounded-md">
-                  <span className="pl-3">
-                     <ArrowUpDown className="text-gray-500" />
-                  </span>
+               <SearchBar
+                  placeholder="Search collections..."
+                  value={inputValue}
+                  onChange={setInputValue}
+               />
 
-                  <DropdownMenu modal={false}>
-                     <DropdownMenuTrigger
-                        render={
-                           <Button
-                              variant="outline"
-                              className="justify-between min-w-40"
-                           >
-                              {SORT_LABELS[sort]}
-                              <ChevronDown className="size-4 text-muted-foreground" />
-                           </Button>
-                        }
-                     />
-                     <DropdownMenuContent align="end">
-                        {SORTS.map((s) => (
-                           <DropdownMenuItem
-                              key={s}
-                              onClick={() => handleSetSort(s)}
-                           >
-                              {SORT_LABELS[s]}
-                              {s === sort && (
-                                 <Check className="ml-auto size-4" />
-                              )}
-                           </DropdownMenuItem>
-                        ))}
-                     </DropdownMenuContent>
-                  </DropdownMenu>
+               <ColTranscribedFilter
+                  onSetStatus={handleSetStatus}
+                  status={status}
+               />
+
+               <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 border rounded-md">
+                     <span className="pl-3">
+                        <ArrowUpDown className="text-gray-500" />
+                     </span>
+
+                     <DropdownMenu modal={false}>
+                        <DropdownMenuTrigger
+                           render={
+                              <Button
+                                 variant="outline"
+                                 className="justify-between min-w-40"
+                              >
+                                 {SORT_LABELS[sort]}
+                                 <ChevronDown className="size-4 text-muted-foreground" />
+                              </Button>
+                           }
+                        />
+                        <DropdownMenuContent align="end">
+                           {SORTS.map((s) => (
+                              <DropdownMenuItem
+                                 key={s}
+                                 onClick={() => handleSetSort(s)}
+                              >
+                                 {SORT_LABELS[s]}
+                                 {s === sort && (
+                                    <Check className="ml-auto size-4" />
+                                 )}
+                              </DropdownMenuItem>
+                           ))}
+                        </DropdownMenuContent>
+                     </DropdownMenu>
+                  </div>
+
+                  {canTranscribe ? (
+                     <Button onClick={() => navigate('/collections/create')}>
+                        <Plus /> Create
+                     </Button>
+                  ) : (
+                     <>
+                        <span></span>
+                        <span></span>
+                     </>
+                  )}
                </div>
-
-               {canTranscribe ? (
-                  <Button onClick={() => navigate('/collections/create')}>
-                     <Plus /> Create
-                  </Button>
-               ) : (
-                  <>
-                     <span></span>
-                     <span></span>
-                  </>
-               )}
             </div>
          </div>
 
-         {isLoading ? (
-            <p>Loading...</p>
-         ) : !collections.length ? (
-            <p className="text-muted-foreground">
-               {search ? 'No collections found.' : 'No collections yet.'}
-            </p>
-         ) : (
-            <div className="grid grid-cols-3 gap-4 transition-opacity duration-150">
-               {collections.map((collection) => (
-                  <CollectionCard collection={collection} key={collection.id} />
-               ))}
+         <div className="grid grid-cols-[2fr_8fr] gap-12">
+            <div className="flex gap-6 flex-col">
+               <h3 className="font-medium text-xl">Categories</h3>
             </div>
-         )}
 
-         {!collections.length ? null : (
-            <AppPagination
-               currentPage={page}
-               totalPages={totalPages}
-               onPageChange={handlePageChange}
-            />
-         )}
+            <div>
+               {isLoading ? (
+                  <p>Loading...</p>
+               ) : !collections.length ? (
+                  <p className="text-muted-foreground">
+                     {search ? 'No collections found.' : 'No collections yet.'}
+                  </p>
+               ) : (
+                  <div className="grid grid-cols-3 gap-4 transition-opacity duration-150">
+                     {collections.map((collection) => (
+                        <CollectionCard
+                           collection={collection}
+                           key={collection.id}
+                        />
+                     ))}
+                  </div>
+               )}
+
+               {!collections.length ? null : (
+                  <AppPagination
+                     currentPage={page}
+                     totalPages={totalPages}
+                     onPageChange={handlePageChange}
+                  />
+               )}
+            </div>
+         </div>
       </div>
    );
 }
