@@ -154,6 +154,7 @@ function DocumentPages() {
    const editDocument = trpc.documents.update.useMutation({
       onSuccess: () => {
          utils.documents.getById.invalidate({ id: documentId! });
+         utils.documents.list.invalidate();
          setIsEditOpen(false);
          setServerError('');
       },

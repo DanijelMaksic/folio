@@ -114,6 +114,7 @@ function CollectionDetails() {
    const editCollection = trpc.collections.update.useMutation({
       onSuccess: () => {
          utils.collections.getById.invalidate({ id: collectionId! });
+         utils.collections.list.invalidate();
          setIsEditOpen(false);
          setServerError('');
       },

@@ -16,21 +16,15 @@ export default function CategorySidebar({ value, onChange }: Props) {
       staleTime: 60_000,
    });
 
+   console.log(categories);
+
    return (
       <aside className="lg:sticky lg:top-24 lg:self-start">
          <div className="flex items-center justify-between gap-3 mb-3">
             <h3 className="font-medium text-xl">Categories</h3>
-
-            <button
-               type="button"
-               onClick={() => onChange('')}
-               className="rounded-md border px-3 py-1 text-sm text-left shadow-xs hover:cursor-pointer"
-            >
-               Reset filter
-            </button>
          </div>
 
-         <div className="flex flex-wrap gap-2 lg:flex-col lg:items-stretch">
+         <div className="flex gap-2">
             {categories.map((c) => (
                <button
                   key={c.id}
@@ -38,7 +32,7 @@ export default function CategorySidebar({ value, onChange }: Props) {
                   aria-pressed={value === c.slug}
                   onClick={() => onChange(value === c.slug ? '' : c.slug)}
                   className={cn(
-                     'rounded-md border px-3 py-1.5 text-sm text-left',
+                     'rounded-full border px-3 py-1 text-sm',
                      value === c.slug ? TAG_STYLES.on : TAG_STYLES.off,
                   )}
                >

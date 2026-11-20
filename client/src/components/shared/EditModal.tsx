@@ -45,7 +45,7 @@ function EditModal({
       register,
       handleSubmit,
       watch,
-      formState: { errors, isDirty },
+      formState: { errors },
    } = useForm<EditFormInput>({
       resolver: zodResolver(editFormSchema),
       mode: 'onChange',
@@ -153,7 +153,6 @@ function EditModal({
                   <Button
                      type="submit"
                      disabled={
-                        !isDirty ||
                         !categoryDirty ||
                         isPending ||
                         descriptionLength! > 1000 ||

@@ -16,6 +16,7 @@ import {
    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import ColTranscribedFilter from '@/components/collections/ColTranscribedFilter';
+import CategorySidebar from '@/components/shared/CategorySidebar';
 
 export type CollectionSort =
    | 'newest'
@@ -103,6 +104,18 @@ export default function Collections() {
       });
    };
 
+   const category = searchParams.get('cat') ?? '';
+
+   const handleSetCategory = (slug: string) => {
+      setSearchParams((prev) => {
+         const next = new URLSearchParams(prev);
+         if (slug) next.set('cat', slug);
+         else next.delete('cat');
+         next.set('page', '1');
+         return next;
+      });
+   };
+
    // Debounce writes to URL
    useEffect(() => {
       const t = setTimeout(() => {
@@ -130,6 +143,7 @@ export default function Collections() {
          search: search || undefined,
          sort,
          status,
+         categorySlug: category || undefined,
       },
       {
          placeholderData: (prev) => prev,
@@ -205,10 +219,8 @@ export default function Collections() {
             </div>
          </div>
 
-         <div className="grid grid-cols-[2fr_8fr] gap-12">
-            <div className="flex gap-6 flex-col">
-               <h3 className="font-medium text-xl">Categories</h3>
-            </div>
+         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[14rem_minmax(0,1fr)] lg:gap-12">
+            <CategorySidebar value={category} onChange={handleSetCategory} />
 
             <div>
                {isLoading ? (
