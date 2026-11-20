@@ -268,6 +268,8 @@ export const documentsRouter = router({
                   createdAt: documents.createdAt,
                   updatedAt: documents.updatedAt,
                   categoryId: documents.categoryId,
+                  categoryName: categories.name,
+                  categorySlug: categories.slug,
                   uploaderName: user.name,
                   uploaderUsername: user.username,
                   coverImageUrl: sql<string | null>`(
@@ -320,6 +322,8 @@ export const documentsRouter = router({
                categoryId: documents.categoryId,
                uploaderName: user.name,
                uploaderUsername: user.username,
+               categoryName: categories.name,
+               categorySlug: categories.slug,
                coverImageUrl: sql<string | null>`(
                  SELECT image_url FROM document_pages
                  WHERE document_id = ${documents.id}
@@ -333,6 +337,7 @@ export const documentsRouter = router({
             })
             .from(documents)
             .leftJoin(user, eq(user.id, documents.uploadedBy))
+            .leftJoin(categories, eq(categories.id, documents.categoryId))
             .where(eq(documents.id, input.id));
 
          if (!document) throw new TRPCError({ code: 'NOT_FOUND' });

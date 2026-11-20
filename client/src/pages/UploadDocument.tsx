@@ -24,7 +24,7 @@ import {
    IMAGES_MAX_TOTAL_BYTES,
    PDF_MAX_BYTES,
 } from '@shared';
-import CategorySelect from '@/components/shared/CategorySelect';
+import CategorySelect from '@/components/categories/CategorySelect';
 
 interface SelectedFile {
    file: File;

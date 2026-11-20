@@ -90,6 +90,23 @@ function AboutTab({ document }: { document: Document }) {
       },
       { label: 'Pages', value: stats ? stats.totalPages : '—' },
       {
+         label: 'Category',
+         value: stats ? (
+            document?.categoryName === null ? (
+               '—'
+            ) : (
+               <Link
+                  to={`/documents/?cat=${document.categorySlug}`}
+                  className="text-primary underline underline-offset-4 hover:opacity-80"
+               >
+                  {document.categoryName}
+               </Link>
+            )
+         ) : (
+            document?.categoryName
+         ),
+      },
+      {
          label: 'Collection',
          value: document.collectionId ? (
             <Link

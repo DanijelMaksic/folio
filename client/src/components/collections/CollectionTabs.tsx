@@ -15,6 +15,8 @@ interface DisplayedDocument {
    status: 'processing' | 'ready' | 'failed';
    collectionId: string | null;
    uploaderName: string | null;
+   categoryName: string | null;
+   categorySlug: string | null;
    coverImageUrl: string | null;
    pageCount: number;
 }

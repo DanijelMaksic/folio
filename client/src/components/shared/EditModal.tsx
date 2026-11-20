@@ -14,7 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { EditFormInput, editFormSchema } from '@shared';
 import { zodResolver } from '@/lib/zod-resolver';
 import { useState } from 'react';
-import CategorySelect from '@/components/shared/CategorySelect';
+import CategorySelect from '@/components/categories/CategorySelect';
 
 interface EditModalProps {
    heading: string;

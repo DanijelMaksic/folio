@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { TRPCClientErrorLike } from '@trpc/client';
 import type { AppRouter } from '@server/trpc/router';
-import CategorySelect from '@/components/shared/CategorySelect';
+import CategorySelect from '@/components/categories/CategorySelect';
 
 export default function CreateCollection() {
    const navigate = useNavigate();

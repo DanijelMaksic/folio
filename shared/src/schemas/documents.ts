@@ -94,6 +94,8 @@ export const documentSchema = z.object({
    status: z.enum(['processing', 'ready', 'failed']),
    createdAt: z.string(),
    updatedAt: z.string(),
+   categoryName: z.string().nullable().optional(),
+   categorySlug: z.string().nullable().optional(),
    uploaderName: z.string().nullable().optional(),
    uploaderUsername: z.string().nullable().optional(),
    collectionId: z.string().nullable().optional(),

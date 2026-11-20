@@ -16,7 +16,7 @@ import {
    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import ColTranscribedFilter from '@/components/collections/ColTranscribedFilter';
-import CategorySidebar from '@/components/shared/CategorySidebar';
+import CategorySidebar from '@/components/categories/CategorySidebar';
 
 export type CollectionSort =
    | 'newest'

@@ -39,6 +39,8 @@ export const collectionSchema = z.object({
    createdBy: z.string(),
    creatorName: z.string().nullable().optional(),
    creatorUsername: z.string().nullable().optional(),
+   categoryName: z.string().nullable().optional(),
+   categorySlug: z.string().nullable().optional(),
    createdAt: z.string(),
    coverImageUrl: z.string().nullable().optional(),
 });

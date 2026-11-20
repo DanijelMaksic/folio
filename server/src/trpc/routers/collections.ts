@@ -129,6 +129,8 @@ export const collectionsRouter = router({
                   creatorName: user.name,
                   creatorUsername: user.username,
                   createdAt: collections.createdAt,
+                  categoryName: categories.name,
+                  categorySlug: categories.slug,
                   coverImageUrl: sql<string | null>`(
                      SELECT dp.image_url FROM document_pages dp
                      INNER JOIN documents d ON d.id = dp.document_id
@@ -179,9 +181,12 @@ export const collectionsRouter = router({
                creatorName: user.name,
                creatorUsername: user.username,
                createdAt: collections.createdAt,
+               categoryName: categories.name,
+               categorySlug: categories.slug,
             })
             .from(collections)
             .leftJoin(user, eq(user.id, collections.createdBy))
+            .leftJoin(categories, eq(categories.id, collections.categoryId))
             .where(eq(collections.id, input.id));
 
          if (!collection) {

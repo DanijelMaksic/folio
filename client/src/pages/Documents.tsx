@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import TranscriptionFilter from '@/components/documents/TranscriptionFilter';
 import DocTranscribedFilter from '@/components/documents/DocTranscribedFilter';
-import CategorySidebar from '@/components/shared/CategorySidebar';
+import CategorySidebar from '@/components/categories/CategorySidebar';
 
 export type DocumentSort = 'newest' | 'oldest' | 'title-asc' | 'title-desc';
 

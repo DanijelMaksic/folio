@@ -80,6 +80,21 @@ function AboutTab({ collection }: { collection: Collection }) {
             day: 'numeric',
          }),
       },
+
+      {
+         label: 'Category',
+         value:
+            collection?.categoryName === null ? (
+               '—'
+            ) : (
+               <Link
+                  to={`/collections/?cat=${collection.categorySlug}`}
+                  className="text-primary underline underline-offset-4 hover:opacity-80"
+               >
+                  {collection.categoryName}
+               </Link>
+            ),
+      },
    ];
 
    return (
