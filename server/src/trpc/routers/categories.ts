@@ -24,15 +24,13 @@ export const categoriesRouter = router({
             id: categories.id,
             name: categories.name,
             slug: categories.slug,
-            documentCount:
-               sql<number>`(SELECT COUNT(*) FROM documents d WHERE d.category_id = ${categories.id})`.mapWith(
-                  Number,
-               ),
-            collectionCount:
-               sql<number>`(SELECT COUNT(*) FROM collections c WHERE c.category_id = ${categories.id})`.mapWith(
-                  Number,
-               ),
-         })
+            documentCount: sql<number>`(
+               SELECT COUNT(*) FROM documents d WHERE d.category_id = categories.id
+               )`.mapWith(Number),
+            collectionCount: sql<number>`(
+                SELECT COUNT(*) FROM collections c WHERE c.category_id = categories.id
+               )`.mapWith(Number),
+            })
          .from(categories)
          .orderBy(asc(sql`lower(${categories.name})`), asc(categories.id)),
    ),
@@ -61,6 +59,7 @@ export const categoriesRouter = router({
             throw e;
          }
       }),
+
    update: editorProcedure
       .input(updateCategorySchema)
       .mutation(async ({ input }) => {

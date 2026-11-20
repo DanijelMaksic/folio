@@ -115,6 +115,14 @@ function Nav() {
                                  >
                                     Review queue
                                  </DropdownMenuItem>
+
+                                 <DropdownMenuItem
+                                    onClick={() =>
+                                       navigate('/category-management')
+                                    }
+                                 >
+                                    Category settings
+                                 </DropdownMenuItem>
                               </>
                            )}
 

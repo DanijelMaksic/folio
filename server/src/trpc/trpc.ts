@@ -1,6 +1,7 @@
 import { initTRPC, TRPCError } from '@trpc/server';
 import type { Context } from './context.js';
 import { ZodError } from 'zod';
+import { isEditor } from '@folio/shared';
 
 // tRPC initialization file
 
@@ -48,7 +49,7 @@ export const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
 });
 
 export const editorProcedure = protectedProcedure.use(({ ctx, next }) => {
-   if (ctx.user.globalRole !== 'editor') {
+   if (!isEditor(ctx.user.globalRole)) {
       throw new TRPCError({ code: 'FORBIDDEN' });
    }
    return next({ ctx });

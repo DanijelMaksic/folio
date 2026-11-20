@@ -16,15 +16,13 @@ export default function CategorySidebar({ value, onChange }: Props) {
       staleTime: 60_000,
    });
 
-   console.log(categories);
-
    return (
       <aside className="lg:sticky lg:top-24 lg:self-start">
          <div className="flex items-center justify-between gap-3 mb-3">
             <h3 className="font-medium text-xl">Categories</h3>
          </div>
 
-         <div className="flex gap-2">
+         <div className="flex flex-wrap gap-2">
             {categories.map((c) => (
                <button
                   key={c.id}

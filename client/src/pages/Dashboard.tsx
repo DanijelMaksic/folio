@@ -1,8 +1,6 @@
 import { Link, Navigate } from 'react-router-dom';
 import { trpc } from '@/lib/trpc';
 import { useSession } from '@/lib/auth-client';
-import { isContributor } from '@folio/shared';
-import { Button } from '@/components/ui/button';
 import { OverviewStats } from '@/components/dashboard/OverviewStats';
 import { AttentionCards } from '@/components/dashboard/AttentionCards';
 import { RejectedList } from '@/components/dashboard/RejectedList';
@@ -11,10 +9,9 @@ import { RecentDocuments } from '@/components/dashboard/RecentDocuments';
 export default function Dashboard() {
    const { data: session, isPending } = useSession();
    const user = session?.user;
-   const canContribute = isContributor(user?.globalRole);
 
    const overview = trpc.dashboard.getOverview.useQuery(undefined, {
-      enabled: !!session?.user && canContribute,
+      enabled: !!session?.user,
    });
 
    if (isPending) return null;
@@ -22,22 +19,6 @@ export default function Dashboard() {
    if (!session?.user) return <Navigate to="/sign-in" replace />;
 
    const data = overview.data;
-
-   if (!canContribute) {
-      return (
-         <div className="mx-auto max-w-xl px-4 py-16 text-center space-y-4">
-            <h1 className="text-2xl font-semibold">Dashboard</h1>
-            <p className="text-muted-foreground">
-               The dashboard is available to contributors. Request the
-               contributor role to upload documents and track your
-               transcriptions.
-            </p>
-            <Button>
-               <Link to="/settings">Request contributor role</Link>
-            </Button>
-         </div>
-      );
-   }
 
    return (
       <div className="mx-auto max-w-3xl space-y-8 px-4 py-8">
