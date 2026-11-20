@@ -47,7 +47,7 @@ export default function VerifyOtp() {
          setError(error.message ?? 'Invalid code');
       } else {
          await refetch();
-         navigate('/');
+         navigate('/dashboard');
       }
    };
 

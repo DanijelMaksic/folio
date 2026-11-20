@@ -13,9 +13,6 @@
 - On document upload, grey out whole upload form when `isPending` is true
 - On `PageDetails.tsx`, if page pagination is user, doc viewer saved zoom breaks
 
-- When editor signs in, they are taken to `/` instead to `/dashboard`
-- On sign up, navigate user to `/dashboard` instead of `/`
-
 - Normalize the username input: The simplest way is in the shared schema, so it can’t be forgotten: `username: z.string().trim().min(1).toLowerCase()`. Otherwise use `input.username.toLowerCase()` in the router.
 - When a blank transcription is approved, and user suggests a correction, textarea is locked due to blank checkbox being pre-checked
 
