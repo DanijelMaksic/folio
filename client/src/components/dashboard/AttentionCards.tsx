@@ -1,5 +1,3 @@
-import { useSession } from '@/lib/auth-client';
-import { isEditor } from '@shared';
 import { Link } from 'react-router-dom';
 
 type Props = {
@@ -11,8 +9,6 @@ export function AttentionCards({
    reviewQueueCount,
    pendingRoleRequestCount,
 }: Props) {
-   const { data: session } = useSession();
-
    const cards = [
       reviewQueueCount !== null && {
          key: 'review',
@@ -26,17 +22,11 @@ export function AttentionCards({
          count: pendingRoleRequestCount,
          label: 'pending role requests',
       },
-      isEditor(session?.user?.globalRole) && {
-         key: 'categories',
-         to: '/category-management',
-         catLabel: 'Manage categories',
-      },
    ].filter(Boolean) as {
       key: string;
       to: string;
       count: number;
       label: string;
-      catLabel?: string;
    }[];
 
    if (cards.length === 0) return null;
@@ -48,11 +38,10 @@ export function AttentionCards({
                key={c.key}
                to={c.to}
                data-testid={`attention-${c.key}`}
-               className={`flex items-center ${c.catLabel ? 'gap-0' : 'gap-4'} rounded-lg border p-4 transition-colors hover:bg-muted`}
+               className="flex items-center gap-4 rounded-lg border p-4 transition-colors hover:bg-muted"
             >
                <span className="text-3xl font-semibold">{c.count}</span>
                <span className="text-sm text-muted-foreground">{c.label}</span>
-               <span className="text-lg">{c.catLabel}</span>
             </Link>
          ))}
       </div>

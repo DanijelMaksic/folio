@@ -19,7 +19,7 @@ import Dashboard from '@/pages/Dashboard';
 import UserPage from '@/pages/UserPage';
 import Settings from '@/pages/Settings';
 import RoleManagementPage from '@/pages/RoleManagementPage';
-import CategoryManagement from '@/components/categories/CategoryManagement';
+import CategorySettings from './components/categories/CategorySettings';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
    const { data: session, isPending } = useSession();
@@ -110,10 +110,10 @@ export default function App() {
                />
 
                <Route
-                  path="/category-management"
+                  path="/category-settings"
                   element={
                      <ProtectedRoute>
-                        <CategoryManagement />
+                        <CategorySettings />
                      </ProtectedRoute>
                   }
                />

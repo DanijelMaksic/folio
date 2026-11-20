@@ -118,7 +118,7 @@ function Nav() {
 
                                  <DropdownMenuItem
                                     onClick={() =>
-                                       navigate('/category-management')
+                                       navigate('/category-settings')
                                     }
                                  >
                                     Category settings

@@ -18,7 +18,7 @@ type Cat = {
    collectionCount: number;
 };
 
-export default function CategoryManagement() {
+export default function CategorySettings() {
    const utils = trpc.useUtils();
    const { data: categories = [], isLoading } = trpc.categories.list.useQuery();
 
