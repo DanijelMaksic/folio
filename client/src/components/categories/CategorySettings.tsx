@@ -10,6 +10,9 @@ import {
    DialogHeader,
    DialogTitle,
 } from '@/components/ui/dialog';
+import { isEditor } from '@shared';
+import { useNavigate } from 'react-router-dom';
+import { useSession } from '@/lib/auth-client';
 
 type Cat = {
    id: string;
@@ -21,6 +24,8 @@ type Cat = {
 export default function CategorySettings() {
    const utils = trpc.useUtils();
    const { data: categories = [], isLoading } = trpc.categories.list.useQuery();
+   const navigate = useNavigate();
+   const { data: session } = useSession();
 
    const [newName, setNewName] = useState('');
    const [editing, setEditing] = useState<{ id: string; name: string } | null>(
@@ -59,6 +64,11 @@ export default function CategorySettings() {
       },
       onError: (e) => setError(e.message),
    });
+
+   if (!isEditor(session?.user.globalRole)) {
+      navigate('/');
+      return null;
+   }
 
    if (isLoading) return <div>Loading...</div>;
 
