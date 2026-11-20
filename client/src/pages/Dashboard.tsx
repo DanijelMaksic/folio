@@ -5,6 +5,7 @@ import { OverviewStats } from '@/components/dashboard/OverviewStats';
 import { AttentionCards } from '@/components/dashboard/AttentionCards';
 import { RejectedList } from '@/components/dashboard/RejectedList';
 import { RecentDocuments } from '@/components/dashboard/RecentDocuments';
+import { isEditor } from '@shared';
 
 export default function Dashboard() {
    const { data: session, isPending } = useSession();
@@ -46,16 +47,18 @@ export default function Dashboard() {
             />
          )}
 
-         <Link
-            to="/category-settings"
-            className="rounded-lg border p-4 transition-colors hover:bg-muted flex flex-col gap-1"
-         >
-            <h3 className="text-xl font-medium">Category settings</h3>
-            <p className="text-muted-foreground text-sm">
-               Add, rename or delete the categories used for documents and
-               collections
-            </p>
-         </Link>
+         {isEditor(user?.globalRole) && (
+            <Link
+               to="/category-settings"
+               className="rounded-lg border p-4 transition-colors hover:bg-muted flex flex-col gap-1"
+            >
+               <h3 className="text-xl font-medium">Category settings</h3>
+               <p className="text-muted-foreground text-sm">
+                  Add, rename or delete the categories used for documents and
+                  collections
+               </p>
+            </Link>
+         )}
 
          <section aria-labelledby="stats-heading" className="space-y-3">
             <h2 id="stats-heading" className="text-lg font-medium">
