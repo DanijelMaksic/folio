@@ -40,9 +40,12 @@ function RoleRequestsTab() {
    const sort: RequestSort =
       rawSort && SORTS.includes(rawSort) ? rawSort : 'newest';
 
-   const { data, isLoading, isError } = trpc.admin.listRoleRequests.useQuery({
-      sort,
-   });
+   const { data, isLoading, isError } = trpc.admin.listRoleRequests.useQuery(
+      {
+         sort,
+      },
+      { placeholderData: (prev) => prev },
+   );
 
    const approve = trpc.admin.approveRoleRequest.useMutation({
       onSuccess: () => utils.admin.listRoleRequests.invalidate(),

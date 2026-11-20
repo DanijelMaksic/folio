@@ -142,7 +142,6 @@ function CollectionDetails() {
    };
 
    const isSearchActive = debouncedSearch.length > 0;
-   const showSearchBar = search.length > 0 || !!displayedDocuments?.length;
 
    if (isLoadingCollection) return <p>Loading...</p>;
 
@@ -163,48 +162,44 @@ function CollectionDetails() {
                onPageChange={setPage}
             >
                <div className="flex items-center justify-end gap-3 mt-1 mb-4">
-                  {showSearchBar ? (
-                     <>
-                        <SearchBar
-                           placeholder="Search documents..."
-                           value={search}
-                           onChange={setSearch}
+                  <SearchBar
+                     placeholder="Search documents..."
+                     value={search}
+                     onChange={setSearch}
+                  />
+
+                  <div className="flex items-center gap-2 border rounded-md">
+                     <span className="pl-3">
+                        <ArrowUpDown className="text-gray-500" />
+                     </span>
+
+                     <DropdownMenu modal={false}>
+                        <DropdownMenuTrigger
+                           render={
+                              <Button
+                                 variant="outline"
+                                 className="justify-between min-w-41"
+                              >
+                                 {SORT_LABELS[sort]}
+                                 <ChevronDown className="size-4 text-muted-foreground" />
+                              </Button>
+                           }
                         />
-
-                        <div className="flex items-center gap-2 border rounded-md">
-                           <span className="pl-3">
-                              <ArrowUpDown className="text-gray-500" />
-                           </span>
-
-                           <DropdownMenu modal={false}>
-                              <DropdownMenuTrigger
-                                 render={
-                                    <Button
-                                       variant="outline"
-                                       className="justify-between min-w-41"
-                                    >
-                                       {SORT_LABELS[sort]}
-                                       <ChevronDown className="size-4 text-muted-foreground" />
-                                    </Button>
-                                 }
-                              />
-                              <DropdownMenuContent align="end">
-                                 {SORTS.map((s) => (
-                                    <DropdownMenuItem
-                                       key={s}
-                                       onClick={() => handleSetSort(s)}
-                                    >
-                                       {SORT_LABELS[s]}
-                                       {s === sort && (
-                                          <Check className="ml-auto size-4" />
-                                       )}
-                                    </DropdownMenuItem>
-                                 ))}
-                              </DropdownMenuContent>
-                           </DropdownMenu>
-                        </div>
-                     </>
-                  ) : null}
+                        <DropdownMenuContent align="end">
+                           {SORTS.map((s) => (
+                              <DropdownMenuItem
+                                 key={s}
+                                 onClick={() => handleSetSort(s)}
+                              >
+                                 {SORT_LABELS[s]}
+                                 {s === sort && (
+                                    <Check className="ml-auto size-4" />
+                                 )}
+                              </DropdownMenuItem>
+                           ))}
+                        </DropdownMenuContent>
+                     </DropdownMenu>
+                  </div>
 
                   <ActionsMenu
                      show={canTranscribe && (isMyCollection || editor)}

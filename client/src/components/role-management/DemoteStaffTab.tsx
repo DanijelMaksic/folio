@@ -53,7 +53,10 @@ function DemoteStaffTab() {
    const role: RoleType =
       rawRole && VALID_ROLES.includes(rawRole) ? rawRole : 'all';
 
-   const { data: staff, isLoading } = trpc.admin.listStaff.useQuery({ role });
+   const { data: staff, isLoading } = trpc.admin.listStaff.useQuery(
+      { role },
+      { placeholderData: (prev) => prev },
+   );
 
    const demote = trpc.admin.setUserRole.useMutation({
       onSuccess: () => {

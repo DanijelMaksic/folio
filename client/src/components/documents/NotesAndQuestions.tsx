@@ -62,12 +62,15 @@ function NotesAndQuestions({ pageId }: { pageId: string }) {
       setExpanded(false);
    }
 
-   const { data, isPending } = trpc.notes.listByPage.useQuery({
-      pageId,
-      page,
-      limit: PAGE_SIZE,
-      sort,
-   });
+   const { data, isPending } = trpc.notes.listByPage.useQuery(
+      {
+         pageId,
+         page,
+         limit: PAGE_SIZE,
+         sort,
+      },
+      { placeholderData: (prev) => prev },
+   );
 
    const {
       register,

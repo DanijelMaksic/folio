@@ -39,12 +39,15 @@ function AuditLogTab() {
    const type: RoleChangeType =
       rawType && VALID_ROLES.includes(rawType) ? rawType : 'all';
 
-   const { data, isLoading } = trpc.admin.listRoleChanges.useQuery({
-      limit: 20,
-      sort,
-      page,
-      type,
-   });
+   const { data, isLoading } = trpc.admin.listRoleChanges.useQuery(
+      {
+         limit: 20,
+         sort,
+         page,
+         type,
+      },
+      { placeholderData: (prev) => prev },
+   );
 
    const handleSetSort = (newSort: RoleChangesSort) => {
       setSearchParams((prev) => {

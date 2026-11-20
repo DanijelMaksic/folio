@@ -75,7 +75,6 @@ export default function SignUp() {
                         aria-invalid={!!errors.name}
                         {...register('name')}
                         placeholder="John Doe"
-                        {...register('name')}
                         required
                         disabled={isPending}
                      />
@@ -92,7 +91,6 @@ export default function SignUp() {
                         aria-invalid={!!errors.username}
                         {...register('username')}
                         placeholder="johndoe"
-                        {...register('username')}
                         required
                         disabled={isPending}
                      />
@@ -110,7 +108,6 @@ export default function SignUp() {
                         aria-invalid={!!errors.email}
                         {...register('email')}
                         placeholder="you@example.com"
-                        {...register('email')}
                         required
                         disabled={isPending}
                      />
