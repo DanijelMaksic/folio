@@ -91,7 +91,7 @@ function Nav() {
                            </button>
                         }
                      />
-                     <DropdownMenuContent>
+                     <DropdownMenuContent className="min-w-fit">
                         <DropdownMenuGroup>
                            <DropdownMenuLabel>My Account</DropdownMenuLabel>
                            <DropdownMenuItem

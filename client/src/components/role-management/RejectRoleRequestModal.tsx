@@ -16,7 +16,7 @@ import { rejectRoleRequestFormSchema, RejectRoleRequestInput } from '@shared';
 
 interface RejectRoleRequestModalProps {
    open: boolean;
-   applicant: string;
+   applicant: string | null;
    isPending: boolean;
    error?: string;
    onConfirm: (reason: string) => void;
@@ -63,7 +63,7 @@ function RejectRoleRequestModal({
             <DialogHeader>
                <DialogTitle>Reject request</DialogTitle>
                <DialogDescription>
-                  {applicant} will be notified by email. You can include a
+                  {applicant ?? "Deleted user"} will be notified by email. You can include a
                   reason, but it's optional.
                </DialogDescription>
             </DialogHeader>
