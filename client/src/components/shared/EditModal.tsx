@@ -78,7 +78,7 @@ function EditModal({
 
             <form
                onSubmit={handleSubmit((v) => onEdit(v, categoryId || null))}
-               className="space-y-4"
+               className={`space-y-4 ${isPending ? 'pointer-events-none opacity-65' : ''}`}
                noValidate
             >
                <div className="space-y-2">

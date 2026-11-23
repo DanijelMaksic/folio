@@ -76,7 +76,7 @@ function DeleteProfileModal({ open, onOpenChange }: DeleteProfileModalProps) {
 
             <form
                onSubmit={handleSubmit(onSubmit)}
-               className="space-y-4"
+               className={`space-y-4 ${isSubmitting ? 'pointer-events-none opacity-65' : ''}`}
                noValidate
             >
                <div className="space-y-2">

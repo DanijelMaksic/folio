@@ -77,7 +77,7 @@ function ReviewPanel({
 
          <form
             onSubmit={handleSubmit(onReject)}
-            className="space-y-2"
+            className={`space-y-4 ${rejectMutation.isPending ? 'pointer-events-none opacity-65' : ''}`}
             noValidate
          >
             <Textarea

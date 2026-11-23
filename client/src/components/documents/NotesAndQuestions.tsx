@@ -122,7 +122,7 @@ function NotesAndQuestions({ pageId }: { pageId: string }) {
                   onSubmit={handleSubmit(({ content }) =>
                      create.mutate({ pageId, content }),
                   )}
-                  className="my-8 border rounded-md flex-1"
+                  className={`my-8 border rounded-md flex-1 ${create.isPending ? 'pointer-events-none opacity-65' : ''}`}
                >
                   <Textarea
                      rows={expanded ? 3 : 1}

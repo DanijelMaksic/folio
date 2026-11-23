@@ -56,7 +56,7 @@ export default function SignIn() {
                <form
                   noValidate
                   onSubmit={handleSubmit(onSignIn)}
-                  className="space-y-4"
+                  className={`space-y-4 ${loading ? 'pointer-events-none opacity-65' : ''}`}
                >
                   <div className="space-y-2">
                      <Label htmlFor="email">Email</Label>

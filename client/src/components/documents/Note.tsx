@@ -122,7 +122,7 @@ function Note({ note }: { note: NoteData }) {
                   onSubmit={handleSubmit(({ content }) =>
                      update.mutate({ id: note.id, content }),
                   )}
-                  className="space-y-2"
+                  className={`space-y-4 ${update.isPending ? 'pointer-events-none opacity-65' : ''}`}
                >
                   <Textarea
                      rows={3}

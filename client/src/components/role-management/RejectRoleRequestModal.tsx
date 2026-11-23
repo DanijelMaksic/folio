@@ -63,14 +63,14 @@ function RejectRoleRequestModal({
             <DialogHeader>
                <DialogTitle>Reject request</DialogTitle>
                <DialogDescription>
-                  {applicant ?? "Deleted user"} will be notified by email. You can include a
-                  reason, but it's optional.
+                  {applicant ?? 'Deleted user'} will be notified by email. You
+                  can include a reason, but it's optional.
                </DialogDescription>
             </DialogHeader>
 
             <form
                onSubmit={handleSubmit(onSubmit)}
-               className="space-y-4"
+               className={`space-y-4 ${isPending ? 'pointer-events-none opacity-65' : ''}`}
                noValidate
             >
                <div className="space-y-2">

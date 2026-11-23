@@ -489,6 +489,8 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Two users in one e2e test (for example contributor requests, admin approves) use separate browser contexts, since one `page` shares one set of session cookies
 
+- Disable/grey out forms while submission is pending
+
 **Issues resolved:**
 
 - `ERR_CONNECTION_REFUSED` on every request after adding new server code: the server had crashed on a bad import or a missing shared export (Node reports "does not provide an export named ..."). Fixed the import and re-exported new shared schemas from `shared/src/index.ts`
