@@ -507,6 +507,8 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - On `PageDetails.tsx`, if page pagination is used, doc viewer saved zoom breaks. Fixed by adding `key={page?.id}` to `<PageViewer />` in `OverviewTab.tsx` and `TranscribeTab.tsx`
 
+- If too many images are selected, modal window becomes so large that the upload button can't be seen. Fixed by adding `overlow-y-auto` and `max-h-100` to the attachement
+
 **Known issues carried forward:**
 
 - Resend free tier: only delivers to Resend account owner email in dev. Real domain verification deferred to Sprint 8, and the email-change flow and non-owner verification emails stay untested until then

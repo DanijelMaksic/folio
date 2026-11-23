@@ -170,7 +170,7 @@ export default function UploadDocument() {
       <form
          onSubmit={handleSubmit(onSubmit)}
          noValidate
-         className={`max-w-lg mx-auto p-6 space-y-4 border border-gray-200 rounded-md mt-12 ${upload.isPending ? 'pointer-events-none opacity-65' : ''}`}
+         className={`max-w-xl mx-auto p-6 space-y-4 border border-gray-200 rounded-md my-12 ${upload.isPending ? 'pointer-events-none opacity-65' : ''}`}
       >
          <h1 className="text-2xl font-semibold">Upload Document</h1>
 

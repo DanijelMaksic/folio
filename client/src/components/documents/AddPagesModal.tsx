@@ -126,7 +126,7 @@ function AddPagesModal({ documentId, onSuccess, onClose }: AddPagesModalProps) {
 
    return (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-         <div className="bg-background rounded-lg p-6 w-full max-w-md space-y-4 border">
+         <div className="bg-background rounded-lg p-6 w-full max-w-xl space-y-4 border">
             <h2 className="text-lg font-semibold">Add Pages</h2>
 
             <div className="space-y-2">
@@ -142,7 +142,7 @@ function AddPagesModal({ documentId, onSuccess, onClose }: AddPagesModalProps) {
                />
 
                {selectedFiles.length > 0 && (
-                  <AttachmentGroup className="flex-wrap">
+                  <AttachmentGroup className="flex-wrap max-h-100 overflow-y-auto pr-1">
                      {selectedFiles.map((sf, i) => (
                         <Attachment
                            key={`${sf.file.name}-${i}`}
