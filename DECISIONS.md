@@ -509,6 +509,8 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - If too many images are selected, modal window becomes so large that the upload button can't be seen. Fixed by adding `overlow-y-auto` and `max-h-100` to the attachement
 
+- On textarea elements in modals, if user spams one character, it breaks the element. Fixed by adding `wrap-anywhere` to textarea
+
 **Known issues carried forward:**
 
 - Resend free tier: only delivers to Resend account owner email in dev. Real domain verification deferred to Sprint 8, and the email-change flow and non-owner verification emails stay untested until then

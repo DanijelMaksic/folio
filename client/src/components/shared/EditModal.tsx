@@ -109,7 +109,7 @@ function EditModal({
                      <Textarea
                         id="edit-description-field"
                         {...register('description')}
-                        className="max-h-56 overflow-y-auto"
+                        className="max-h-56 overflow-y-auto wrap-anywhere"
                      />
                      <div className="flex justify-between text-sm">
                         <p className="text-destructive">

@@ -130,7 +130,7 @@ function NotesAndQuestions({ pageId }: { pageId: string }) {
                      aria-invalid={!!errors.content}
                      onFocus={() => setExpanded(true)}
                      {...register('content')}
-                     className="max-h-66 overflow-y-auto"
+                     className="max-h-66 overflow-y-auto wrap-anywhere"
                   />
 
                   {expanded && (

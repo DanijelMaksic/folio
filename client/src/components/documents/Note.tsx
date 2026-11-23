@@ -128,7 +128,7 @@ function Note({ note }: { note: NoteData }) {
                      rows={3}
                      aria-invalid={!!errors.content}
                      {...register('content')}
-                     className="max-h-66 overflow-y-auto bg-white"
+                     className="max-h-66 overflow-y-auto bg-white wrap-anywhere"
                   />
                   <div className="flex items-center justify-between gap-3">
                      <div className="flex justify-between text-sm self-start gap-3">

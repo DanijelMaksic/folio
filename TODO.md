@@ -6,8 +6,6 @@
 ## Things to fix
 
 - Notes are misaligned
-- On textarea elements, if user spams one character, it breaks the element
-
 - Fix tests
 - Run `tsc`
 
