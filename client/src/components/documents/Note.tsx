@@ -87,7 +87,7 @@ function Note({ note }: { note: NoteData }) {
             </Link>
          )}
 
-         <div className="border rounded-md bg-gray-50 flex-1 py-3 px-6">
+         <div className="border rounded-md bg-gray-50 flex-1 pt-3 pb-6 px-6">
             <div className="flex items-center gap-3 text-sm mb-1">
                <Link
                   to={`/users/${username}`}
@@ -128,34 +128,41 @@ function Note({ note }: { note: NoteData }) {
                      rows={3}
                      aria-invalid={!!errors.content}
                      {...register('content')}
+                     className="max-h-66 overflow-y-auto bg-white"
                   />
-                  <div className="flex justify-between text-sm">
-                     <span className="text-destructive">
-                        {errors.content?.message ?? errors.root?.message}
-                     </span>
-                     <span
-                        className={`${length <= NOTE_MAX_LENGTH ? 'text-muted-foreground' : 'text-destructive'} tabular-nums`}
-                     >
-                        {length}/{NOTE_MAX_LENGTH}
-                     </span>
-                  </div>
-                  <div className="flex gap-2">
-                     <Button
-                        type="submit"
-                        size="sm"
-                        disabled={!isDirty || update.isPending}
-                     >
-                        {update.isPending ? 'Saving...' : 'Save'}
-                     </Button>
-                     <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        disabled={update.isPending}
-                        onClick={cancelEdit}
-                     >
-                        Cancel
-                     </Button>
+                  <div className="flex items-center justify-between gap-3">
+                     <div className="flex justify-between text-sm self-start gap-3">
+                        <span
+                           className={`${length <= NOTE_MAX_LENGTH ? 'text-muted-foreground' : 'text-destructive'} tabular-nums`}
+                        >
+                           {length}/{NOTE_MAX_LENGTH}
+                        </span>
+
+                        <span className="text-destructive">
+                           {errors.content?.message ?? errors.root?.message}
+                        </span>
+                     </div>
+                     <div className="flex gap-2">
+                        <Button
+                           type="button"
+                           size="sm"
+                           variant="outline"
+                           disabled={update.isPending}
+                           onClick={cancelEdit}
+                        >
+                           Cancel
+                        </Button>
+
+                        <Button
+                           type="submit"
+                           size="sm"
+                           disabled={
+                              !isDirty || update.isPending || length > 1000
+                           }
+                        >
+                           {update.isPending ? 'Saving...' : 'Save'}
+                        </Button>
+                     </div>
                   </div>
                </form>
             ) : (

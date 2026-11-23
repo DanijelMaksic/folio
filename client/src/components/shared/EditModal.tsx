@@ -109,6 +109,7 @@ function EditModal({
                      <Textarea
                         id="edit-description-field"
                         {...register('description')}
+                        className="max-h-56 overflow-y-auto"
                      />
                      <div className="flex justify-between text-sm">
                         <p className="text-destructive">
@@ -153,7 +154,6 @@ function EditModal({
                   <Button
                      type="submit"
                      disabled={
-                        !categoryDirty ||
                         isPending ||
                         descriptionLength! > 1000 ||
                         titleLength > 250

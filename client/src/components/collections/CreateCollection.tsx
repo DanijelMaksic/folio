@@ -30,7 +30,7 @@ export default function CreateCollection() {
    };
 
    return (
-      <div className="max-w-lg mx-auto p-6 space-y-4 border border-gray-200 rounded-md mt-12">
+      <div className="max-w-lg mx-auto p-6 space-y-4 border border-gray-200 rounded-md my-12">
          <h1 className="text-2xl font-semibold">Create a collection</h1>
 
          <div className="space-y-2">

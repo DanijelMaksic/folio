@@ -80,6 +80,7 @@ function RejectRoleRequestModal({
                      rows={4}
                      aria-invalid={!!errors.reason}
                      {...register('reason')}
+                     className="max-h-56 overflow-y-auto"
                   />
                   <div className="flex justify-between text-sm">
                      <span className="text-destructive">

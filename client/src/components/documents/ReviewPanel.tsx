@@ -85,6 +85,7 @@ function ReviewPanel({
                rows={4}
                aria-invalid={!!errors.reason}
                {...register('reason')}
+               className="max-h-66 overflow-y-auto"
             />
             <div className="flex justify-between text-sm">
                <p className="text-destructive">{errors?.reason?.message}</p>
