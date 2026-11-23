@@ -43,7 +43,7 @@ function OverviewTab() {
    return (
       <div ref={gridRef} style={gridStyle} className={grid}>
          <div className={imageCell}>
-            <PageViewer page={page} />
+            <PageViewer page={page} key={page?.id} />
          </div>
 
          {showHandle && <ResizeHandle {...handleProps} />}

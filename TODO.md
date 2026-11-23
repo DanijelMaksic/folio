@@ -10,7 +10,6 @@
 - On textarea elements, limit height after certain threshold, to avoid infinite vertical height growth when inputing loads of text
 - On textarea elements, if user spams one character, it breaks the element
 - On document upload, grey out the whole upload form when `isPending` is true
-- On `PageDetails.tsx`, if page pagination is used, doc viewer saved zoom breaks
 
 - Fix tests
 - Run `tsc`

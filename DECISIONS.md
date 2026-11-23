@@ -503,6 +503,8 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 
 - Playwright strict mode violation on `getByLabel('Name')` in the edit profile dialog, because it also matched "Username" by substring. Fixed with `{ exact: true }`
 
+- On `PageDetails.tsx`, if page pagination is used, doc viewer saved zoom breaks. Fixed by adding `key={page?.id}` to `<PageViewer />` in `OverviewTab.tsx` and `TranscribeTab.tsx`
+
 **Known issues carried forward:**
 
 - Resend free tier: only delivers to Resend account owner email in dev. Real domain verification deferred to Sprint 8, and the email-change flow and non-owner verification emails stay untested until then

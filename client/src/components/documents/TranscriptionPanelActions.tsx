@@ -39,7 +39,7 @@ function TranscriptionPanelActions({
             <>
                {!preview && (
                   <div className="flex items-center gap-2 mr-4">
-                     <span>Mark as blank</span>
+                     <label htmlFor="blank-checkbox">Mark as blank</label>
                      <Checkbox
                         onCheckedChange={(v) => setIsBlank(v === true)}
                         className="border-gray-400"
