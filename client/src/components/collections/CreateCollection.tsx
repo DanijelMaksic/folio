@@ -8,6 +8,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { TRPCClientErrorLike } from '@trpc/client';
 import type { AppRouter } from '@server/trpc/router';
 import CategorySelect from '@/components/categories/CategorySelect';
+import { ArrowLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function CreateCollection() {
    const navigate = useNavigate();
@@ -31,7 +33,14 @@ export default function CreateCollection() {
 
    return (
       <div className="max-w-lg mx-auto p-6 space-y-4 border border-gray-200 rounded-md my-12">
-         <h1 className="text-2xl font-semibold">Create a collection</h1>
+         <div className="flex items-center justify-between gap-3">
+            <h1 className="text-2xl font-semibold">Create a collection</h1>
+
+            <Link to={navigate(-1)} className="flex items-center gap-1 group">
+               <ArrowLeft className="size-5 group-hover:-translate-x-1 transition-transform" />
+               <span className="text-sm">Back</span>
+            </Link>
+         </div>
 
          <div className="space-y-2">
             <Label htmlFor="title">Title</Label>

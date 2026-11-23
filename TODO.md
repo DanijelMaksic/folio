@@ -5,7 +5,6 @@
 
 ## Things to fix
 
-- Notes are misaligned
 - Fix tests
 - Run `tsc`
 

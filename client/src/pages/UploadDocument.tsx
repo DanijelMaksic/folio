@@ -17,7 +17,7 @@ import {
    AttachmentMedia,
    AttachmentTitle,
 } from '@/components/ui/attachment';
-import { ImageIcon, Paperclip, FileText, X } from 'lucide-react';
+import { Paperclip, FileText, X, ArrowLeft } from 'lucide-react';
 import {
    EditFormInput,
    editFormSchema,
@@ -25,6 +25,7 @@ import {
    PDF_MAX_BYTES,
 } from '@shared';
 import CategorySelect from '@/components/categories/CategorySelect';
+import { Link } from 'react-router-dom';
 
 interface SelectedFile {
    file: File;
@@ -172,7 +173,14 @@ export default function UploadDocument() {
          noValidate
          className={`max-w-xl mx-auto p-6 space-y-4 border border-gray-200 rounded-md my-12 ${upload.isPending ? 'pointer-events-none opacity-65' : ''}`}
       >
-         <h1 className="text-2xl font-semibold">Upload Document</h1>
+         <div className="flex items-center justify-between gap-3">
+            <h1 className="text-2xl font-semibold">Upload Document</h1>
+
+            <Link to="/documents" className="flex items-center gap-1 group">
+               <ArrowLeft className="size-5 group-hover:-translate-x-1 transition-transform" />
+               <span>Back</span>
+            </Link>
+         </div>
 
          <div className="space-y-2">
             <Label htmlFor="title">Title</Label>

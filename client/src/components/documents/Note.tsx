@@ -81,7 +81,7 @@ function Note({ note }: { note: NoteData }) {
          ) : (
             <Link
                to={`/users/${username}`}
-               className="flex size-10 shrink-0 items-center justify-center rounded-full border bg-muted text-sm font-medium uppercase"
+               className="flex size-12 shrink-0 items-center justify-center rounded-full border bg-muted text-sm font-medium uppercase"
             >
                {username[0]}
             </Link>
