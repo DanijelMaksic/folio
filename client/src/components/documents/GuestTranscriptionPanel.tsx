@@ -40,26 +40,7 @@ function GuestTranscriptionPanel({
                />
             </div>
 
-            {!isHorizontal && (
-               <div className="flex gap-2 items-center justify-end opacity-50 pointer-events-none shrink-0">
-                  <div className="flex items-center gap-2 mr-4">
-                     <span>Mark as blank</span>
-                     <Checkbox className="border-gray-400" />
-                  </div>
-
-                  <button className="px-3 py-1 text-sm border rounded hover:bg-muted">
-                     Preview
-                  </button>
-
-                  <button className="px-3 py-1 text-sm border rounded hover:bg-muted">
-                     Save
-                  </button>
-
-                  <button className="px-3 py-1 text-sm bg-primary text-primary-foreground rounded">
-                     Submit
-                  </button>
-               </div>
-            )}
+            {!isHorizontal && <GuestPanelActions />}
          </div>
          <Textarea
             className={`font-mono leading-6 disabled:opacity-60 disabled:caret-transparent flex-1 field-sizing-fixed! ${
@@ -77,26 +58,7 @@ function GuestTranscriptionPanel({
             placeholder="Type your transcription here..."
          />
 
-         {isHorizontal && (
-            <div className="flex gap-2 items-center justify-end opacity-50 pointer-events-none shrink-0">
-               <div className="flex items-center gap-2 mr-4">
-                  <span>Mark as blank</span>
-                  <Checkbox className="border-gray-400" />
-               </div>
-
-               <button className="px-3 py-1 text-sm border rounded hover:bg-muted">
-                  Preview
-               </button>
-
-               <button className="px-3 py-1 text-sm border rounded hover:bg-muted">
-                  Save
-               </button>
-
-               <button className="px-3 py-1 text-sm bg-primary text-primary-foreground rounded">
-                  Submit
-               </button>
-            </div>
-         )}
+         {isHorizontal && <GuestPanelActions />}
 
          {modalOpen && (
             <SignInModal
@@ -109,3 +71,26 @@ function GuestTranscriptionPanel({
 }
 
 export default GuestTranscriptionPanel;
+
+function GuestPanelActions() {
+   return (
+      <div className="flex gap-2 items-center justify-end opacity-50 pointer-events-none shrink-0">
+         <div className="flex items-center gap-2 mr-4">
+            <span>Mark as blank</span>
+            <Checkbox className="border-gray-400" />
+         </div>
+
+         <button className="px-3 py-1 text-sm border rounded hover:bg-muted">
+            Preview
+         </button>
+
+         <button className="px-3 py-1 text-sm border rounded hover:bg-muted">
+            Save
+         </button>
+
+         <button className="px-3 py-1 text-sm bg-primary text-primary-foreground rounded">
+            Submit
+         </button>
+      </div>
+   );
+}

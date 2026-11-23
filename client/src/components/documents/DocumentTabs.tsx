@@ -23,8 +23,6 @@ export interface DocumentTabsProps {
    status: StatusType;
    documentId: string | undefined;
    currentPage: number;
-   categoryName: string | null;
-   categorySlug: string | null;
    totalPages: number;
    tab: string;
    document: Document;

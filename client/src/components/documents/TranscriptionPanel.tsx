@@ -8,12 +8,13 @@ import {
    TooltipTrigger,
 } from '@/components/ui/tooltip';
 import TranscriptionToolbar from '@/components/documents/TranscriptionToolbar';
-import { Checkbox } from '@/components/ui/checkbox';
 import TranscriptionText from '@/components/documents/TranscriptionText';
 import { useParams } from 'react-router-dom';
 import GuestTranscriptionPanel from '@/components/documents/GuestTranscriptionPanel';
 import { useViewerStore } from '@/store/useViewerStore';
 import SubmitModal from '@/components/documents/SubmitModal';
+import TranscriptionPanelActions from '@/components/documents/TranscriptionPanelActions';
+import TranscriptionPanelStatus from '@/components/documents/TranscriptionPanelStatus';
 
 function TranscriptionPanel({
    canTranscribe,
@@ -202,139 +203,31 @@ function TranscriptionPanel({
                )}
 
                {transcription?.status && !preview && !isHorizontal && (
-                  <div className="text-sm text-muted-foreground capitalize flex gap-2">
-                     <div className="italic self-end">
-                        <span>Status: </span>
-                        <span data-testid="transcription-status">
-                           {transcription?.status}
-                        </span>
-                     </div>
-
-                     {transcription?.status === 'submitted' && (
-                        <Tooltip>
-                           <TooltipTrigger
-                              render={
-                                 <button
-                                    type="button"
-                                    className="border border-gray-300 rounded-full px-2 text-gray-600"
-                                 >
-                                    ?
-                                 </button>
-                              }
-                           />
-                           <TooltipContent>
-                              <p className="max-w-44">
-                                 Submitted transcriptions are reviewed by an
-                                 editor before they’re published.
-                              </p>
-                           </TooltipContent>
-                        </Tooltip>
-                     )}
-                  </div>
+                  <TranscriptionPanelStatus status={transcription.status} />
                )}
             </div>
 
             {!isHorizontal && (
-               <div className="flex gap-2 items-center justify-end shrink-0">
-                  {' '}
-                  {!isSubmitted && (
-                     <>
-                        {!preview && (
-                           <div className="flex items-center gap-2 mr-4">
-                              <span>Mark as blank</span>
-                              <Checkbox
-                                 onCheckedChange={(v) => setIsBlank(v === true)}
-                                 className="border-gray-400"
-                                 id="blank-checkbox"
-                                 name="blank-checkbox"
-                                 checked={isBlank}
-                              />
-                           </div>
-                        )}
-
-                        <button
-                           className="px-3 py-1 text-sm border disabled:pointer-events-none rounded hover:bg-muted disabled:opacity-50"
-                           onClick={() => setPreview(!preview)}
-                           disabled={
-                              updateMutation.isPending ||
-                              !transcriptionContent.trim() ||
-                              isBlank
-                           }
-                        >
-                           {preview ? 'Edit' : 'Preview'}
-                        </button>
-
-                        <Tooltip>
-                           <TooltipTrigger
-                              render={
-                                 <button
-                                    className="px-3 py-1 text-sm border disabled:pointer-events-none rounded hover:bg-muted disabled:opacity-50"
-                                    onClick={handleSave}
-                                    disabled={
-                                       updateMutation.isPending || !hasContent
-                                    }
-                                 >
-                                    {updateMutation.isPending
-                                       ? 'Saving...'
-                                       : 'Save'}
-                                 </button>
-                              }
-                           />
-                           <TooltipContent>
-                              <p className="max-w-44">
-                                 {navigator.platform === 'Win32'
-                                    ? 'Ctrl+S'
-                                    : 'Cmd+S'}
-                              </p>
-                           </TooltipContent>
-                        </Tooltip>
-
-                        <button
-                           className="px-3 py-1 text-sm bg-primary text-primary-foreground disabled:pointer-events-none rounded  hover:opacity-90 disabled:opacity-50"
-                           onClick={handleSubmit}
-                           disabled={submitMutation.isPending || !hasContent}
-                        >
-                           {submitMutation.isPending
-                              ? 'Submitting...'
-                              : 'Submit'}
-                        </button>
-                     </>
-                  )}
-               </div>
+               <TranscriptionPanelActions
+                  isSubmitted={isSubmitted}
+                  preview={preview}
+                  isBlank={isBlank}
+                  setIsBlank={setIsBlank}
+                  setPreview={setPreview}
+                  isSaving={updateMutation.isPending}
+                  transcriptionContent={transcriptionContent}
+                  handleSave={handleSave}
+                  hasContent={hasContent}
+                  setIsSubmitOpen={setIsSubmitOpen}
+                  isSubmitting={submitMutation.isPending}
+               />
             )}
 
             {transcription?.status && isHorizontal && (
-               <div className="text-sm text-muted-foreground capitalize flex gap-2">
-                  <div className="italic self-end">
-                     <span>Status: </span>
-                     <span data-testid="transcription-status">
-                        {transcription?.status}
-                     </span>
-                  </div>
-
-                  {transcription?.status === 'submitted' && (
-                     <Tooltip>
-                        <TooltipTrigger
-                           render={
-                              <button
-                                 type="button"
-                                 className="border border-gray-300 rounded-full px-2 text-gray-600"
-                              >
-                                 ?
-                              </button>
-                           }
-                        />
-                        <TooltipContent>
-                           <p className="max-w-44">
-                              Submitted transcriptions are reviewed by an editor
-                              before they’re published.
-                           </p>
-                        </TooltipContent>
-                     </Tooltip>
-                  )}
-               </div>
+               <TranscriptionPanelStatus status={transcription.status} />
             )}
          </div>
+
          {!transcription ? (
             <button
                className="text-sm underline"
@@ -387,76 +280,19 @@ function TranscriptionPanel({
                )}
 
                {isHorizontal && (
-                  <div className="flex gap-2 items-center justify-end shrink-0">
-                     {' '}
-                     {!isSubmitted && (
-                        <>
-                           {!preview && (
-                              <div className="flex items-center gap-2 mr-4">
-                                 <span>Mark as blank</span>
-                                 <Checkbox
-                                    onCheckedChange={(v) =>
-                                       setIsBlank(v === true)
-                                    }
-                                    className="border-gray-400"
-                                    id="blank-checkbox"
-                                    name="blank-checkbox"
-                                    checked={isBlank}
-                                 />
-                              </div>
-                           )}
-
-                           <button
-                              className="px-3 py-1 text-sm border disabled:pointer-events-none rounded hover:bg-muted disabled:opacity-50"
-                              onClick={() => setPreview(!preview)}
-                              disabled={
-                                 updateMutation.isPending ||
-                                 !transcriptionContent.trim() ||
-                                 isBlank
-                              }
-                           >
-                              {preview ? 'Edit' : 'Preview'}
-                           </button>
-
-                           <Tooltip>
-                              <TooltipTrigger
-                                 render={
-                                    <button
-                                       className="px-3 py-1 text-sm border disabled:pointer-events-none rounded hover:bg-muted disabled:opacity-50"
-                                       onClick={handleSave}
-                                       disabled={
-                                          updateMutation.isPending ||
-                                          !hasContent
-                                       }
-                                    >
-                                       {updateMutation.isPending
-                                          ? 'Saving...'
-                                          : 'Save'}
-                                    </button>
-                                 }
-                              />
-                              <TooltipContent>
-                                 <p className="max-w-44">
-                                    {' '}
-                                    {navigator.platform === 'Win32'
-                                       ? 'Ctrl+S'
-                                       : 'Cmd+S'}
-                                 </p>
-                              </TooltipContent>
-                           </Tooltip>
-
-                           <button
-                              className="px-3 py-1 text-sm bg-primary text-primary-foreground disabled:pointer-events-none rounded  hover:opacity-90 disabled:opacity-50"
-                              onClick={() => setIsSubmitOpen(true)}
-                              disabled={submitMutation.isPending || !hasContent}
-                           >
-                              {submitMutation.isPending
-                                 ? 'Submitting...'
-                                 : 'Submit'}
-                           </button>
-                        </>
-                     )}
-                  </div>
+                  <TranscriptionPanelActions
+                     isSubmitted={isSubmitted}
+                     preview={preview}
+                     isBlank={isBlank}
+                     setIsBlank={setIsBlank}
+                     setPreview={setPreview}
+                     isSaving={updateMutation.isPending}
+                     transcriptionContent={transcriptionContent}
+                     handleSave={handleSave}
+                     hasContent={hasContent}
+                     setIsSubmitOpen={setIsSubmitOpen}
+                     isSubmitting={submitMutation.isPending}
+                  />
                )}
             </>
          )}
