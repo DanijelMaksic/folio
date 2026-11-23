@@ -378,7 +378,11 @@ function TranscriptionPanel({
                      data-testid="transcription-content"
                      onChange={(e) => setTranscriptionContent(e.target.value)}
                      disabled={isSubmitted || isBlank}
-                     placeholder="Type your transcription here..."
+                     placeholder={
+                        isBlank
+                           ? 'This page is marked as blank. Uncheck "Mark as blank" to write a transcription.'
+                           : 'Type your transcription here...'
+                     }
                   />
                )}
 

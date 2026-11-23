@@ -210,7 +210,11 @@ export default function Documents() {
          </div>
 
          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[14rem_minmax(0,1fr)] lg:gap-12">
-            <CategorySidebar value={category} onChange={handleSetCategory} />
+            {isLoading ? (
+               <div>Loading</div>
+            ) : (
+               <CategorySidebar value={category} onChange={handleSetCategory} />
+            )}
 
             <div>
                {isLoading ? (

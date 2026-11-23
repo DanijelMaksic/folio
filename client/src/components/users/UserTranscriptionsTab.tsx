@@ -151,6 +151,11 @@ function UserTranscriptionsTab({ userId }: { userId: string }) {
                         </div>
                      </div>
 
+                     {t.isBlank && (
+                        <p className="text-muted-foreground">
+                           This page is blank
+                        </p>
+                     )}
                      <TranscriptionText
                         content={t.content}
                         className="line-clamp-12"
