@@ -67,7 +67,6 @@ export default function SignUp() {
                   noValidate
                   onSubmit={handleSubmit(onSignUp)}
                   className={`space-y-4 ${isPending ? 'pointer-events-none opacity-65' : ''}`}
-                  className="space-y-4"
                >
                   <div className="space-y-2">
                      <Label htmlFor="name">Full name</Label>

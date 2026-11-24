@@ -6,6 +6,5 @@
 ## Things to fix
 
 - Fix tests
-- Run `tsc`
 
 ## Things to refactor

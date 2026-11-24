@@ -166,7 +166,9 @@ function Note({ note }: { note: NoteData }) {
                   </div>
                </form>
             ) : (
-               <p className="whitespace-pre-wrap break-words">{note.content}</p>
+               <p className="whitespace-pre-wrap wrap-break-words">
+                  {note.content}
+               </p>
             )}
          </div>
       </div>
