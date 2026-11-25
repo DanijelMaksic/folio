@@ -341,7 +341,8 @@ export const adminRouter = router({
                .limit(input.limit)
                .offset(offset)
                .orderBy(order, desc(roleChanges.id)),
-            db.select({ total: count() }).from(roleChanges),
+            db.select({ total: count() }).from(roleChanges).where(where),
+            ,
          ]);
 
          return {

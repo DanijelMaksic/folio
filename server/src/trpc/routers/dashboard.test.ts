@@ -39,7 +39,10 @@ vi.mock('@/lib/queue.js', () => ({
    },
 }));
 
-const contributorUser = mockUser({ globalRole: 'contributor' });
+const contributorUser = mockUser({
+   id: 'contributor-id',
+   globalRole: 'contributor',
+});
 const editorUser = mockUser({ id: 'editor-id', globalRole: 'editor' });
 const adminUser = mockUser({ id: 'admin-id', globalRole: 'admin' });
 
@@ -72,52 +75,48 @@ const mockRejected = {
    updatedAt,
 };
 
-// Chain: select().from().leftJoin().where().groupBy().orderBy().limit()
-function mockRecentDocsQuery(rows: unknown[]) {
-   mockSelect.mockReturnValueOnce({
-      from: vi.fn(() => ({
-         leftJoin: vi.fn(() => ({
-            where: vi.fn(() => ({
-               groupBy: vi.fn(() => ({
-                  orderBy: vi.fn(() => ({
-                     limit: vi.fn().mockResolvedValueOnce(rows),
-                  })),
-               })),
-            })),
-         })),
-      })),
-   });
-}
+beforeEach(() => {
+   vi.resetAllMocks();
+});
 
-// Chain: select().from().innerJoin().innerJoin().where().orderBy().limit()
-function mockRejectedQuery(rows: unknown[]) {
+// ── helpers ───────────────────────
+
+// select().from().leftJoin().where().groupBy().orderBy().limit()
+const mockRecentDocsQuery = (rows: unknown[]) => {
+   const where = vi.fn((_where?: unknown) => ({
+      groupBy: vi.fn(() => ({
+         orderBy: vi.fn(() => ({ limit })),
+      })),
+   }));
+   const limit = vi.fn((_n?: number) => Promise.resolve(rows));
+   mockSelect.mockReturnValueOnce({
+      from: vi.fn(() => ({ leftJoin: vi.fn(() => ({ where })) })),
+   });
+   return { where, limit };
+};
+
+// select().from().innerJoin().innerJoin().where().orderBy().limit()
+const mockRejectedQuery = (rows: unknown[]) => {
+   const limit = vi.fn((_n?: number) => Promise.resolve(rows));
+   const where = vi.fn((_where?: unknown) => ({
+      orderBy: vi.fn(() => ({ limit })),
+   }));
    mockSelect.mockReturnValueOnce({
       from: vi.fn(() => ({
          innerJoin: vi.fn(() => ({
-            innerJoin: vi.fn(() => ({
-               where: vi.fn(() => ({
-                  orderBy: vi.fn(() => ({
-                     limit: vi.fn().mockResolvedValueOnce(rows),
-                  })),
-               })),
-            })),
+            innerJoin: vi.fn(() => ({ where })),
          })),
       })),
    });
-}
+   return { where, limit };
+};
 
-// Chain: select().from().where() (used for both count queries)
-function mockCountQuery(rows: unknown[]) {
-   mockSelect.mockReturnValueOnce({
-      from: vi.fn(() => ({
-         where: vi.fn().mockResolvedValueOnce(rows),
-      })),
-   });
-}
-
-beforeEach(() => {
-   vi.clearAllMocks();
-});
+// select().from().where() (both count queries)
+const mockCountQuery = (rows: unknown[]) => {
+   const where = vi.fn((_where?: unknown) => Promise.resolve(rows));
+   mockSelect.mockReturnValueOnce({ from: vi.fn(() => ({ where })) });
+   return { where };
+};
 
 // ── getOverview ───────────────────────
 
@@ -147,7 +146,7 @@ describe('dashboard.getOverview', () => {
       });
    });
 
-   it('returns null counts for a contributor', async () => {
+   it('returns null counts and runs no count queries for a contributor', async () => {
       mockGetUserStats.mockResolvedValueOnce(mockStats);
       mockRecentDocsQuery([]);
       mockRejectedQuery([]);
@@ -157,8 +156,33 @@ describe('dashboard.getOverview', () => {
 
       expect(result.reviewQueueCount).toBeNull();
       expect(result.pendingRoleRequestCount).toBeNull();
-      // recent docs + rejected only, no count queries
+      // recent docs + rejected only
       expect(mockSelect).toHaveBeenCalledTimes(2);
+   });
+
+   it('limits both lists to 5 items', async () => {
+      mockGetUserStats.mockResolvedValueOnce(mockStats);
+      const docs = mockRecentDocsQuery([]);
+      const rejected = mockRejectedQuery([]);
+
+      const caller = createAuthenticatedCaller(contributorUser);
+      await caller.dashboard.getOverview();
+
+      expect(docs.limit).toHaveBeenCalledWith(5);
+      expect(rejected.limit).toHaveBeenCalledWith(5);
+   });
+
+   it('scopes both lists to the current user', async () => {
+      mockGetUserStats.mockResolvedValueOnce(mockStats);
+      const docs = mockRecentDocsQuery([]);
+      const rejected = mockRejectedQuery([]);
+
+      const caller = createAuthenticatedCaller(contributorUser);
+      await caller.dashboard.getOverview();
+
+      // eq(uploadedBy / userId, user.id) is always present
+      expect(docs.where.mock.calls[0][0]).toBeDefined();
+      expect(rejected.where.mock.calls[0][0]).toBeDefined();
    });
 
    it('returns empty lists when the user has no documents or rejections', async () => {
@@ -180,7 +204,7 @@ describe('dashboard.getOverview', () => {
       expect(result.rejectedTranscriptions).toHaveLength(0);
    });
 
-   it('keeps a null cover image and null rejection reason', async () => {
+   it('keeps a null cover image and a null rejection reason', async () => {
       mockGetUserStats.mockResolvedValueOnce(mockStats);
       mockRecentDocsQuery([{ ...mockRecentDoc, coverImageUrl: null }]);
       mockRejectedQuery([{ ...mockRejected, rejectionReason: null }]);
@@ -192,11 +216,28 @@ describe('dashboard.getOverview', () => {
       expect(result.rejectedTranscriptions[0]?.rejectionReason).toBeNull();
    });
 
-   it('includes the review queue count for an editor', async () => {
+   it('shows processing and failed documents in the recent list', async () => {
+      mockGetUserStats.mockResolvedValueOnce(mockStats);
+      mockRecentDocsQuery([
+         { ...mockRecentDoc, id: 'doc-2', status: 'processing' },
+         { ...mockRecentDoc, id: 'doc-3', status: 'failed' },
+      ]);
+      mockRejectedQuery([]);
+
+      const caller = createAuthenticatedCaller(contributorUser);
+      const result = await caller.dashboard.getOverview();
+
+      expect(result.recentDocuments.map((d) => d.status)).toEqual([
+         'processing',
+         'failed',
+      ]);
+   });
+
+   it('includes the review queue count for an editor, without role requests', async () => {
       mockGetUserStats.mockResolvedValueOnce(mockStats);
       mockRecentDocsQuery([mockRecentDoc]);
       mockRejectedQuery([]);
-      mockCountQuery([{ count: 4 }]);
+      const queue = mockCountQuery([{ count: 4 }]);
 
       const caller = createAuthenticatedCaller(editorUser);
       const result = await caller.dashboard.getOverview();
@@ -204,6 +245,8 @@ describe('dashboard.getOverview', () => {
       expect(result.reviewQueueCount).toBe(4);
       expect(result.pendingRoleRequestCount).toBeNull();
       expect(mockSelect).toHaveBeenCalledTimes(3);
+      // status = submitted AND userId != current user
+      expect(queue.where.mock.calls[0][0]).toBeDefined();
    });
 
    it('falls back to 0 when the review queue count row is missing', async () => {
@@ -233,10 +276,37 @@ describe('dashboard.getOverview', () => {
       expect(mockSelect).toHaveBeenCalledTimes(4);
    });
 
+   it('falls back to 0 when the role request count row is missing', async () => {
+      mockGetUserStats.mockResolvedValueOnce(mockStats);
+      mockRecentDocsQuery([]);
+      mockRejectedQuery([]);
+      mockCountQuery([{ count: 2 }]);
+      mockCountQuery([]);
+
+      const caller = createAuthenticatedCaller(adminUser);
+      const result = await caller.dashboard.getOverview();
+
+      expect(result.reviewQueueCount).toBe(2);
+      expect(result.pendingRoleRequestCount).toBe(0);
+   });
+
+   it('propagates an error from getUserStats', async () => {
+      mockGetUserStats.mockRejectedValueOnce(new Error('stats down'));
+      mockRecentDocsQuery([]);
+      mockRejectedQuery([]);
+
+      const caller = createAuthenticatedCaller(contributorUser);
+      await expect(caller.dashboard.getOverview()).rejects.toMatchObject({
+         code: 'INTERNAL_SERVER_ERROR',
+      });
+   });
+
    it('throws UNAUTHORIZED if not signed in', async () => {
       const caller = createUnauthenticatedCaller();
       await expect(caller.dashboard.getOverview()).rejects.toMatchObject({
          code: 'UNAUTHORIZED',
       });
+      expect(mockGetUserStats).not.toHaveBeenCalled();
+      expect(mockSelect).not.toHaveBeenCalled();
    });
 });
