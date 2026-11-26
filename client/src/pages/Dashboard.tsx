@@ -86,7 +86,7 @@ export default function Dashboard() {
                </h2>
                {data?.recentDocuments.length! > 0 && (
                   <Link
-                     to="/documents"
+                     to={`/users/${user?.username}`}
                      className="text-sm text-muted-foreground hover:underline"
                   >
                      View all
