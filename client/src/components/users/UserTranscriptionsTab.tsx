@@ -55,7 +55,7 @@ function UserTranscriptionsTab({ userId }: { userId: string }) {
    );
 
    return (
-      <div>
+      <>
          <div className="flex items-center justify-between gap-3 my-3">
             <h3 className="text-lg font-semibold">
                List of approved transcriptions
@@ -170,7 +170,7 @@ function UserTranscriptionsTab({ userId }: { userId: string }) {
             totalPages={data?.totalPages ?? 1}
             onPageChange={handlePageChange}
          />
-      </div>
+      </>
    );
 }
 

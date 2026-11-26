@@ -21,7 +21,13 @@ const OPTIONS = [
    { value: 'most-documents', label: 'Most documents' },
 ];
 
-function UserCollectionsTab({ userId }: { userId: string }) {
+function UserCollectionsTab({
+   userId,
+   isMe,
+}: {
+   userId: string;
+   isMe: string;
+}) {
    const { page, search, sort, input, setInput, setPage, setSort } =
       useListParams<Sort>(SORTS, 'newest');
 
@@ -34,14 +40,20 @@ function UserCollectionsTab({ userId }: { userId: string }) {
 
    return (
       <>
-         <ListControls
-            placeholder="Search collections..."
-            input={input}
-            onInput={setInput}
-            sort={sort}
-            onSort={(v) => setSort(v as Sort)}
-            options={OPTIONS}
-         />
+         <div className="flex items-center justify-between gap-3">
+            <h3 className="text-lg font-semibold">
+               {isMe ? 'My collections' : 'List of collections'}
+            </h3>
+
+            <ListControls
+               placeholder="Search collections..."
+               input={input}
+               onInput={setInput}
+               sort={sort}
+               onSort={(v) => setSort(v as Sort)}
+               options={OPTIONS}
+            />
+         </div>
 
          {isLoading ? (
             <p>Loading...</p>

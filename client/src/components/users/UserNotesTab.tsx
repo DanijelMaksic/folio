@@ -13,7 +13,7 @@ const OPTIONS = [
    { value: 'oldest', label: 'Oldest' },
 ];
 
-function UserNotesTab({ userId }: { userId: string }) {
+function UserNotesTab({ userId, isMe }: { userId: string; isMe: boolean }) {
    const { page, search, sort, input, setInput, setPage, setSort } =
       useListParams<Sort>(SORTS, 'newest');
 
@@ -26,14 +26,19 @@ function UserNotesTab({ userId }: { userId: string }) {
 
    return (
       <>
-         <ListControls
-            placeholder="Search notes..."
-            input={input}
-            onInput={setInput}
-            sort={sort}
-            onSort={(v) => setSort(v as Sort)}
-            options={OPTIONS}
-         />
+         <div className="flex items-center justify-between gap-3">
+            <h3 className="text-lg font-semibold">
+               {isMe ? 'My notes' : 'List of notes'}
+            </h3>
+            <ListControls
+               placeholder="Search notes..."
+               input={input}
+               onInput={setInput}
+               sort={sort}
+               onSort={(v) => setSort(v as Sort)}
+               options={OPTIONS}
+            />
+         </div>
 
          {isLoading ? (
             <p>Loading...</p>

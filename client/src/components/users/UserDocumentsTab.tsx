@@ -32,7 +32,7 @@ const OPTIONS = [
    { value: 'most-transcribed', label: 'Most transcribed' },
 ];
 
-function UserDocumentsTab({ userId }: { userId: string }) {
+function UserDocumentsTab({ userId, isMe }: { userId: string; isMe: boolean }) {
    const { page, search, sort, input, setInput, setPage, setSort } =
       useListParams<Sort>(SORTS, 'newest');
 
@@ -45,14 +45,20 @@ function UserDocumentsTab({ userId }: { userId: string }) {
 
    return (
       <>
-         <ListControls
-            placeholder="Search documents..."
-            input={input}
-            onInput={setInput}
-            sort={sort}
-            onSort={(v) => setSort(v as Sort)}
-            options={OPTIONS}
-         />
+         <div className="flex items-center justify-between gap-3">
+            <h3 className="text-lg font-semibold">
+               {isMe ? 'My documents' : 'List of documents'}
+            </h3>
+
+            <ListControls
+               placeholder="Search documents..."
+               input={input}
+               onInput={setInput}
+               sort={sort}
+               onSort={(v) => setSort(v as Sort)}
+               options={OPTIONS}
+            />
+         </div>
 
          {isLoading ? (
             <p>Loading...</p>

@@ -86,16 +86,16 @@ function UserPage() {
             </TabsList>
 
             <TabsContent value="documents">
-               <UserDocumentsTab userId={profile.id} />
+               <UserDocumentsTab userId={profile.id} isMe={isMe} />
             </TabsContent>
             <TabsContent value="transcriptions">
                <UserTranscriptionsTab userId={profile.id} />
             </TabsContent>
             <TabsContent value="collections">
-               <UserCollectionsTab userId={profile.id} />
+               <UserCollectionsTab userId={profile.id} isMe={isMe} />
             </TabsContent>
             <TabsContent value="notes">
-               <UserNotesTab userId={profile.id} />
+               <UserNotesTab userId={profile.id} isMe={isMe} />
             </TabsContent>
          </Tabs>
       </div>
