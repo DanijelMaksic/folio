@@ -2,11 +2,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { trpc } from '@/lib/trpc';
 import { Transcription } from '@shared';
 import { useEffect, useState, useLayoutEffect, useRef } from 'react';
-import {
-   Tooltip,
-   TooltipContent,
-   TooltipTrigger,
-} from '@/components/ui/tooltip';
 import TranscriptionToolbar from '@/components/documents/TranscriptionToolbar';
 import TranscriptionText from '@/components/documents/TranscriptionText';
 import { useParams } from 'react-router-dom';

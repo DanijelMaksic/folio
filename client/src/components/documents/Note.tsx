@@ -16,7 +16,12 @@ import { useSession } from '@/lib/auth-client';
 import { trpc } from '@/lib/trpc';
 import { zodResolver } from '@/lib/zod-resolver';
 import { Link } from 'react-router-dom';
-import { timeAgo } from '@/lib/helpers';
+import { formatDate, timeAgo } from '@/lib/helpers';
+import {
+   Tooltip,
+   TooltipContent,
+   TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 type NoteData =
    inferRouterOutputs<AppRouter>['notes']['listByPage']['notes'][number];
@@ -96,10 +101,19 @@ function Note({ note }: { note: NoteData }) {
                   {username}
                </Link>
 
-               <span className="text-muted-foreground">
-                  {timeAgo(note.createdAt)}
-                  {edited && ' (edited)'}
-               </span>
+               <Tooltip>
+                  <TooltipTrigger
+                     render={
+                        <span className="text-muted-foreground cursor-default">
+                           {timeAgo(note.createdAt)}
+                           {edited && ' (edited)'}
+                        </span>
+                     }
+                  />
+                  <TooltipContent>
+                     <span>{formatDate(note.createdAt)}</span>
+                  </TooltipContent>
+               </Tooltip>
 
                {!isEditing && (
                   <div className="ml-auto">

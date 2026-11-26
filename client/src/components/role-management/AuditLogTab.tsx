@@ -1,4 +1,4 @@
-import { timeAgo } from '@/lib/helpers';
+import { formatDate, timeAgo } from '@/lib/helpers';
 import { trpc } from '@/lib/trpc';
 import { useSearchParams, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,11 @@ import {
 import { ArrowUpDown, Check, ChevronDown } from 'lucide-react';
 import AppPagination from '@/components/shared/AppPagination';
 import RoleChangeTypeFilter from '@/components/role-management/RoleChangeTypeFilter';
+import {
+   Tooltip,
+   TooltipContent,
+   TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 type RoleChangesSort = 'newest' | 'oldest';
 
@@ -186,9 +191,18 @@ function AuditLogTab() {
                      )}
                   </div>
 
-                  <div className="flex items-center gap-3">
-                     <span>{timeAgo(c.createdAt)}</span>
-                  </div>
+                  <Tooltip>
+                     <TooltipTrigger
+                        render={
+                           <div className="flex items-center gap-3 cursor-default">
+                              <span>{timeAgo(c.createdAt)}</span>
+                           </div>
+                        }
+                     />
+                     <TooltipContent>
+                        <span>{formatDate(c.createdAt)}</span>
+                     </TooltipContent>
+                  </Tooltip>
                </li>
             ))}
          </ul>

@@ -1,5 +1,3 @@
-import { useSearchParams } from 'react-router-dom';
-
 export const toBase64 = (file: File): Promise<string> =>
    new Promise((res, rej) => {
       const reader = new FileReader();

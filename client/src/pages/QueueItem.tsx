@@ -14,6 +14,7 @@ import {
    TooltipContent,
    TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { formatDate, timeAgo } from '@/lib/helpers';
 
 interface QueueItemProps {
    id: string;
@@ -54,18 +55,25 @@ function QueueItem({ item }: { item: QueueItemProps }) {
                   Contributor:{' '}
                   <Link
                      to={`/users/${item.contributorUsername}`}
-                     className="font-medium text-foreground hover:underline"
+                     className="font-medium text-foreground underline hover:text-gray-700"
                   >
                      {item.contributorUsername}
                   </Link>
                </p>
                <p>
                   Submitted:{' '}
-                  <span className="font-medium text-foreground">
-                     {item.updatedAt
-                        ? new Date(item.updatedAt).toLocaleDateString()
-                        : '—'}
-                  </span>
+                  <Tooltip>
+                     <TooltipTrigger
+                        render={
+                           <span className="font-medium text-foreground cursor-default">
+                              {timeAgo(item.updatedAt)}
+                           </span>
+                        }
+                     />
+                     <TooltipContent>
+                        <span>{formatDate(item.updatedAt)}</span>
+                     </TooltipContent>
+                  </Tooltip>
                </p>
             </div>
 
