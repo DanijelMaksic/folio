@@ -26,7 +26,7 @@ function UserCollectionsTab({
    isMe,
 }: {
    userId: string;
-   isMe: string;
+   isMe: boolean;
 }) {
    const { page, search, sort, input, setInput, setPage, setSort } =
       useListParams<Sort>(SORTS, 'newest');
