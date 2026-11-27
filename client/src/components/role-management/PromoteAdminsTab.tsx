@@ -78,7 +78,7 @@ function PromoteAdmins() {
                      <div className="flex items-center gap-3">
                         <Link
                            to={`/users/${e.username}`}
-                           className="border rounded-md px-3 py-1 font-medium hover:bg-gray-50"
+                           className="border rounded-md px-3 py-1 font-medium hover:bg-muted"
                         >
                            View profile
                         </Link>

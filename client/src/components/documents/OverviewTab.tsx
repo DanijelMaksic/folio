@@ -55,7 +55,7 @@ function OverviewTab() {
                      <h2 className="text-lg font-medium">Transcription</h2>
 
                      {user?.id === approvedTranscription.userId ? (
-                        <p className="rounded-md bg-gray-900 px-3 py-1 text-sm text-white">
+                        <p className="rounded-md bg-primary px-3 py-1 text-sm text-accent">
                            Your transcription
                         </p>
                      ) : (
@@ -64,7 +64,7 @@ function OverviewTab() {
                            {approvedTranscription.username ? (
                               <Link
                                  to={`/users/${approvedTranscription.username}`}
-                                 className="font-semibold hover:underline"
+                                 className="font-semibold underline text-primary"
                               >
                                  {approvedTranscription.username}
                               </Link>

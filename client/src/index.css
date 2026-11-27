@@ -1,9 +1,9 @@
 @import 'tailwindcss';
 @import 'shadcn/tailwind.css';
 @import 'tw-animate-css';
-@import '@fontsource-variable/inter';
 @import '@fontsource-variable/source-serif-4';
 @import '@fontsource-variable/source-serif-4/wght-italic.css';
+@import '@fontsource-variable/hanken-grotesk';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -48,7 +48,7 @@
    --color-sidebar-border: var(--sidebar-border);
    --color-sidebar-ring: var(--sidebar-ring);
    --font-heading: var(--font-sans);
-   --font-sans: 'Hanken Grotesk', sans-serif;
+   --font-sans: 'Hanken Grotesk Variable', sans-serif;
    --font-serif: 'Source Serif 4 Variable', Georgia, serif;
 }
 
@@ -80,7 +80,7 @@
    --accent: var(--color-stone-100);
    --accent-foreground: var(--color-stone-900);
    --destructive: var(--color-red-600);
-   --border: var(--color-stone-200);
+   --border: var(--color-stone-300);
    --input: var(--color-stone-200);
    --ring: var(--color-teal-600);
    --sidebar: var(--color-stone-100);
@@ -109,7 +109,7 @@
    --primary-foreground: var(--color-teal-950);
    --secondary: var(--color-stone-800);
    --secondary-foreground: var(--color-stone-50);
-   --muted: var(--color-stone-800);
+   --muted: var(--color-stone-900);
    --muted-foreground: var(--color-stone-400);
    --accent: var(--color-stone-800);
    --accent-foreground: var(--color-stone-50);

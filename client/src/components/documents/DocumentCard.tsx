@@ -48,7 +48,7 @@ export function DocumentCard({ document }: { document: Document }) {
 
          {stats?.percent === 100 && (
             <div className="absolute top-2 right-2 z-10">
-               <Check className="bg-gray-100 rounded-full p-0.5 shadow-md" />
+               <Check className="bg-secondary text-secondary-foreground rounded-full p-0.5 shadow-md" />
             </div>
          )}
       </Link>

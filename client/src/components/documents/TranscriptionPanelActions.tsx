@@ -42,7 +42,7 @@ function TranscriptionPanelActions({
                      <label htmlFor="blank-checkbox">Mark as blank</label>
                      <Checkbox
                         onCheckedChange={(v) => setIsBlank(v === true)}
-                        className="border-gray-400"
+                        className="border-border"
                         id="blank-checkbox"
                         name="blank-checkbox"
                         checked={isBlank}

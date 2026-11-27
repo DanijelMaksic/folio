@@ -12,14 +12,14 @@ function TranscriptionPlaceholder({ type }: { type: string }) {
             {type === 'not-signed-in' && (
                <Link
                   to="/sign-in"
-                  className="border rounded-lg px-2 py-1 hover:bg-gray-100 border-gray-400 transition-all"
+                  className="border rounded-lg px-2 py-1 hover:bg-gray-100 border-border transition-all"
                >
                   Sign in to contribute
                </Link>
             )}
 
             {type === 'contributor' && (
-               <span className="border rounded-lg px-2 py-1 border-gray-400">
+               <span className="border rounded-lg px-2 py-1 border-border">
                   Go to Transcribe tab to contribute
                </span>
             )}

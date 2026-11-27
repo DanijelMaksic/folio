@@ -18,6 +18,7 @@ import { signOut, useSession } from '@/lib/auth-client';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
 import { isEditor } from '@shared';
+import ThemeToggle from '@/components/shared/ThemeToggle';
 
 function Nav() {
    const { data: session } = useSession();
@@ -71,7 +72,7 @@ function Nav() {
                         render={
                            <button
                               type="button"
-                              className="flex items-center gap-2 rounded-full border border-gray-300 py-1 pl-1 pr-3 hover:bg-muted transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none bg-gray-50"
+                              className="flex items-center gap-2 rounded-full border border-border py-1 pl-1 pr-3 hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none bg-stone-50 dark:bg-secondary"
                            >
                               {user.image ? (
                                  <img
@@ -147,6 +148,8 @@ function Nav() {
                   </DropdownMenu>
                </>
             )}
+
+            <ThemeToggle />
          </NavigationMenuList>
       </NavigationMenu>
    );

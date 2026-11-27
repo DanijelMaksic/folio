@@ -176,11 +176,11 @@ function AuditLogTab() {
                         {c.targetUsername ?? 'Deleted user'}
                      </Link>
                      <span>from</span>
-                     <span className="border border-gray-300 rounded-full px-2.5">
+                     <span className="border border-border rounded-full px-2.5">
                         {c.oldRole}
                      </span>
                      <span>to </span>
-                     <span className="border border-gray-300 rounded-full px-2.5">
+                     <span className="border border-border rounded-full px-2.5">
                         {c.newRole}
                      </span>
 

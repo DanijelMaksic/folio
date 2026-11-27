@@ -22,7 +22,7 @@ function TranscriptionPanelStatus({
                   render={
                      <button
                         type="button"
-                        className="border border-gray-300 rounded-full px-2 text-gray-600"
+                        className="border border-border rounded-full px-2 text-gray-600"
                      >
                         ?
                      </button>

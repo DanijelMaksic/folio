@@ -19,12 +19,12 @@ function SearchBar({
             onChange={(e) => onChange(e.target.value)}
             value={value}
             data-testid="search-bar"
-            className="border-gray-300 w-full"
+            className="border-border w-full"
          />
          <Button
             variant="outline"
             aria-label="Search"
-            className="border-gray-300"
+            className="border-border"
          >
             <SearchIcon />
          </Button>

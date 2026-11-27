@@ -92,7 +92,7 @@ function Note({ note }: { note: NoteData }) {
             </Link>
          )}
 
-         <div className="border rounded-md bg-gray-50 flex-1 pt-3 pb-6 px-6">
+         <div className="border rounded-md bg-muted flex-1 pt-3 pb-6 px-6">
             <div className="flex items-center gap-3 text-sm mb-1">
                <Link
                   to={`/users/${username}`}

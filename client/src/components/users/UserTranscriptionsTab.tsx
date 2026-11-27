@@ -104,7 +104,7 @@ function UserTranscriptionsTab({ userId }: { userId: string }) {
                {data?.versions.map((t) => (
                   <div
                      key={t.id}
-                     className="border rounded-md bg-gray-50 py-3 px-6"
+                     className="border rounded-md bg-muted py-3 px-6"
                   >
                      <div className="flex flex-wrap items-center justify-between gap-x-2 text-sm text-muted-foreground mb-1">
                         <div>
@@ -133,7 +133,7 @@ function UserTranscriptionsTab({ userId }: { userId: string }) {
                            ) : (
                               <>
                                  •{' '}
-                                 <span className="text-sm border border-gray-300 capitalize  bg-muted rounded-md text-gray-500 px-2 py-1">
+                                 <span className="text-sm border border-border capitalize  bg-muted rounded-md text-gray-500 px-2 py-1">
                                     Replaced
                                  </span>
                               </>

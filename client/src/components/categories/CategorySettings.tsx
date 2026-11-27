@@ -95,7 +95,7 @@ export default function CategorySettings() {
 
          <div className="flex items-center gap-3">
             <h3 className="text-xl font-medium">Categories</h3>
-            <span className="text-gray-600 text-lg bg-gray-100 px-2.5 rounded-md">
+            <span className="bg-secondary text-secondary-foreground text-lg px-2.5 rounded-md">
                {categories.length}
             </span>
          </div>

@@ -77,7 +77,7 @@ function GuestPanelActions() {
       <div className="flex gap-2 items-center justify-end opacity-50 pointer-events-none shrink-0">
          <div className="flex items-center gap-2 mr-4">
             <span>Mark as blank</span>
-            <Checkbox className="border-gray-400" />
+            <Checkbox className="border-border" />
          </div>
 
          <button className="px-3 py-1 text-sm border rounded hover:bg-muted">

@@ -10,8 +10,8 @@ function ResizeHandle(props: ComponentProps<'div'>) {
          className="group relative order-2 flex w-4 cursor-col-resize touch-none select-none items-center justify-center self-stretch"
          {...props}
       >
-         <div className="absolute inset-y-0 left-1/2 w-px bg-gray-300 group-hover:bg-gray-500" />
-         <div className="relative h-10 w-1.5 rounded-full bg-gray-500" />
+         <div className="absolute inset-y-0 left-1/2 w-px bg-border group-hover:bg-stone-500 dark:group-hover:bg-stone-600" />
+         <div className="relative h-10 w-1.5 rounded-full bg-primary" />
       </div>
    );
 }

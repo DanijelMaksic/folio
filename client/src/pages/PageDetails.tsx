@@ -365,9 +365,9 @@ function PageDetails() {
                         </Button>
                      )}
 
-                     <Pagination className="border rounded-md border-gray-300 py-1 px-2">
+                     <Pagination className="border rounded-md border-border py-1 px-2">
                         <PaginationContent>
-                           <PaginationItem className="flex items-center border-r border-gray-300 pr-2 py-0.5">
+                           <PaginationItem className="flex items-center border-r border-border pr-2 py-0.5">
                               <button
                                  onClick={(e) => {
                                     e.preventDefault();
@@ -391,7 +391,7 @@ function PageDetails() {
                               Page {page.pageNumber} of {pageCount}
                            </span>
 
-                           <PaginationItem className="flex items-center border-l border-gray-300 pl-2">
+                           <PaginationItem className="flex items-center border-l border-border pl-2">
                               <button
                                  onClick={(e) => {
                                     e.preventDefault();

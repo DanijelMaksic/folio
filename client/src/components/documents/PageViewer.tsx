@@ -22,7 +22,7 @@ const Controls = ({
    const { resetViewerState } = useViewerStore();
 
    return (
-      <div className="tools absolute left-1/2 -translate-x-1/2 top-4 z-10 bg-white/80 flex items-center justify-center gap-6 py-1 px-3 rounded-md shadow-md">
+      <div className="tools absolute left-1/2 -translate-x-1/2 top-4 z-10 bg-secondary flex items-center justify-center gap-6 py-1 px-3 rounded-md shadow-md">
          <button type="button" onClick={() => zoomIn()}>
             +
          </button>
@@ -105,7 +105,7 @@ function PageViewer({ page }: { page: PageBase | undefined }) {
    return (
       <div
          ref={containerRef}
-         className={`bg-gray-200 flex justify-center border items-center rounded-md overflow-hidden relative ${
+         className={`bg-muted flex justify-center border items-center rounded-md overflow-hidden relative ${
             isFullscreen
                ? 'h-screen w-full'
                : focusMode

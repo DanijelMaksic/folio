@@ -51,7 +51,7 @@ function RevisionHistoryTab() {
          {revisions?.map((rev) => (
             <li
                key={rev.id}
-               className="text-xs border rounded px-4 py-3 space-y-1"
+               className="text-xs border rounded px-4 py-3 space-y-1 bg-muted"
             >
                <p className="text-muted-foreground">
                   {new Date(rev.savedAt).toLocaleString()}

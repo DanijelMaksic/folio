@@ -91,7 +91,7 @@ function DemoteStaffTab() {
          <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
                <h3 className="text-xl font-medium">Editors and admins</h3>
-               <span className="text-gray-600 text-lg bg-gray-100 px-2.5 rounded-md">
+               <span className="text-secondary-foreground text-lg bg-secondary px-2.5 rounded-md">
                   {staff?.length}
                </span>
             </div>
@@ -135,7 +135,7 @@ function DemoteStaffTab() {
                            </Link>
                         </div>
 
-                        <span className="border border-gray-300 px-2.5 py-0.5 rounded-full text-gray-600">
+                        <span className="border border-border px-2.5 py-0.5 rounded-full text-gray-600">
                            {s.globalRole}
                         </span>
                      </div>
@@ -143,7 +143,7 @@ function DemoteStaffTab() {
                      <div className="flex items-center gap-3">
                         <Link
                            to={`/users/${s.username}`}
-                           className="border rounded-md px-3 py-1 font-medium hover:bg-gray-50"
+                           className="border rounded-md px-3 py-1 font-medium hover:bg-muted"
                         >
                            View profile
                         </Link>

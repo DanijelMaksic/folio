@@ -99,7 +99,7 @@ function VersionsTab() {
                {versions.map((v) => (
                   <li
                      key={v.id}
-                     className="border rounded-md bg-white p-4 space-y-2"
+                     className="border rounded-md bg-muted p-4 space-y-2"
                      data-testid="version-item"
                   >
                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">

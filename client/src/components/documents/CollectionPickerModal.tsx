@@ -96,9 +96,9 @@ function CollectionPickerModal({
                                        : collection.id,
                                  )
                               }
-                              className={`border border-gray-300 rounded-md p-4 ${
+                              className={`border border-border rounded-md p-4 ${
                                  collection.id === selectedId
-                                    ? 'bg-gray-300'
+                                    ? 'bg-primary text-primary-foreground'
                                     : ''
                               }`}
                            >

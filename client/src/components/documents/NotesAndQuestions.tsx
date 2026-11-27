@@ -190,7 +190,7 @@ function NotesAndQuestions({ pageId }: { pageId: string }) {
          <div className="flex items-center justify-between gap-3 border-b pb-3">
             <div className="flex items-center gap-2">
                <h4 className="text-xl">All notes</h4>
-               <span className="bg-gray-100 rounded-md px-2.5 py-0.5">
+               <span className="bg-secondary text-secondary-foreground rounded-md px-2.5 py-0.5">
                   {data?.notes.length}
                </span>
             </div>

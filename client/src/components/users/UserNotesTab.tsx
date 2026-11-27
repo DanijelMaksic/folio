@@ -51,7 +51,7 @@ function UserNotesTab({ userId, isMe }: { userId: string; isMe: boolean }) {
                {notes.map((n) => (
                   <div
                      key={n.id}
-                     className="border rounded-md bg-gray-50 py-3 px-6"
+                     className="border rounded-md bg-muted py-3 px-6"
                   >
                      <div className="flex flex-wrap items-center gap-x-2 text-sm text-muted-foreground mb-1">
                         <Link
