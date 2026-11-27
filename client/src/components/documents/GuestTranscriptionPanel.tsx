@@ -43,7 +43,7 @@ function GuestTranscriptionPanel({
             {!isHorizontal && <GuestPanelActions />}
          </div>
          <Textarea
-            className={`font-mono leading-6 disabled:opacity-60 disabled:caret-transparent flex-1 field-sizing-fixed! ${
+            className={`font-serif leading-6 disabled:opacity-60 disabled:caret-transparent flex-1 field-sizing-fixed! ${
                focusMode
                   ? 'min-h-0 resize-none overflow-y-auto'
                   : 'min-h-90 resize-y'

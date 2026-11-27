@@ -50,8 +50,8 @@ function OverviewTab() {
 
          <div className={panelCell}>
             {approvedTranscription ? (
-               <div className="flex h-full min-h-0 flex-col gap-3 overflow-y-auto rounded-md border p-4">
-                  <div className="flex shrink-0 items-center justify-between gap-6">
+               <div className="flex h-full min-h-0 flex-col gap-3 overflow-y-auto rounded-md border px-6 py-4">
+                  <div className="flex shrink-0 items-center justify-between gap-6 border-b pb-3">
                      <h2 className="text-lg font-medium">Transcription</h2>
 
                      {user?.id === approvedTranscription.userId ? (
@@ -85,7 +85,7 @@ function OverviewTab() {
                      </div>
                   ) : (
                      <TranscriptionText
-                        className="text-[1rem] leading-7"
+                        className="text-[1rem] leading-7 font-serif"
                         content={approvedTranscription.content}
                      />
                   )}

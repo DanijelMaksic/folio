@@ -710,3 +710,9 @@ Agile methodology was utilized in building the Folio app. This file keeps track 
 - While user transcribes a page that already has his own transcription approved, but is transcribing again, if user hits save button, `OverviewTab.tsx` shows the newly saved transcription draft as new approved transcription. The problem is that user's current transcription has status of 'approved', and if they hit submit, `OverviewTab.tsx` will show empty state, indicating that there are no approved transcriptions for this page (in other words, old approved transcription got deleted). Fixed by removing the ability to transcribe a page that the user already has an approved transcription for
 
 ## Sprint 10 — Visual Design Revamp
+
+**Goal:** App has a consistent visual design and has friendly UI/UX and accessibility.
+
+**Completed:**
+
+- Not

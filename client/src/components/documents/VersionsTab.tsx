@@ -49,16 +49,16 @@ function VersionsTab() {
 
    const { data: approved } = trpc.transcriptions.getApprovedByPage.useQuery(
       { pageId: page?.id! },
-      { enabled: !!page?.id },
+      { enabled: !!page?.id, placeholderData: (prev) => prev },
    );
 
    const { data: versions, isLoading } = trpc.versions.listByPage.useQuery(
       { pageId: page?.id!, limit: 30, sort },
-      { enabled: !!page?.id },
+      { enabled: !!page?.id, placeholderData: (prev) => prev },
    );
 
    return (
-      <div className="space-y-3 border rounded-md px-4 py-3">
+      <div className="space-y-3 border bg-accent rounded-md px-4 py-3 mb-6">
          <div className="flex items-center justify-between">
             <h2 className="text-lg font-medium">Version history</h2>
 
@@ -99,7 +99,7 @@ function VersionsTab() {
                {versions.map((v) => (
                   <li
                      key={v.id}
-                     className="border rounded-md p-4 space-y-2"
+                     className="border rounded-md bg-white p-4 space-y-2"
                      data-testid="version-item"
                   >
                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
@@ -144,7 +144,10 @@ function VersionsTab() {
                            This page is blank
                         </p>
                      ) : (
-                        <TranscriptionText content={v.content} />
+                        <TranscriptionText
+                           className="text-[1rem] font-serif leading-7"
+                           content={v.content}
+                        />
                      )}
                   </li>
                ))}

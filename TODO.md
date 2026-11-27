@@ -9,3 +9,5 @@
 - Fix E2E tests
 
 ## Things to refactor
+
+- Make empty space smaller beneath heading in approved transcription (and preview)

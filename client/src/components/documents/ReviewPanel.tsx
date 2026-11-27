@@ -64,7 +64,10 @@ function ReviewPanel({
             {submittedTranscription.content === '' ? (
                <span className="text-muted-foreground">This page is blank</span>
             ) : (
-               <TranscriptionText content={submittedTranscription.content} />
+               <TranscriptionText
+                  className="font-serif leading-7"
+                  content={submittedTranscription.content}
+               />
             )}
          </div>
 

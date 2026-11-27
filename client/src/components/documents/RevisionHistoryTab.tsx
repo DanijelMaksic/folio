@@ -49,7 +49,10 @@ function RevisionHistoryTab() {
             <li className="text-md text-muted-foreground">No revisions yet.</li>
          )}
          {revisions?.map((rev) => (
-            <li key={rev.id} className="text-xs border rounded p-2 space-y-1">
+            <li
+               key={rev.id}
+               className="text-xs border rounded px-4 py-3 space-y-1"
+            >
                <p className="text-muted-foreground">
                   {new Date(rev.savedAt).toLocaleString()}
                </p>
@@ -61,12 +64,12 @@ function RevisionHistoryTab() {
                ) : (
                   <p
                      data-testid="transcription-revision"
-                     className="font-mono text-sm whitespace-pre-wrap"
+                     className="font-serif text-sm whitespace-pre-wrap"
                   >
                      <TranscriptionText
                         data-testid="transcription-revision"
                         content={rev.content}
-                        className="..."
+                        className="text-[1rem] font-serif leading-7"
                      />
                   </p>
                )}

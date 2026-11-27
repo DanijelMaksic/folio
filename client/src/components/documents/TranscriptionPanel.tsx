@@ -245,16 +245,16 @@ function TranscriptionPanel({
 
                {preview ? (
                   <div className="relative flex-1 min-h-90 border rounded-md">
-                     <div className="absolute inset-0 overflow-y-auto p-4">
+                     <div className="absolute inset-0 overflow-y-auto px-6 py-3">
                         <TranscriptionText
-                           className="text-[1rem] leading-7"
+                           className="text-[1rem] leading-7 font-serif"
                            content={transcriptionContent}
                         />
                      </div>
                   </div>
                ) : (
                   <Textarea
-                     className={`font-mono leading-6 disabled:opacity-60 disabled:caret-transparent flex-1 field-sizing-fixed! ${
+                     className={`font-serif leading-7 text-[1rem]! disabled:opacity-60 disabled:caret-transparent flex-1 px-6 py-3 field-sizing-fixed! ${
                         focusMode
                            ? 'min-h-0 resize-none overflow-y-auto'
                            : 'min-h-90 resize-y'
